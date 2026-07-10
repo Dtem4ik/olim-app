@@ -1,0 +1,19 @@
+# lefthook — git hooks for Olim App
+# pre-commit: lint + typecheck on staged files
+# commit-msg: enforce Conventional Commits
+
+pre-commit:
+  parallel: true
+  jobs:
+    - name: biome
+      glob: "*.{js,jsx,ts,tsx,json,jsonc,css}"
+      run: pnpm biome check --no-errors-on-unmatched --files-ignore-unknown=true {staged_files}
+      stage_fixed: true
+    - name: typecheck
+      glob: "*.{ts,tsx}"
+      run: pnpm typecheck
+
+commit-msg:
+  jobs:
+    - name: commitlint
+      run: pnpm commitlint --edit {1}
