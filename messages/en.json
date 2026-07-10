@@ -1,0 +1,76 @@
+{
+  "app": {
+    "name": "Olim",
+    "tagline": "Adaptation navigator for Israel"
+  },
+  "home": {
+    "greeting": "Welcome",
+    "subtitle": "A step-by-step plan for new immigrants: banks, rent, health, work and benefits.",
+    "cta": "Open the UI kit",
+    "devHint": "Phase 1 foundation. Components live at /dev/ui."
+  },
+  "nav": {
+    "primary": "Primary navigation",
+    "home": "Home",
+    "plan": "Plan",
+    "guides": "Guides",
+    "search": "Search",
+    "profile": "Profile"
+  },
+  "search": {
+    "placeholder": "Search the guides…",
+    "label": "Search",
+    "clear": "Clear query",
+    "submit": "Search"
+  },
+  "theme": {
+    "toggle": "Toggle theme",
+    "light": "Light theme",
+    "dark": "Dark theme"
+  },
+  "deadline": {
+    "overdue": "Overdue",
+    "overdueDays": "Overdue by {days, plural, one {# day} other {# days}}",
+    "today": "Today",
+    "soon": "{days, plural, one {# day} other {# days}} left",
+    "later": "By {date}"
+  },
+  "checklist": {
+    "done": "Done",
+    "todo": "Mark as done"
+  },
+  "empty": {
+    "title": "Nothing here yet",
+    "description": "Your steps will appear here once you complete a short quiz.",
+    "action": "Take the quiz"
+  },
+  "devUi": {
+    "title": "UI kit v1",
+    "subtitle": "Every foundation component. Toggle the theme with the button on the right.",
+    "sectionTiles": "Section tiles",
+    "stepCards": "Step cards",
+    "checklist": "Checklist items",
+    "deadlines": "Deadline badges",
+    "searchBar": "Search bar",
+    "emptyState": "Empty state",
+    "bottomNav": "Bottom navigation",
+    "themeLight": "Light",
+    "themeDark": "Dark"
+  },
+  "sections": {
+    "banks": { "title": "Banks & money", "description": "Open an account, get a card, transfers" },
+    "rent": { "title": "Renting a home", "description": "Contract, deposit, tenant rights" },
+    "health": { "title": "Health", "description": "Kupat holim, registration, doctors" },
+    "work": { "title": "Work", "description": "Job search, worker rights, taxes" }
+  },
+  "steps": {
+    "openAccount": {
+      "title": "Open a bank account",
+      "summary": "Bring your teudat zehut and teudat oleh. Oleh accounts are often fee-free."
+    },
+    "kupatHolim": {
+      "title": "Register with a kupat holim",
+      "summary": "Pick a health fund and register within the first days after landing."
+    }
+  }
+}
