@@ -1,107 +1,132 @@
 # Phase 2 — Data model and content pipeline
 
-Status: **in progress** — sub-phase **2a (Supabase schema) is complete**; 2b
-(content pipeline) and 2c (content v1) are **not started** (paused for review of
-2a). This report will be extended as 2b/2c land.
+Status: **complete** (2a schema · 2b pipeline · 2c content v1).
 
-Branch: `phase-2/data-model`. Commit for 2a: `feat(db): add Supabase content
-schema, RLS, zod mirrors (Phase 2a)`.
+Branch: `phase-2/data-model`. Commits:
+- `feat(db): add Supabase content schema, RLS, zod mirrors (Phase 2a)`
+- `feat(db): split basis descendant into child_of_jew / grandchild_of_jew`
+- `feat(content): content pipeline — validator, lint, import, fixtures (Phase 2b)`
+- `fix(content): narrow the banned guarantee stem to promise forms only`
+- plus this report + ARCHITECTURE update.
+
+Real content (2c) lives in the **private `olim-content` repo** (a local sibling
+dir, committed there as `content: initial "after landing" content v1 (Phase 2c)`).
 
 ---
 
 ## 2a — Supabase schema ✅
 
-### Done
+- Local Supabase dev stack (CLI + Docker). Homebrew install failed on outdated
+  Xcode CLT, so the pinned release binary `v2.109.1` is used (`supabase` +
+  `supabase-go` co-located). `supabase start` / `db reset` apply migrations clean.
+- Migration `init_content_schema` — additive, entirely in `public` (the shared
+  `portfolio` schema is never touched). Tables `sections`, `steps`, `benefits`,
+  `plans`, `step_reports` with CHECK constraints, indexes (incl. GIN on
+  `steps.cond`), and `updated_at` triggers.
+- **RLS from day one:** public read on content tables; insert-only `step_reports`;
+  `plans` owner-scoped with a SECURITY DEFINER `get_plan_by_share_slug()` for safe
+  public share-slug reads. Explicit grants (new-table auto-exposure is disabled —
+  the current Supabase default; a live REST test caught this before it shipped).
+- `lib/content/schema.ts` — zod mirrors of every table + the `cond` condition
+  language and `warn_rule` types. `basis` splits `child_of_jew` /
+  `grandchild_of_jew` (a major personalization fork). `lib/supabase/database.types.ts`
+  generated from the local DB. `.env.example` synced with the Vercel integration
+  variable names.
 
-**Local Supabase dev stack**
-- `supabase` CLI installed (Homebrew failed on outdated Xcode Command Line Tools,
-  so the pinned release binary `v2.109.1` is used; `supabase` + `supabase-go`
-  kept co-located, symlinked onto PATH). Docker Desktop running.
-- `supabase init` → `supabase/config.toml` (unmodified defaults) + migrations dir.
-- `supabase start` brings the stack up and applies migrations from scratch; a
-  local `supabase db reset` re-applies cleanly.
+## 2b — Content pipeline ✅
 
-**Migration `20260711145729_init_content_schema.sql`** — additive, entirely in
-`public`. The shared `portfolio` schema is never referenced, altered, or granted
-on (AGENTS.md rules 6 & 7). Objects created (all `public`):
-- functions: `set_updated_at()`, `get_plan_by_share_slug(text)`
-- tables: `sections`, `steps`, `benefits`, `plans`, `step_reports`
-- indexes incl. a GIN index on `steps.cond`; `updated_at` triggers on all
-  mutable tables.
+- `lib/content/bundle.ts` — JSON bundle format, recursive dir loader, cross-file
+  integrity checks (referential + slug uniqueness).
+- `lib/content/lint.ts` — trusted-source allowlist (gov.il, btl.gov.il, nativ.gov.il,
+  kolzchut.org.il, jewishagency.org), banned phrases (no guarantees / legal-advice
+  wording; the Russian guarantee rule targets promise forms only, so legitimate
+  terms like "банковская гарантия" pass), verification freshness.
+- Scripts: `content:validate` (CI gate), `content:import` (idempotent upsert),
+  `content:check-links` (non-blocking report), `content:review-queue`.
+- **Safety:** `content:import` / `content:review-queue` default to the LOCAL stack
+  and refuse a non-local target unless `--allow-remote` — the DB is shared with
+  production. Verified: the guardrail aborts on a remote URL.
+- `content/fixtures/` — 5 real steps / 4 sections / 2 benefits (committed) power
+  tests and the CI `content` job. `docs/CONTENT_SCHEMA.md` documents the format,
+  `cond`/`warn_rule` languages, and the allowlist. CI gained a `content` job.
 
-Key column-level integrity (SQL CHECKs mirrored by the zod schemas):
-- kebab-case slugs; `source_url` must be `https://`; title/summary/body length
-  caps; `benefits` `valid_to >= valid_from` and a `(slug, valid_from)` unique
-  key so dated benefit versions coexist; `plans.share_slug` length ≥ 12 (nanoid
-  security bar); jsonb shape checks (`docs`/`tips` arrays, `cond`/`meta` objects).
+## 2c — Content v1: "after landing" ✅ (partial vs. the 60–90 target)
 
-**RLS from day one**
-- `sections` / `steps` / `benefits`: public read (`anon`, `authenticated`); no
-  client writes.
-- `step_reports`: insert-only for the public; no select policy → cannot be read
-  back through the API.
-- `plans`: clients can create; owners (`authenticated`) read/update their own;
-  public share-slug reads go through the `SECURITY DEFINER`
-  `get_plan_by_share_slug()` so a table scan can never enumerate every plan.
-- **Explicit grants** were required: this project runs with new-table
-  auto-exposure disabled (current Supabase default), so `anon`/`authenticated`
-  get no privileges on new `public` tables until granted. A live REST test caught
-  this (SELECT returned 401 before grants were added).
+Authored in Russian in the private `olim-content` repo. **8 sections, 46 steps,
+4 benefit records.** Every step carries a real, individually search-verified
+`source_url` and `last_verified_at`; every step is `needs_review: true` for the
+human editor; benefit amounts are `null` pending editor verification of 2026
+figures (amounts are never inlined in step text — AGENTS.md rule 3).
 
-**Type safety**
-- `lib/content/schema.ts` — zod schemas mirroring every table (`*Input` authoring
-  shape + `*Row` DB shape), plus the `cond` condition language
-  (stage/basis/country/family/pet/children_ages/months_in_country) and the three
-  `warn_rule` types (`expires_days`, `deadline_before_flight_days`,
-  `deadline_after_arrival_days`). Personalization vocabularies are centralized
-  here for the Phase 3 quiz to reuse.
-- `lib/supabase/database.types.ts` — generated DB types (excluded from Biome and
-  from coverage as generated code).
-- `.env.example` — synced with the Vercel↔Supabase integration variable names
-  (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`,
-  `SUPABASE_SERVICE_ROLE_KEY`, …) plus the localhost defaults.
+Steps per section:
 
-**Tooling**
-- Scripts: `db:start`, `db:stop`, `db:reset`, `db:types`. AGENTS.md Commands +
-  a "Local Supabase" note updated.
+| Section | Steps | Primary sources |
+|---|---|---|
+| Банки и деньги | 5 | Kol Zchut, gov.il (banking guide) |
+| Здоровье и больничная касса | 5 | Bituach Leumi, Kol Zchut |
+| Льготы репатрианта | 9 | gov.il (absorption basket, rights guide), Bituach Leumi, Kol Zchut |
+| Аренда и жильё | 6 | Kol Zchut (arnona, rent assistance), gov.il |
+| Работа | 7 | Kol Zchut (employment, min wage, contracts), gov.il |
+| Транспорт | 6 | gov.il (license exchange), Kol Zchut (Rav-Kav, discounts) |
+| Связь и интернет | 4 | Kol Zchut (consumer rights, long-term contracts) |
+| Иврит и ульпан | 4 | Kol Zchut (ulpan), gov.il (first steps) |
 
-### Verification
+Real deadlines encoded as `warn_rule`: kupat-holim registration
+(`deadline_after_arrival_days: 90`), driving on a foreign licence
+(`deadline_after_arrival_days: 365`).
+
+Sources used: **gov.il** (Ministry of Aliyah and Integration — absorption basket,
+rights guide, first steps, driving-license service, banking guide), **Kol Zchut**
+(kolzchut.org.il — bank account, health-fund choice, arnona, rent assistance,
+employment rights, minimum wage, transport, consumer rights, ulpan),
+**Bituach Leumi** (btl.gov.il — kupat-holim registration, new-immigrant portal,
+income guarantee).
+
+## Verification
 
 | Check | Command | Result |
 |---|---|---|
-| Typecheck | `pnpm typecheck` | ✅ no errors |
-| Lint/format | `pnpm lint` | ✅ clean (generated types ignored) |
-| Unit + coverage | `pnpm test:coverage` | ✅ 78 tests / 9 files, **97.7%** stmts |
+| Typecheck | `pnpm typecheck` | ✅ |
+| Lint/format | `pnpm lint` | ✅ (68 files) |
+| Unit + coverage | `pnpm test:coverage` | ✅ 106 tests, 97.3% stmts (lib/content 97.6%) |
 | Migration from scratch | `pnpm db:reset` | ✅ applies clean |
-| RLS — content read (anon) | REST `GET /rest/v1/{sections,steps,benefits}` | ✅ HTTP 200 |
-| RLS — content write (anon) | REST `POST /rest/v1/{sections,steps}` | ✅ HTTP 401 (denied) |
-| RLS — plans read (anon) | REST `GET /rest/v1/plans` | ✅ HTTP 401 (no grant; slug read via RPC) |
+| Content validate (fixtures / CI) | `pnpm content:validate` | ✅ 4/5/2 valid |
+| Content validate (2c) | `pnpm content:validate --dir ../olim-content/content` | ✅ 8/46/4 valid |
+| Import from scratch | `db reset` → `pnpm content:import --dir ../olim-content/content` | ✅ 8 sections / 46 steps / 4 benefits (2 warn_rules) |
+| Idempotent re-import | run twice | ✅ counts unchanged |
+| Review queue | `pnpm content:review-queue` | ✅ lists 46 unreviewed steps |
+| RLS — content write (anon) | REST `POST` sections/steps | ✅ HTTP 401 (denied) |
+| RLS — content read (anon) | REST `GET` sections/steps/benefits | ✅ HTTP 200 |
+| Remote guardrail | `content:import --url <remote>` (no flag) | ✅ refuses, non-zero exit |
+| Link check | `content:check-links --dir ../olim-content/content` | report only; gov.il/kolzchut return 403 (bot protection, not dead links); btl.gov.il 200 |
 
-Reproduce the RLS checks after `pnpm db:start` using the anon key from
-`supabase status` against `http://127.0.0.1:54321/rest/v1`.
+## Deferred / debts
 
-### Notes / debts carried into 2b–2c
+1. **2c step count: 46 vs. the 60–90 DoD target.** Deliberate trade-off: every
+   step maps to a genuinely search-verified official source rather than padding
+   with weak/niche sources. The pipeline (`review-queue`, idempotent import) and
+   the roadmap's "content extended by separate sessions" model are built for
+   incremental growth; extending to 60–90 is straightforward follow-up content
+   work. Additional relevant Kol Zchut/Bituach Leumi URLs were seen during
+   research and can seed the next batch.
+2. **`olim-content` is a local git repo without a remote.** The user must add the
+   private-repo remote and push; it also needs its own minimal Actions workflow
+   (checkout `olim-app` alongside, run `content:validate --dir`). Documented in
+   `olim-content/README.md`.
+3. **Remote is untouched by design.** No `supabase link` / `db push`. Before the
+   first push to the shared remote: take the `pg_dump -n portfolio` snapshot
+   (rule 7) **and inspect the remote `public` schema first** — the portfolio's
+   snapshot-cache tables may already live there; confirm no name clash with
+   `sections`/`steps`/… Also verify `config.toml` `major_version = 17` matches the
+   remote (`SHOW server_version;`).
+4. **Benefit amounts are `null`** and every step is `needs_review: true` — awaiting
+   the human editor. `content:check-links` reports 403 for bot-protected official
+   domains; verify those links in a browser.
+5. `link`-check + author tone are not machine-graded; the editor spot-checks
+   sources on acceptance.
 
-1. **Remote is untouched by design.** No `supabase link` / `db push` was run.
-   Before the first push to the shared remote: take the `pg_dump -n portfolio`
-   snapshot (rule 7), **and inspect the remote `public` schema first** — the
-   portfolio's snapshot-cache tables may already live there
-   (`.env.local` references `docs/supabase-schema.sql`); confirm no name clash
-   with `sections`/`steps`/… before pushing.
-2. `major_version = 17` in `config.toml` — verify it matches the remote
-   (`SHOW server_version;`) before any push.
-3. `plans` anonymous **update** (checking steps without an account) is Phase 5;
-   2a ships create + owner-update + slug-read only.
-4. `supabase db reset` prints a harmless `no files matched: supabase/seed.sql`
-   warning — content is loaded via `content:import` (2b), not a seed file.
+## Setup notes for reviewers
 
-### Deferred (not started)
-
-- **2b** — content JSON format, zod validator + content lint (banned phrases,
-  https source_url allowlist), `content:import` (idempotent upsert),
-  `content:check-links`, `content:review-queue`, `docs/CONTENT_SCHEMA.md`, the
-  committed `content/fixtures/*.json` set, and the CI `content` job.
-- **2c** — 60–90 authored RU steps across the 8 "after landing" sections with
-  verified `source_url`s and 2026 benefit amounts in `benefits`.
-- Phase-2 acceptance items that depend on 2b/2c (clean import from zero, content
-  passing the validator in CI, review queue) are pending.
+- Local stack: install `supabase` CLI, start Docker, `pnpm db:start`, then
+  `pnpm content:import --dir ../olim-content/content`.
+- Clone `olim-content` as a sibling of `olim-app` (`../olim-content`).
