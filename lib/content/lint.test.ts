@@ -58,6 +58,13 @@ describe("banned phrases", () => {
     );
   });
 
+  it("allows the noun гарантия (bank guarantee is a legitimate term)", () => {
+    const bundle = bundleWithStep({
+      body_md: "Часто просят банковскую гарантию (арвут банкаит) или поручителя.",
+    });
+    expect(codes(bundle)).not.toContain("banned-phrase");
+  });
+
   it("scans tips and docs too", () => {
     const bundle = bundleWithStep({
       tips: [{ text: "we guarantee it" }],

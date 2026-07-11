@@ -31,7 +31,10 @@ export const ALLOWED_SOURCE_DOMAINS = [
 export const BANNED_PHRASES: { pattern: RegExp; label: string }[] = [
   { pattern: /guarantee/i, label: "guarantee" },
   { pattern: /\b100\s*%\s*(approval|success|одобрени)/i, label: "100% approval" },
-  { pattern: /гарант(и|і)/i, label: "гарантия/гарантируем" },
+  // Verb/participle promise forms only (гарантируем / гарантирует / гарантировано);
+  // the noun "гарантия" is left alone — it is a legitimate financial/legal term
+  // (банковская гарантия, гарантия прожиточного минимума).
+  { pattern: /гарант(и|і)ру|гарант(и|і)рован/i, label: "гарантируем/гарантировано" },
   { pattern: /\bмы обещаем\b/i, label: "мы обещаем" },
   { pattern: /юридическ(ая|ую) консультаци/i, label: "юридическая консультация" },
   { pattern: /это юридический совет/i, label: "юридический совет" },
