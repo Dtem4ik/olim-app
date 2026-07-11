@@ -14,7 +14,8 @@
       "!**/coverage",
       "!**/playwright-report",
       "!**/test-results",
-      "!**/app/globals.css"
+      "!**/app/globals.css",
+      "!**/lib/supabase/database.types.ts"
     ]
   },
   "formatter": {

@@ -15,7 +15,7 @@ export default defineConfig({
       provider: "v8",
       reporter: ["text", "html", "lcov"],
       include: ["lib/**/*.{ts,tsx}", "components/**/*.{ts,tsx}"],
-      exclude: ["**/*.test.{ts,tsx}", "components/ui/**"],
+      exclude: ["**/*.test.{ts,tsx}", "components/ui/**", "lib/supabase/database.types.ts"],
       thresholds: {
         lines: 80,
         functions: 80,

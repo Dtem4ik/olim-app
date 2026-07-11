@@ -26,6 +26,8 @@ Stack: Next.js (App Router, TS strict) on Vercel · Supabase (Postgres, Auth, pg
 3. **Content is data.** Guide texts belong in Supabase/JSON per `docs/CONTENT_SCHEMA.md`, never in components. Every content step carries `source_url` and `last_verified_at`.
 4. **No hardcoded colors** in components — semantic CSS-variable tokens only (light/dark themes must both work).
 5. **Finish protocol.** Every session ends by writing `docs/PHASE_REPORTS/phase-{N}.md`: done / deferred+why / known debts / verification commands / screenshots or preview links. Update the Commands section below if scripts changed.
+6. **Shared Supabase project.** The Supabase project is shared: olim-app owns the `public` schema; the `portfolio` schema belongs to the production portfolio site (dtem4ik.dev) — never touch it, its grants, or Exposed schemas. Migrations are additive and `public`-scoped; destructive commands against the linked remote (e.g. `supabase db reset --linked`) are forbidden. Local dev-stack resets are fine.
+7. **Neighbor backup ritual.** Before pushing ANY migration to the linked remote: take a fresh `pg_dump -n portfolio` snapshot (keep locally, never commit), state in the phase report that it was taken, and list exactly which objects the migration touches. No snapshot — no push.
 
 ## Quality bar (CI-enforced)
 
@@ -77,11 +79,22 @@ pnpm test:coverage   # Vitest with v8 coverage
 pnpm e2e             # Playwright smoke + axe (both themes); builds first locally
 pnpm e2e:install     # install the Playwright chromium browser
 pnpm lighthouse      # Lighthouse CI (perf ≥90, a11y ≥95)
-pnpm content:import  # (Phase 2)
+pnpm db:start        # start the local Supabase stack (needs Docker running)
+pnpm db:stop         # stop the local Supabase stack
+pnpm db:reset        # recreate the local DB and re-apply migrations (LOCAL only)
+pnpm db:types        # regenerate lib/supabase/database.types.ts from the local DB
+pnpm content:import  # (Phase 2b)
 ```
 
 Node ≥20.11, pnpm 10. Git hooks are installed automatically via `pnpm install`
 (lefthook). First-time e2e needs `pnpm e2e:install`.
+
+**Local Supabase.** Needs Docker running and the `supabase` CLI on PATH
+(`brew install supabase/tap/supabase`, or the release binary — keep `supabase`
+and `supabase-go` co-located). `pnpm db:start` prints local URLs/keys (or
+`supabase status`). Migrations live in `supabase/migrations/` and apply on
+`db:start` / `db:reset`. NEVER run `supabase db reset --linked` or any
+destructive command against the shared remote (AGENTS.md rules 6 & 7).
 
 ## Domain crib sheet (so you don't have to guess)
 
