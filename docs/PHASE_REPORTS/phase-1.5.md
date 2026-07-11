@@ -83,6 +83,31 @@ Unchanged from Phase 1 (`/dev/ui` +1 KB from Label/Separator — the `radix-ui`
 umbrella tree-shakes well). The Lighthouse JS assertion (200 KB regression guard)
 still holds; Perf ≥90 / A11y ≥95 pass with margin.
 
+## Infrastructure & foundation fixes (this session)
+
+Setting up the Phase 1 acceptance infra (GitHub + green Actions, Vercel previews)
+surfaced two foundation bugs, fixed here:
+
+1. **`.mcp.json` was gitignored** — contradicting the AGENTS.md rule to commit it.
+   A fresh session therefore never got the shadcn MCP from the repo (this is why
+   the shadcn server showed up only as "pending approval"). Now tracked, with
+   `shadcn` **and** `context7` servers, and removed from `.gitignore`.
+2. **`prepare: lefthook install` broke every Vercel build.** Vercel's build env has
+   no `.git`, so `lefthook install` exited 128 and failed
+   `pnpm install --frozen-lockfile` — production and PR previews both errored.
+   Guarded with `|| true`; hooks still install locally.
+
+Infra state after this session:
+- **GitHub:** `main` and `phase-1.5/shadcn-audit` pushed to
+  `github.com/Dtem4ik/olim-app`. **Actions green** on `main` (push) and on PR #1
+  (verify · e2e+axe · lighthouse).
+- **Vercel:** project `dtem4iks-projects/olim-app` created and **connected to the
+  GitHub repo** — PRs now get automatic preview deployments (PR #1 preview builds
+  green). Preview URLs are behind Vercel Authentication (project default).
+- **MCP:** `context7` connected; `shadcn` needs a one-time approval in an
+  interactive `claude` session (`claude` → approve), then it loads from the repo
+  `.mcp.json`.
+
 ## Known debts
 
 1. Inherits Phase 1's JS-budget note (170 KB target vs ~163 KB framework floor);
@@ -92,6 +117,12 @@ still holds; Perf ≥90 / A11y ≥95 pass with margin.
 3. Screenshots not regenerated — no structural showcase change; deltas are the
    in-token pixel shifts listed above. Regenerate via the existing e2e flow if
    needed for the review.
+4. **Production deploy of `main` will fail until PR #1 merges** — the lefthook
+   build fix lives in the PR, not yet on `main`. Previews already build green.
+5. CI non-fatal warnings (from Phase 1 config): actions still on Node 20 (auto-run
+   on Node 24), and the `verify` job's `.next` artifact upload logs "no files
+   found" (the e2e/lighthouse jobs rebuild anyway). Cosmetic; fix when convenient.
+6. `supabase` project not created — needs the account owner; belongs to Phase 2.
 
 ## Deferred (out of scope, by design)
 
