@@ -2,6 +2,7 @@
 
 import { useId } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
+import { FieldContent, FieldDescription, FieldTitle } from "@/components/ui/field";
 import { cn } from "@/lib/utils";
 
 export interface ChecklistItemProps {
@@ -14,9 +15,10 @@ export interface ChecklistItemProps {
 }
 
 /**
- * A checkable step row built on the shadcn Checkbox. The Radix checkbox renders
- * a real <button>, which is labelable — nesting it in the <label> makes the
- * whole >=44px row a single tap target.
+ * A checkable step row built on the shadcn Checkbox and the Field content parts
+ * (FieldContent/FieldTitle/FieldDescription). We wrap the row in a <label>
+ * rather than using FieldLabel + htmlFor so the whole >=44px row is a single tap
+ * target — the Radix checkbox renders a real, labelable <button>.
  */
 export function ChecklistItem({
   label,
@@ -43,21 +45,12 @@ export function ChecklistItem({
         aria-describedby={description ? descriptionId : undefined}
         className="mt-0.5"
       />
-      <span className="flex flex-col gap-0.5">
-        <span
-          className={cn(
-            "font-medium leading-snug",
-            checked && "text-muted-foreground line-through",
-          )}
-        >
+      <FieldContent>
+        <FieldTitle className={cn(checked && "text-muted-foreground line-through")}>
           {label}
-        </span>
-        {description && (
-          <span id={descriptionId} className="text-sm text-muted-foreground">
-            {description}
-          </span>
-        )}
-      </span>
+        </FieldTitle>
+        {description && <FieldDescription id={descriptionId}>{description}</FieldDescription>}
+      </FieldContent>
     </label>
   );
 }

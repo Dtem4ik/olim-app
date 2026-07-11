@@ -1,5 +1,13 @@
 import type { LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty";
 import { cn } from "@/lib/utils";
 
 export interface EmptyStateProps {
@@ -11,27 +19,26 @@ export interface EmptyStateProps {
   className?: string;
 }
 
-/** Friendly placeholder for empty lists and unfinished states. */
+/**
+ * Friendly placeholder for empty lists and unfinished states.
+ * Composes the shadcn `Empty` primitive; keeps our rounded-xl border and the
+ * simple icon/title/description/action API used across the app.
+ */
 export function EmptyState({ icon: Icon, title, description, action, className }: EmptyStateProps) {
   return (
-    <div
-      className={cn(
-        "flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed p-8 text-center",
-        className,
-      )}
-    >
-      {Icon && (
-        <span className="flex size-12 items-center justify-center rounded-full bg-muted text-muted-foreground">
-          <Icon className="size-6" aria-hidden />
-        </span>
-      )}
-      <div className="flex flex-col gap-1">
-        <h3 className="font-semibold">{title}</h3>
-        {description && (
-          <p className="mx-auto max-w-sm text-sm text-muted-foreground">{description}</p>
+    <Empty className={cn("rounded-xl border p-8 md:p-8", className)}>
+      <EmptyHeader>
+        {Icon && (
+          <EmptyMedia variant="icon">
+            <Icon aria-hidden />
+          </EmptyMedia>
         )}
-      </div>
-      {action && <div className="mt-1">{action}</div>}
-    </div>
+        <EmptyTitle asChild>
+          <h3>{title}</h3>
+        </EmptyTitle>
+        {description && <EmptyDescription>{description}</EmptyDescription>}
+      </EmptyHeader>
+      {action && <EmptyContent>{action}</EmptyContent>}
+    </Empty>
   );
 }
