@@ -49,10 +49,17 @@ const positiveInt = z.int().positive();
 export const stageSchema = z.enum(["preparing", "just_landed", "first_months", "settled"]);
 export type Stage = z.infer<typeof stageSchema>;
 
-/** Eligibility basis under the Law of Return / status on arrival. */
+/**
+ * Eligibility basis under the Law of Return / status on arrival.
+ * `child_of_jew` and `grandchild_of_jew` are split deliberately: a grandchild
+ * needs a two-generation archival paper trail (the longest part of preparation)
+ * and their spouse's rights and refusal risks differ from a child's — this fork
+ * drives a large share of the personalization value.
+ */
 export const basisSchema = z.enum([
   "jewish",
-  "descendant",
+  "child_of_jew",
+  "grandchild_of_jew",
   "spouse",
   "returning_resident",
   "returning_citizen",
