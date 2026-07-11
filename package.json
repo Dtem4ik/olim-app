@@ -28,6 +28,10 @@
     "e2e": "playwright test",
     "e2e:install": "playwright install --with-deps chromium",
     "lighthouse": "lhci autorun",
+    "db:start": "supabase start",
+    "db:stop": "supabase stop",
+    "db:reset": "supabase db reset",
+    "db:types": "supabase gen types typescript --local --schema public > lib/supabase/database.types.ts",
     "prepare": "lefthook install || true"
   },
   "dependencies": {
@@ -42,7 +46,8 @@
     "radix-ui": "^1.6.2",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
-    "tailwind-merge": "^3.6.0"
+    "tailwind-merge": "^3.6.0",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.12.1",
