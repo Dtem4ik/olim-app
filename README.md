@@ -10,6 +10,21 @@ in place (`docs/PHASE_REPORTS/phase-1.md`). Next: Phase 2 (data model & content)
 Quick start: `pnpm install`, then `pnpm dev` and open `/dev/ui` for the component
 kit. Full command list in `AGENTS.md`.
 
+### Data layer (Phase 2)
+
+The app uses Supabase. For local development:
+
+1. Install the `supabase` CLI and start Docker.
+2. `pnpm db:start` — boots the local stack and applies migrations. `pnpm db:reset`
+   re-applies from scratch; `supabase status` prints local URLs/keys.
+3. `pnpm content:import` — seeds the local DB from the committed `content/fixtures/`.
+
+Real content lives in the **private `olim-content` repo**; clone it as a sibling
+directory (`../olim-content`) and point the tools at it with
+`--dir ../olim-content/content`. Content format is documented in
+`docs/CONTENT_SCHEMA.md`. The Supabase project is shared with the portfolio site —
+never run destructive commands against the linked remote (see `AGENTS.md`).
+
 ## How this project is built
 
 Development runs in phases, each executed by a separate Claude Code session and reviewed by a team-lead session. See:

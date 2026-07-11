@@ -1,0 +1,26 @@
+{
+  "benefits": [
+    {
+      "slug": "sal-klita-first-payment",
+      "title": "Корзина абсорбции — первая выплата",
+      "amount": null,
+      "currency": "ILS",
+      "unit": "one-time",
+      "valid_from": "2026-01-01",
+      "source_url": "https://www.gov.il/ru/departments/general/absorption_basket",
+      "last_verified_at": "2026-07-11",
+      "notes": "Сумма зависит от состава семьи и обновляется государством. Точное значение на 2026 год должен подтвердить редактор по официальному источнику — здесь оставлено пустым намеренно."
+    },
+    {
+      "slug": "sal-klita-monthly",
+      "title": "Корзина абсорбции — ежемесячная выплата",
+      "amount": null,
+      "currency": "ILS",
+      "unit": "month",
+      "valid_from": "2026-01-01",
+      "source_url": "https://www.gov.il/ru/departments/general/absorption_basket",
+      "last_verified_at": "2026-07-11",
+      "notes": "Ежемесячная часть корзины абсорбции в течение примерно 6 месяцев; размер зависит от состава семьи. Сумму на 2026 год подтверждает редактор."
+    }
+  ]
+}

@@ -32,11 +32,16 @@
     "db:stop": "supabase stop",
     "db:reset": "supabase db reset",
     "db:types": "supabase gen types typescript --local --schema public > lib/supabase/database.types.ts",
+    "content:validate": "tsx scripts/content-validate.ts",
+    "content:import": "tsx scripts/content-import.ts",
+    "content:check-links": "tsx scripts/content-check-links.ts",
+    "content:review-queue": "tsx scripts/content-review-queue.ts",
     "prepare": "lefthook install || true"
   },
   "dependencies": {
     "@radix-ui/react-checkbox": "^1.3.7",
     "@radix-ui/react-slot": "^1.3.0",
+    "@supabase/supabase-js": "^2.110.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^1.24.0",
@@ -70,6 +75,7 @@
     "postcss": "^8.5.16",
     "shadcn": "^4.13.0",
     "tailwindcss": "^4.3.2",
+    "tsx": "^4.23.0",
     "typescript": "^5.9.3",
     "vite-tsconfig-paths": "^6.1.1",
     "vitest": "^4.1.10"

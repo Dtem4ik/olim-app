@@ -83,8 +83,18 @@ pnpm db:start        # start the local Supabase stack (needs Docker running)
 pnpm db:stop         # stop the local Supabase stack
 pnpm db:reset        # recreate the local DB and re-apply migrations (LOCAL only)
 pnpm db:types        # regenerate lib/supabase/database.types.ts from the local DB
-pnpm content:import  # (Phase 2b)
+pnpm content:validate      # schema + integrity + editorial lint (CI gate)
+pnpm content:import        # validate, then idempotent upsert → LOCAL stack by default
+pnpm content:check-links   # fetch every source_url; report only, never fails
+pnpm content:review-queue  # list steps still needs_review = true
 ```
+
+Content format, the `cond`/`warn_rule` languages, and the source allowlist are
+documented in `docs/CONTENT_SCHEMA.md`. Real content lives in the private
+`olim-content` repo (clone as a sibling `../olim-content`); the committed
+`content/fixtures/` set powers tests and local dev. `content:import` and
+`content:review-queue` default to the LOCAL stack and refuse a non-local target
+unless `--allow-remote` is passed (shared DB — rules 6 & 7).
 
 Node ≥20.11, pnpm 10. Git hooks are installed automatically via `pnpm install`
 (lefthook). First-time e2e needs `pnpm e2e:install`.
