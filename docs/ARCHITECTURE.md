@@ -33,6 +33,11 @@ components/          product components (SectionTile, StepCard, …)
   ui/                shadcn primitives (Button, Card, Badge, Input, Checkbox,
                      Empty, InputGroup, Field, Label, Separator, Textarea)
 lib/                 pure, unit-tested logic (deadline, cn) + *.test.ts
+  content/           content zod schemas, bundle loader, editorial lint (+ tests)
+  supabase/          generated database.types.ts
+supabase/            Supabase CLI project: config.toml + migrations/
+scripts/             content CLI (validate, import, check-links, review-queue)
+content/fixtures/    committed content subset for tests/dev (real content is private)
 i18n/request.ts      next-intl request config (locale + messages)
 messages/            ru.json (shipping), en.json (keys ready)
 test/                Testing Library render helper (providers)
@@ -94,6 +99,46 @@ the `NextIntlClientProvider` mounted in the root layout. Plural-aware strings us
 ICU syntax (e.g. deadline countdowns). Locale routing (`/[locale]`) and the EN
 switch are deferred to a later phase.
 
+## Data layer (Phase 2)
+
+**Supabase (Postgres) on a SHARED cloud project.** The project is shared with the
+production portfolio site (dtem4ik.dev), which owns the `portfolio` schema. Olim
+App owns the `public` schema ONLY; migrations are additive and `public`-scoped,
+and destructive commands against the linked remote are forbidden (AGENTS.md rules
+6 & 7). Local development runs the full stack via the `supabase` CLI + Docker.
+
+**Schema** (`supabase/migrations/*_init_content_schema.sql`, all in `public`):
+
+| Table | Purpose | RLS |
+|---|---|---|
+| `sections` | top-level guide sections | public read |
+| `steps` | guide steps (`body_md`, `docs`, `warn_rule`, `tips`, `cond` jsonb; `source_url`, `last_verified_at`, `needs_review`) | public read |
+| `benefits` | dated amount tables (sal klita…), unique per `(slug, valid_from)` | public read |
+| `plans` | trackable plan (`share_slug`, `answers`, `done_step_ids`, nullable `user_id`) | insert by anyone; owner read/update; slug read via SECURITY DEFINER `get_plan_by_share_slug()` |
+| `step_reports` | "this step looks outdated" reports | insert-only |
+
+RLS is on from day one. Content tables are world-readable and take no client
+writes (the import uses the service-role key, which bypasses RLS). Table
+privileges are granted explicitly because new-table auto-exposure is disabled
+(current Supabase default). CHECK constraints (kebab slugs, https `source_url`,
+length caps, `share_slug` ≥12) mirror the zod schemas.
+
+**Type safety.** `lib/content/schema.ts` holds zod schemas mirroring every table
+plus the `cond` condition language (stage/basis/country/family/pet/children_ages/
+months_in_country) and `warn_rule` types; these vocabularies are the shared source
+of truth for the Phase 3 quiz. `lib/supabase/database.types.ts` is generated from
+the local DB.
+
+**Content pipeline** (`lib/content/*`, `scripts/*`). Content is authored as JSON
+bundles (`sections`/`steps`/`benefits`). The loader validates each file against the
+schema, merges them, and runs cross-file integrity checks; the lint enforces a
+trusted-source allowlist, banned phrases, and verification freshness. Real content
+lives in the private `olim-content` repo (a sibling dir); `content/fixtures/`
+holds a committed subset for tests/dev. Scripts: `content:validate` (CI gate),
+`content:import` (idempotent upsert, LOCAL by default, refuses remote without
+`--allow-remote`), `content:check-links` (non-blocking), `content:review-queue`.
+Format documented in `docs/CONTENT_SCHEMA.md`.
+
 ## Rendering & performance
 
 Both routes are statically prerendered. Lucide icon components can't cross the
@@ -103,6 +148,7 @@ routes exist. See `docs/PHASE_REPORTS/phase-1.md` for the JS-budget note.
 
 ## CI
 
-`.github/workflows/ci.yml`: `verify` (lint → typecheck → unit+coverage → build),
-then `e2e` (Playwright + axe) and `lighthouse` in parallel. Vercel builds PR
-previews independently.
+`.github/workflows/ci.yml`: `verify` (lint → typecheck → unit+coverage → build)
+and `content` (schema + integrity + editorial lint on the fixtures) run in
+parallel; `e2e` (Playwright + axe) and `lighthouse` follow `verify`. Vercel builds
+PR previews independently.
