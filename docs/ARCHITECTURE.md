@@ -30,7 +30,8 @@ app/                 App Router routes
   globals.css        Tailwind entry + design tokens (light/.light, .dark)
   dev/ui/page.tsx    UI-kit showcase (single theme, toggled)
 components/          product components (SectionTile, StepCard, …)
-  ui/                shadcn primitives (Button, Card, Badge, Input, Checkbox)
+  ui/                shadcn primitives (Button, Card, Badge, Input, Checkbox,
+                     Empty, InputGroup, Field, Label, Separator, Textarea)
 lib/                 pure, unit-tested logic (deadline, cn) + *.test.ts
 i18n/request.ts      next-intl request config (locale + messages)
 messages/            ru.json (shipping), en.json (keys ready)
@@ -60,12 +61,28 @@ contrast is deterministic and verified AA in both themes by the axe e2e.
 
 **Primitives** (`components/ui/*`) are shadcn/ui, copied via the CLI and adapted:
 default/lg/icon sizes are ≥44px tap targets; Badge gained `success`/`warning`
-variants; Input is `h-11`. `asChild` composition uses `@radix-ui/react-slot`.
+variants; Input is `h-11`. `asChild` composition uses `@radix-ui/react-slot`; the
+newer primitives (`Field`, `Label`, `Separator`) import from the `radix-ui`
+umbrella package. Registry primitives in the kit: `Button`, `Card`, `Badge`,
+`Input`, `Checkbox`, `Empty`, `InputGroup`, `Field` (+ `Label`, `Separator`,
+`Textarea`).
 
-**Product components** (`components/*`) are the Phase 1 kit: `SectionTile`,
-`StepCard`, `ChecklistItem` (built on the Radix `Checkbox`), `DeadlineBadge`
-(urgency from the pure `lib/deadline.ts`), `SearchBar`, `BottomNav`, `EmptyState`,
-plus `ThemeToggle` and `SiteBottomNav`. Content-bearing components take strings as
+**Product components** (`components/*`) compose those primitives (shadcn-first
+policy, see `AGENTS.md`) and never reimplement them:
+- `EmptyState` → composes `Empty` (icon/title/description/action).
+- `SearchBar` → composes `InputGroup` (leading search addon + clear button),
+  bumped to `h-11`.
+- `ChecklistItem` → composes `Field` content parts + the Radix `Checkbox`; the row
+  stays a wrapping `<label>` (not `FieldLabel`/`htmlFor`) so the whole ≥44px row is
+  a single tap target.
+- `DeadlineBadge` → composes `Badge` (urgency variant from the pure
+  `lib/deadline.ts`).
+- `StepCard` → composes `Card` + `Badge`; `SectionTile` → composes `Badge`.
+- `BottomNav` / `SectionTile` are legitimately custom: the registry has no mobile
+  tab bar and no 2-D tile (its `Item` is a horizontal row). See the Phase 1.5 audit
+  in `docs/PHASE_REPORTS/phase-1.5.md`.
+
+Also `ThemeToggle` and `SiteBottomNav`. Content-bearing components take strings as
 props (content is data); chrome strings come from next-intl dictionaries.
 
 ## i18n

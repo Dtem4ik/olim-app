@@ -44,6 +44,23 @@ Stack: Next.js (App Router, TS strict) on Vercel · Supabase (Postgres, Auth, pg
 - Prefer boring solutions; no new dependencies without a reason stated in the PR description.
 - If you find a mistake in docs — fix the doc in the same PR, don't work around it silently.
 
+## UI policy: shadcn-first
+
+- **Before writing ANY component, check whether shadcn/ui already provides it** (or a composable primitive for it). Use the shadcn MCP server to search the registry; do not guess from memory — the registry is large (dialogs, sheets, command palette, form, combobox, skeleton, toast/sonner, tabs, accordion, etc.).
+- Custom components are allowed only when nothing in the registry fits, and they must compose shadcn primitives rather than reimplement them. State in the PR description which registry components you checked and why they didn't fit.
+- Adapt installed primitives to our semantic tokens and the ≥44px tap-target rule — don't fork their internals beyond that.
+- Use the Context7 MCP server to pull up-to-date docs for libraries (Next.js, Supabase, Tailwind, next-intl, Capacitor) instead of relying on training memory — APIs move fast.
+
+## MCP setup (one-time, config committed to repo)
+
+If `.mcp.json` with the shadcn server is not present in the repo yet, run:
+
+```
+pnpm dlx shadcn@latest mcp init --client claude
+```
+
+Commit the resulting config so every future session gets the shadcn MCP automatically. Add Context7 MCP alongside if not configured.
+
 ## Commands
 
 Populated in Phase 1. Keep current:
