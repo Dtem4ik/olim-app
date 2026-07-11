@@ -51,6 +51,29 @@ jobs:
           path: .next
           retention-days: 1
 
+  content:
+    name: content (schema · integrity · lint)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Validates the committed fixtures. No database needed — schema + integrity
+      # + editorial lint only. Real content in olim-content runs the same check.
+      - name: Validate content
+        run: pnpm content:validate
+
   e2e:
     name: e2e · axe (both themes)
     runs-on: ubuntu-latest
