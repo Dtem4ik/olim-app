@@ -1,16 +1,18 @@
 import { describe, expect, it } from "vitest";
 import {
-  benefitInputSchema,
   condSchema,
   dateSchema,
   httpsUrlSchema,
   rangeSchema,
-  sectionInputSchema,
   slugSchema,
-  stepInputSchema,
-  stepReportInputSchema,
   warnRuleSchema,
 } from "./schema";
+import {
+  benefitInputSchema,
+  sectionInputSchema,
+  stepInputSchema,
+  stepReportInputSchema,
+} from "./tables";
 
 describe("slugSchema", () => {
   it.each([
