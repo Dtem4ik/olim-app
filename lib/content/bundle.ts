@@ -19,7 +19,7 @@ import {
   type StepInput,
   sectionInputSchema,
   stepInputSchema,
-} from "./schema";
+} from "./tables";
 
 export const contentBundleSchema = z
   .object({

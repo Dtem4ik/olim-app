@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { ContentBundle } from "./bundle";
 import { lintBundle } from "./lint";
-import { benefitInputSchema, stepInputSchema } from "./schema";
+import { benefitInputSchema, stepInputSchema } from "./tables";
 
 const NOW = new Date("2026-07-11T12:00:00Z");
 

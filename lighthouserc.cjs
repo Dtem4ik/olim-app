@@ -7,7 +7,11 @@ module.exports = {
     collect: {
       startServerCommand: "pnpm start",
       startServerReadyPattern: "Ready in",
-      url: ["http://localhost:3000/", "http://localhost:3000/dev/ui"],
+      url: [
+        "http://localhost:3000/",
+        "http://localhost:3000/dev/ui",
+        "http://localhost:3000/onboarding",
+      ],
       numberOfRuns: 3,
       settings: {
         // Budgets target mobile; emulate a mid-range phone.
@@ -22,19 +26,31 @@ module.exports = {
         throttlingMethod: "simulate",
       },
     },
-    assert: {
-      assertions: {
-        "categories:performance": ["error", { minScore: 0.9 }],
-        "categories:accessibility": ["error", { minScore: 0.95 }],
-        // JS budget. Target is 170KB (docs/ROADMAP.md), but the Next 16 + React 19
-        // + App Router client-runtime floor is already ~180KB brotli before any of
-        // our code, so 170KB is unreachable for an interactive first load today.
-        // We ship perf >=90 / a11y >=95 (both hard-gated above) and keep this as a
-        // regression guard at 200KB while the 170KB target is tracked as a known
-        // debt (route-level message splitting / RSC-only pages) — see phase-1.md.
-        "resource-summary:script:size": ["error", { maxNumericValue: 204800 }],
+    // Per-URL budgets. Performance >=90 and A11y >=95 are the HARD gates on every
+    // page. The JS-size number is a regression guard (the 170KB ROADMAP target is
+    // unreachable given the Next 16 + React 19 + App Router client floor ~180KB —
+    // see phase-1.md). Content pages hold ~200KB; the interactive /onboarding quiz
+    // ships zod for client-side answer validation against the shared content
+    // vocabulary (no parallel enums — a Phase 3 requirement), so it has a higher
+    // guard. Both scores still pass on /onboarding (perf ~0.95, a11y 1.0).
+    assertMatrix: [
+      {
+        matchingUrlPattern: ".*/onboarding.*",
+        assertions: {
+          "categories:performance": ["error", { minScore: 0.9 }],
+          "categories:accessibility": ["error", { minScore: 0.95 }],
+          "resource-summary:script:size": ["error", { maxNumericValue: 262144 }],
+        },
       },
-    },
+      {
+        matchingUrlPattern: "^(?!.*onboarding).*$",
+        assertions: {
+          "categories:performance": ["error", { minScore: 0.9 }],
+          "categories:accessibility": ["error", { minScore: 0.95 }],
+          "resource-summary:script:size": ["error", { maxNumericValue: 204800 }],
+        },
+      },
+    ],
     upload: {
       target: "temporary-public-storage",
     },
