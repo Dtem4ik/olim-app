@@ -32,8 +32,11 @@ app/                 App Router routes
 components/          product components (SectionTile, StepCard, …)
   ui/                shadcn primitives (Button, Card, Badge, Input, Checkbox,
                      Empty, InputGroup, Field, Label, Separator, Textarea)
+app/onboarding/      quiz route (server: loads fixtures → client flow)
+components/onboarding/ onboarding quiz + plan preview (client)
 lib/                 pure, unit-tested logic (deadline, cn) + *.test.ts
-  content/           content zod schemas, bundle loader, editorial lint (+ tests)
+  content/           schema (client-safe vocabulary), tables (server), bundle loader, lint
+  plan/              condition engine (build-plan), profile store, persona snapshots
   supabase/          generated database.types.ts
 supabase/            Supabase CLI project: config.toml + migrations/
 scripts/             content CLI (validate, import, check-links, review-queue)
@@ -138,6 +141,32 @@ holds a committed subset for tests/dev. Scripts: `content:validate` (CI gate),
 `content:import` (idempotent upsert, LOCAL by default, refuses remote without
 `--allow-remote`), `content:check-links` (non-blocking), `content:review-queue`.
 Format documented in `docs/CONTENT_SCHEMA.md`.
+
+## Personalization (Phase 3)
+
+**Onboarding quiz** (`app/onboarding`, `components/onboarding/`). A client flow of
+one-question-per-screen: stage, basis, country, family (+ children ages when
+relevant), pet, arrival/flight date (conditional on stage), city. Answers build a
+**versioned localStorage profile** (`olim.profile.v1`) validated by
+`lib/plan/profile.ts`. The quiz options come straight from the content
+vocabularies (`stageSchema.options`, `basisSchema.options`, …) — no parallel
+enums. The server route loads fixture steps via the content loader and hands them
+to the client; the engine runs client-side to render a stage-grouped plan preview.
+
+**Condition engine** (`lib/plan/build-plan.ts`) — the product core, 100%
+unit-tested. `buildPlan(answers, steps)` is a pure function that:
+- filters steps by the `cond` language (stage, basis, country, family, pet,
+  `children_ages` / `months_in_country` ranges); an absent key is no constraint,
+  and a condition needing an answer the person did not give does not match;
+- sorts by lifecycle stage (`preparing → just_landed → first_months → settled`,
+  no-stage last) then `sort_order` then slug;
+- attaches deadline warnings from each step's `warn_rule` + the person's flight /
+  arrival dates, reusing `getDeadlineStatus` (`lib/deadline.ts`).
+
+Six reference personas are snapshot-tested (`lib/plan/personas.test.ts`) to prove
+different answers yield meaningfully different plans. Real Supabase wiring of the
+home/plan/section screens is Phase 4; Phase 3 proves the engine end-to-end against
+the committed fixtures.
 
 ## Rendering & performance
 
