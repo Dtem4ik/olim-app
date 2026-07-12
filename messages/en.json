@@ -72,5 +72,93 @@
       "title": "Register with a kupat holim",
       "summary": "Pick a health fund and register within the first days after landing."
     }
+  },
+  "onboarding": {
+    "title": "Quick quiz",
+    "subtitle": "7 questions to assemble a plan for your situation. Answers stay in this browser only.",
+    "start": "Start",
+    "resume": "Resume",
+    "startOver": "Start over",
+    "editAnswers": "Edit answers",
+    "back": "Back",
+    "next": "Next",
+    "skip": "Skip",
+    "finish": "Show my plan",
+    "progress": "Question {current} of {total}",
+    "optional": "optional",
+    "stages": {
+      "preparing": "Preparing to make aliyah",
+      "just_landed": "Just landed",
+      "first_months": "First months here",
+      "settled": "Settling in"
+    },
+    "questions": {
+      "stage": { "label": "Where are you in the process?" },
+      "basis": {
+        "label": "On what basis are you making aliyah?",
+        "options": {
+          "jewish": "Jewish",
+          "child_of_jew": "Child of a Jew",
+          "grandchild_of_jew": "Grandchild of a Jew",
+          "spouse": "Spouse of an oleh",
+          "returning_resident": "Returning resident",
+          "returning_citizen": "Returning citizen",
+          "other": "Other / not sure yet"
+        }
+      },
+      "country": {
+        "label": "Where are you coming from?",
+        "options": {
+          "russia": "Russia",
+          "ukraine": "Ukraine",
+          "belarus": "Belarus",
+          "kazakhstan": "Kazakhstan",
+          "usa": "USA",
+          "france": "France",
+          "germany": "Germany",
+          "other": "Another country"
+        }
+      },
+      "family": {
+        "label": "Who is coming with you?",
+        "options": {
+          "single": "Just me",
+          "couple": "With my spouse",
+          "with_children": "With children",
+          "single_parent": "On my own with children"
+        }
+      },
+      "childrenAges": {
+        "label": "How old are the children?",
+        "help": "Add each child's age — it affects daycare, school and benefits.",
+        "placeholder": "Age",
+        "add": "Add",
+        "remove": "Remove",
+        "empty": "No ages added yet."
+      },
+      "pet": {
+        "label": "Bringing a pet?",
+        "options": { "yes": "Yes", "no": "No" }
+      },
+      "arrivalDate": {
+        "label": "When did you land?",
+        "help": "Used to compute deadlines — e.g. 90 days to register with a health fund."
+      },
+      "flightDate": {
+        "label": "When is your flight?",
+        "help": "If you have a date, we'll flag what to finish before the flight."
+      },
+      "city": {
+        "label": "Which city do you live in (or plan to)?",
+        "placeholder": "e.g. Haifa"
+      }
+    },
+    "preview": {
+      "title": "Your plan",
+      "subtitle": "{count, plural, one {# step} other {# steps}} for your situation. The full plan screen comes later.",
+      "empty": "No steps match your answers yet — content is still being filled in.",
+      "noStage": "General",
+      "deadline": "deadline"
+    }
   }
 }
