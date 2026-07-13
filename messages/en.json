@@ -4,10 +4,31 @@
     "tagline": "Adaptation navigator for Israel"
   },
   "home": {
-    "greeting": "Welcome",
-    "subtitle": "A step-by-step plan for new immigrants: banks, rent, health, work and benefits.",
-    "cta": "Open the UI kit",
-    "devHint": "Phase 1 foundation. Components live at /dev/ui."
+    "invite": {
+      "title": "Your aliyah adaptation plan",
+      "subtitle": "Take a short quiz — we'll assemble the steps for your situation: banks, health, rent, work and benefits.",
+      "cta": "Take the quiz"
+    },
+    "greeting": {
+      "preparing": "Preparing for aliyah",
+      "just_landed": "You're in Israel — let's start",
+      "first_months": "Settling in",
+      "settled": "You're settled"
+    },
+    "context": {
+      "months": "{months, plural, one {# month} other {# months}} in the country",
+      "city": "{city}"
+    },
+    "burning": {
+      "title": "Burning deadlines",
+      "empty": "No burning deadlines — you can breathe."
+    },
+    "next": {
+      "title": "Next steps",
+      "allDone": "You've checked off every step. Nice!"
+    },
+    "sections": { "title": "Sections" },
+    "edit": "Edit answers"
   },
   "nav": {
     "primary": "Primary navigation",
@@ -160,5 +181,41 @@
       "noStage": "General",
       "deadline": "deadline"
     }
+  },
+  "guides": {
+    "title": "Sections",
+    "subtitle": "Practical adaptation guides.",
+    "personalizedHint": "Showing steps for your situation.",
+    "allHint": "Take the quiz to see steps tailored to you.",
+    "stepsCount": "{count, plural, one {# step} other {# steps}}",
+    "empty": "No steps in this section yet.",
+    "back": "All sections"
+  },
+  "step": {
+    "bring": "Bring with you",
+    "steps": "What to do",
+    "tip": "Tip from those who've been there",
+    "verified": "Verified {date}",
+    "source": "Official source",
+    "done": "Done",
+    "todo": "Mark as done",
+    "outdated": {
+      "button": "Information outdated?",
+      "prompt": "What's wrong? (optional)",
+      "placeholder": "e.g. the link is broken, the amount changed…",
+      "submit": "Send",
+      "cancel": "Cancel",
+      "thanks": "Thanks! We'll check."
+    }
+  },
+  "profile": {
+    "title": "Profile",
+    "situation": "Your situation",
+    "edit": "Edit answers",
+    "theme": "Theme",
+    "language": "Language",
+    "languageSoon": "Soon",
+    "startOver": "Reset everything",
+    "empty": "You haven't taken the quiz yet."
   }
 }

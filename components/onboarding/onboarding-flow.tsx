@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { capture } from "@/lib/analytics";
 import { basisSchema, familySchema, stageSchema } from "@/lib/content/schema";
 import { buildPlan, type EngineStep, type PlanAnswers } from "@/lib/plan/build-plan";
 import {
@@ -136,6 +137,7 @@ export function OnboardingFlow({ steps }: { steps: EngineStep[] }) {
       if (built) {
         saveProfile(built);
         setProfile(built);
+        capture("quiz_completed", { stage: built.stage, basis: built.basis, family: built.family });
         setPhase("preview");
       }
       return;
