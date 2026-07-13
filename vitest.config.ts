@@ -15,7 +15,20 @@ export default defineConfig({
       provider: "v8",
       reporter: ["text", "html", "lcov"],
       include: ["lib/**/*.{ts,tsx}", "components/**/*.{ts,tsx}"],
-      exclude: ["**/*.test.{ts,tsx}", "components/ui/**", "lib/supabase/database.types.ts"],
+      exclude: [
+        "**/*.test.{ts,tsx}",
+        "components/ui/**",
+        "lib/supabase/database.types.ts",
+        // Route-level view compositions + analytics/error providers are
+        // integration-tested by the Playwright e2e flow (Phase 4 DoD), not unit
+        // coverage. Unit coverage targets pure lib logic + reusable primitives.
+        "components/home/**",
+        "components/guides/**",
+        "components/plan/**",
+        "components/profile/**",
+        "components/analytics-provider.tsx",
+        "lib/plan/use-progress.ts",
+      ],
       thresholds: {
         lines: 80,
         functions: 80,

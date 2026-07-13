@@ -168,6 +168,45 @@ different answers yield meaningfully different plans. Real Supabase wiring of th
 home/plan/section screens is Phase 4; Phase 3 proves the engine end-to-end against
 the committed fixtures.
 
+## Screens & data flow (Phase 4)
+
+Mobile-first App Router screens, all under a shared `BottomNav` (Home / My plan /
+Guides / Profile):
+
+- **`/` Home** (`components/home`): server component reads sections+steps via the
+  content repo and hands them to a client view that hydrates the localStorage
+  profile, computes the plan with `buildPlan`, and renders a contextual greeting,
+  a "burning deadlines" block, the next 3 unchecked steps, and the sections grid
+  with per-section counts. No profile → invites to the quiz.
+- **`/guides`** — sections index (counts personalized when a profile exists).
+- **`/guides/[section]`** — server-rendered section; each step is an expandable
+  card (chosen over a separate route for a faster, in-context mobile flow):
+  short answer → "bring with you" → checkable steps → community tip → trust footer
+  (`last_verified_at`, official-source link, "Информация устарела?"). Step bodies
+  are rendered server-side (`lib/markdown.ts`, no client markdown dep).
+- **`/plan` My plan** — the full plan grouped by stage with shared checkboxes.
+- **`/profile`** — answers summary, edit/reset, theme toggle, language placeholder.
+
+**Content repository** (`lib/content/repo.ts`, server-only): reads from Supabase
+(anon key, RLS public read) and falls back to the committed fixtures when no
+stack is configured or it is empty — so screens render in CI (no DB), locally
+(full content), and in a preview before the shared remote is seeded. Local
+builds point at the `supabase start` stack via `.env.{development,production}.local`
+(gitignored; Vercel is unaffected).
+
+**Progress store** (`lib/plan/progress.ts` + `use-progress.ts`): checked steps
+keyed by slug in `olim.progress.v1`, shared across screens via
+`useSyncExternalStore`. Deliberately small and swappable for DB-backed plans in
+Phase 5.
+
+**"Outdated?" report**: a Server Action (`app/guides/actions.ts`) inserts into
+`step_reports` (RLS insert-only) — keeps the Supabase SDK off the client bundle.
+
+**Analytics & errors** (`components/analytics-provider.tsx`, `lib/analytics.ts`):
+PostHog (`quiz_completed`, `step_done`, `section_opened`, `report_outdated`,
+pageviews) and Sentry, both dynamically imported and **env-gated** — silently
+disabled without their `NEXT_PUBLIC_*` keys (local/CI), enabled in prod.
+
 ## Rendering & performance
 
 Both routes are statically prerendered. Lucide icon components can't cross the
