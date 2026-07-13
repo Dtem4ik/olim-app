@@ -41,21 +41,21 @@ export interface PlanWarning {
   status: DeadlineStatus | null;
 }
 
-export interface PlanEntry {
-  step: EngineStep;
+export interface PlanEntry<S extends EngineStep = EngineStep> {
+  step: S;
   warning: PlanWarning | null;
 }
 
-export interface PlanStageGroup {
+export interface PlanStageGroup<S extends EngineStep = EngineStep> {
   stage: Stage | null;
-  entries: PlanEntry[];
+  entries: PlanEntry<S>[];
 }
 
-export interface PersonalPlan {
+export interface PersonalPlan<S extends EngineStep = EngineStep> {
   /** Matched steps, sorted by stage then sort_order. */
-  entries: PlanEntry[];
+  entries: PlanEntry<S>[];
   /** The same entries grouped by stage, in lifecycle order (for the preview UI). */
-  stages: PlanStageGroup[];
+  stages: PlanStageGroup<S>[];
   /** Convenience: slugs of the matched steps, in order. */
   stepSlugs: string[];
 }
@@ -159,11 +159,11 @@ export function computeWarning(rule: WarnRule, answers: PlanAnswers, now: Date):
  * Build a personalized plan from answers and the full step set.
  * `now` is injectable for deterministic tests.
  */
-export function buildPlan(
+export function buildPlan<S extends EngineStep>(
   answers: PlanAnswers,
-  steps: readonly EngineStep[],
+  steps: readonly S[],
   now: Date = new Date(),
-): PersonalPlan {
+): PersonalPlan<S> {
   const matched = steps.filter((step) => matchesCond(step.cond, answers));
 
   matched.sort((a, b) => {
@@ -173,12 +173,12 @@ export function buildPlan(
     return a.slug.localeCompare(b.slug);
   });
 
-  const entries: PlanEntry[] = matched.map((step) => ({
+  const entries: PlanEntry<S>[] = matched.map((step) => ({
     step,
     warning: step.warn_rule ? computeWarning(step.warn_rule, answers, now) : null,
   }));
 
-  const stages: PlanStageGroup[] = [];
+  const stages: PlanStageGroup<S>[] = [];
   for (const entry of entries) {
     const stage = entry.step.stage ?? null;
     const last = stages.at(-1);

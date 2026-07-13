@@ -1,6 +1,6 @@
 "use client";
 
-import { BookOpen, Home, ListChecks, Search, User } from "lucide-react";
+import { BookOpen, Home, ListChecks, User } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { BottomNav } from "@/components/bottom-nav";
 
@@ -18,7 +18,6 @@ export function SiteBottomNav({ activeHref = "/" }: { activeHref?: string }) {
         { href: "/", label: t("home"), icon: Home },
         { href: "/plan", label: t("plan"), icon: ListChecks },
         { href: "/guides", label: t("guides"), icon: BookOpen },
-        { href: "/search", label: t("search"), icon: Search },
         { href: "/profile", label: t("profile"), icon: User },
       ]}
     />
