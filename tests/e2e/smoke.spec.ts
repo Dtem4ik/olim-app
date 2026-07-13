@@ -18,11 +18,12 @@ async function expectNoSeriousA11yViolations(page: Page) {
 }
 
 test.describe("home", () => {
-  test("renders the landing and links to the UI kit", async ({ page }) => {
+  test("renders the personalized-home shell and invites to the quiz", async ({ page }) => {
     await page.goto("/");
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
     await expect(page.getByRole("navigation", { name: /навигаци/i })).toBeVisible();
-    await expect(page.getByRole("link", { name: /UI-кит/i })).toBeVisible();
+    // Without a profile, home invites to the onboarding quiz.
+    await expect(page.getByTestId("home-invite-cta")).toBeVisible();
   });
 
   test("has no serious accessibility violations in either theme", async ({ page }) => {
