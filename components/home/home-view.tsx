@@ -160,16 +160,20 @@ export function HomeView({
             {t("sections.title")}
           </h2>
           <div className="grid grid-cols-2 gap-3" data-testid="sections-grid">
-            {sections.map((s) => (
-              <SectionTile
-                key={s.slug}
-                title={s.title}
-                description={s.description ?? undefined}
-                icon={sectionIcon(s.icon)}
-                href={`/guides/${s.slug}`}
-                count={countFor(s.slug)}
-              />
-            ))}
+            {sections.map((s) => {
+              const count = countFor(s.slug);
+              return (
+                <SectionTile
+                  key={s.slug}
+                  title={s.title}
+                  description={s.description ?? undefined}
+                  icon={sectionIcon(s.icon)}
+                  href={`/guides/${s.slug}`}
+                  count={count}
+                  dimmed={profile != null && count === 0}
+                />
+              );
+            })}
           </div>
         </section>
 

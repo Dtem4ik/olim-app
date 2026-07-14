@@ -10,6 +10,11 @@ export interface SectionTileProps {
   href: string;
   /** Number of steps in this section, shown as a badge. */
   count?: number;
+  /**
+   * De-emphasize the tile (e.g. a personalized section with 0 matched steps).
+   * The section stays tappable/browsable — just visually secondary.
+   */
+  dimmed?: boolean;
   className?: string;
 }
 
@@ -20,13 +25,16 @@ export function SectionTile({
   icon: Icon,
   href,
   count,
+  dimmed,
   className,
 }: SectionTileProps) {
   return (
     <Link
       href={href}
+      data-dimmed={dimmed ? "" : undefined}
       className={cn(
         "group flex min-h-11 flex-col gap-3 rounded-xl border bg-surface p-4 text-surface-foreground shadow-sm transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+        dimmed && "opacity-60 hover:opacity-100",
         className,
       )}
     >
