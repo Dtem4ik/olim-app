@@ -25,7 +25,7 @@ Each phase is executed in a separate Claude Code session.
 - **Conventional Commits**, branches `phase-N/*`, PRs into main with green CI.
 - **Tests:** Vitest (unit: all logic — condition engine, formatters, hooks; ≥80% coverage on `lib/`), Playwright (e2e smokes for each phase's key flows), Testing Library for components.
 - **A11y:** eslint-plugin-jsx-a11y + axe in Playwright (0 critical/serious); focus states, ARIA, contrast in both themes; tap targets ≥44px.
-- **Performance budgets (CI, Lighthouse mobile):** Performance ≥90, A11y ≥95, LCP <2.5s on 4G, JS first load <170KB per page. Checked every phase, not at the end.
+- **Performance budgets (CI, Lighthouse mobile):** hard gates are the user-facing metrics — Performance ≥90, A11y ≥95, LCP <2.5s on 4G. JS first load is a ratcheted regression guard (currently ≤280KB): it may be lowered after trimming, and may only be raised by an explicit documented decision — never silently. Checked every phase, not at the end. (The original 170KB target predated measuring the ~163KB framework floor of Next 16 + React 19 and was unrealistic; trimming — message splitting, lazy zod — remains a tracked debt.)
 - **i18n:** next-intl from Phase 1; no hardcoded strings in JSX — dictionaries only (RU now, EN keys ready from day one).
 - **Themes:** semantic tokens (`bg-surface`, `text-primary`, …) via CSS variables; dark = `prefers-color-scheme` + manual toggle; a hardcoded color in a component is a review blocker.
 - **Errors/analytics:** Sentry + PostHog events from Phase 4 (`quiz_completed`, `step_done`, `plan_shared`, `search_performed`, `report_outdated`).
