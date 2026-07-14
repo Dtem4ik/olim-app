@@ -16,8 +16,9 @@ Stack: Next.js (App Router, TS strict) on Vercel · Supabase (Postgres, Auth, pg
 | `docs/PHASE_REPORTS/` | One report per completed phase. Read the latest before working. |
 | `docs/ARCHITECTURE.md` | System design (created in Phase 1, keep updated). |
 | `docs/CONTENT_SCHEMA.md` | Content data format (created in Phase 2). |
+| `CONTRIBUTING.md` | Phase workflow, local setup, content flow, commit/PR conventions. |
 | `docs/reference/*.ru.md` | Product research in Russian — domain knowledge donor, not code docs. |
-| `PHASE_1_PROMPT.md` | Kickoff prompt for the first working session. |
+| `docs/PROMPTS/PHASE_{N}_PROMPT.md` | Kickoff prompt per phase. |
 
 ## Hard rules
 
@@ -26,6 +27,7 @@ Stack: Next.js (App Router, TS strict) on Vercel · Supabase (Postgres, Auth, pg
 3. **Content is data.** Guide texts belong in Supabase/JSON per `docs/CONTENT_SCHEMA.md`, never in components. Every content step carries `source_url` and `last_verified_at`.
 4. **No hardcoded colors** in components — semantic CSS-variable tokens only (light/dark themes must both work).
 5. **Finish protocol.** Every session ends by writing `docs/PHASE_REPORTS/phase-{N}.md`: done / deferred+why / known debts / verification commands / screenshots or preview links. Update the Commands section below if scripts changed.
+   **Docs are part of DoD:** before finishing, sweep the living docs — README (Status section + anything user-visible that changed), `docs/ARCHITECTURE.md`, `CONTRIBUTING.md`, and this file. Stale docs mislead every future agent session and human contributor; a phase with outdated docs is not done.
 6. **Shared Supabase project.** The Supabase project is shared: olim-app owns the `public` schema; the `portfolio` schema belongs to the production portfolio site (dtem4ik.dev) — never touch it, its grants, or Exposed schemas. Migrations are additive and `public`-scoped; destructive commands against the linked remote (e.g. `supabase db reset --linked`) are forbidden. Local dev-stack resets are fine.
 7. **Neighbor backup ritual.** Before pushing ANY migration to the linked remote: take a fresh `pg_dump -n portfolio` snapshot (keep locally, never commit), state in the phase report that it was taken, and list exactly which objects the migration touches. No snapshot — no push.
 
