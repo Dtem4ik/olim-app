@@ -38,6 +38,22 @@
     "search": "Search",
     "profile": "Profile"
   },
+  "plan": {
+    "title": "My plan",
+    "progressLabel": "Plan progress",
+    "progress": "{done} of {total} {total, plural, one {step} other {steps}}",
+    "filters": {
+      "label": "Filter steps",
+      "all": "All",
+      "burning": "Burning",
+      "done": "Done"
+    },
+    "empty": {
+      "all": "No steps for your answers yet — content is still being filled in.",
+      "burning": "No burning deadlines — you can relax.",
+      "done": "Nothing checked off yet. Mark steps as done as you go."
+    }
+  },
   "search": {
     "placeholder": "Search the guides…",
     "label": "Search",
