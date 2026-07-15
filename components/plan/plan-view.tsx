@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
 import { DeadlineBadge } from "@/components/deadline-badge";
+import { SharePlanButton } from "@/components/plan/share-plan-button";
 import { SiteBottomNav } from "@/components/site-bottom-nav";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { buttonVariants } from "@/components/ui/button";
@@ -33,7 +34,7 @@ export function PlanView({ steps }: { steps: ContentStep[] }) {
   const tHome = useTranslations("home");
   const tOnb = useTranslations("onboarding");
   const tStep = useTranslations("step");
-  const { isDone, toggle } = useProgress();
+  const { isDone, toggle, done } = useProgress();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [filter, setFilter] = useState<Filter>("all");
   useEffect(() => setProfile(loadProfile()), []);
@@ -62,7 +63,7 @@ export function PlanView({ steps }: { steps: ContentStep[] }) {
       .filter((group) => group.entries.length > 0);
   }, [plan, filter, isDone]);
 
-  if (!plan) {
+  if (!profile || !plan) {
     return (
       <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col pb-24">
         <header className="flex items-center justify-between px-4 pt-6">
@@ -107,6 +108,8 @@ export function PlanView({ steps }: { steps: ContentStep[] }) {
             aria-valuemax={100}
           />
         </section>
+
+        {total > 0 && <SharePlanButton answers={profile} done={done} />}
 
         <Tabs value={filter} onValueChange={(v) => setFilter(v as Filter)}>
           <TabsList aria-label={tPlan("filters.label")}>

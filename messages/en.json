@@ -52,7 +52,24 @@
       "all": "No steps for your answers yet — content is still being filled in.",
       "burning": "No burning deadlines — you can relax.",
       "done": "Nothing checked off yet. Mark steps as done as you go."
+    },
+    "share": {
+      "button": "Share my plan",
+      "sharing": "Preparing a link…",
+      "copied": "Link copied",
+      "error": "Something went wrong — try again",
+      "shareTitle": "My aliyah adaptation plan",
+      "shareText": "I put together an adaptation plan for new olim — take a look"
     }
+  },
+  "sharedPlan": {
+    "title": "A shared adaptation plan",
+    "subtitle": "Someone's aliyah plan — read only.",
+    "progress": "{done} of {total} {total, plural, one {step} other {steps}} done",
+    "empty": "This plan has no steps yet.",
+    "ctaTitle": "Build your own plan",
+    "ctaSubtitle": "Answer a few questions and we'll assemble steps for your situation.",
+    "cta": "Take the quiz"
   },
   "search": {
     "placeholder": "Search the guides…",

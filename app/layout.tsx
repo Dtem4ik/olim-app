@@ -5,6 +5,7 @@ import { getLocale, getMessages, getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
 import { AnalyticsProvider } from "@/components/analytics-provider";
 import { ThemeProvider } from "@/components/theme-provider";
+import { getSiteUrl } from "@/lib/site-url";
 import "./globals.css";
 
 const inter = Inter({
@@ -16,6 +17,7 @@ const inter = Inter({
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("app");
   return {
+    metadataBase: new URL(getSiteUrl()),
     title: {
       default: `${t("name")} — ${t("tagline")}`,
       template: `%s — ${t("name")}`,
