@@ -68,12 +68,19 @@ export default async function Image({ params }: { params: Promise<{ slug: string
               height: 64,
               borderRadius: 18,
               background: PRIMARY,
-              color: BG,
-              fontSize: 40,
-              fontWeight: 700,
             }}
           >
-            ✦
+            {/* Navigator sparkle drawn as a rotated square — no font glyph needed. */}
+            <div
+              style={{
+                display: "flex",
+                width: 26,
+                height: 26,
+                borderRadius: 6,
+                background: "#ffffff",
+                transform: "rotate(45deg)",
+              }}
+            />
           </div>
           <div style={{ display: "flex", fontSize: 40, fontWeight: 700 }}>{tApp("name")}</div>
         </div>

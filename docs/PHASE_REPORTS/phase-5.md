@@ -1,10 +1,11 @@
 # Phase 5 — My plan, sharing, PWA
 
-Status: **code complete (5a · 5b · 5c) + housekeeping**. One gate is **outstanding
-and user-assisted**: Step 0 (the first push + seed of the shared remote) was not
-performed this session — see "Step 0" below. It requires Docker running and the
-user's go-ahead on the shared production database, so it is intentionally left for
-a supervised run.
+Status: **code complete (5a · 5b · 5c) + housekeeping**, fully verified locally
+(unit, e2e incl. the DB-backed share round-trip, Lighthouse, PWA/offline, shared
+page + OG unfurl — screenshots below). One gate is **outstanding and
+user-assisted**: Step 0, the first push + seed of the shared **production** remote,
+was not performed — it needs the user's explicit go-ahead on the shared DB. See
+"Step 0" below.
 
 Branch: `phase-5/plan-share-pwa`. Commits:
 - `docs: housekeeping sweep — README status, CONTRIBUTING, phase-5 prompt`
@@ -35,12 +36,13 @@ This is the first time the shared remote would be touched, and per AGENTS.md rul
 6 & 7 + the kickoff it must be a supervised ritual. It was **not** run this session
 because:
 
-- **Docker is not running** locally, so `supabase start`, a `pg_dump -n portfolio`
-  snapshot, and REST count verification cannot be performed.
 - The remote is **not linked** in this checkout (`supabase/.temp/project-ref`
   absent), and pushing to the shared production DB needs the user's explicit
   go-ahead after inspecting the remote `public` schema (the kickoff says: if ANY
-  table exists there, STOP and report).
+  table exists there, STOP and report). No supervised confirmation was given.
+- Docker came up mid-session, so everything that only needs the **local** stack
+  was completed (full content import 8/46/4, DB-backed share e2e) — but that is
+  the local stack, never the shared remote.
 
 **To run it (supervised):** start Docker → `pg_dump -n portfolio` snapshot (local,
 never commit) → inspect remote `public` (STOP if non-empty) → verify
@@ -134,7 +136,9 @@ fallback (as in Phase 4).
 | Typecheck | `pnpm typecheck` | ✅ |
 | Lint/format | `pnpm lint` | ✅ (127 files) |
 | Unit + coverage | `pnpm test` | ✅ 181 tests (24 files); +rate-limit, +share-slug, +shared-plan |
+| Content import (local) | `db:reset` → `content:import --dir ../olim-content/content` | ✅ 8 sections / 46 steps / 4 benefits |
 | e2e + axe (both themes, mobile + desktop) | `pnpm e2e` | ✅ 28 passed, 2 skipped (DB-gated share round-trip); tracker filters + done, share button, 404 on unknown slug; axe clean both themes |
+| **DB-backed share round-trip** | `E2E_SUPABASE=1 pnpm e2e plan.spec` | ✅ 12 passed — real `plans` insert + `/plan/{slug}` read-only render with done-mark, both projects |
 | Lighthouse (mobile) | `pnpm lighthouse` | ✅ perf ≥90 / a11y ≥95 / JS guard on `/`, `/dev/ui`, `/onboarding`, `/guides`, `/guides/[section]`, **`/plan`** |
 | Build | `pnpm build` | ✅ 10 routes; `public/sw.js` generated, `/offline` precached |
 | PWA assets served | curl `/manifest.webmanifest`, `/sw.js`, `/icons/*`, `/offline` | ✅ all 200; manifest has name/short_name/start_url/standalone/192+512+maskable icons |
@@ -149,21 +153,23 @@ Screenshots (mobile, chrome-devtools) in `docs/PHASE_REPORTS/assets/phase-5/`:
 | Tracker (light) | ![](assets/phase-5/tracker-light.png) |
 | Tracker (dark) | ![](assets/phase-5/tracker-dark.png) |
 | Home — dimmed zero-count tile ("Работа") | ![](assets/phase-5/home-dimmed.png) |
+| Shared plan `/plan/{slug}` (read-only, no city/dates) | ![](assets/phase-5/shared-plan.png) |
+| OG unfurl image (Cyrillic renders; brand diamond) | ![](assets/phase-5/og-unfurl.png) |
 | Plan open OFFLINE (airplane mode) | ![](assets/phase-5/plan-offline.png) |
 | Offline fallback page | ![](assets/phase-5/offline-page.png) |
 
 ## Deferred / debts (user-assisted or later phase)
 
 1. **Step 0 — remote push + seed** (see above): the outstanding gate. Blocks the
-   full-content preview and the DB-backed verifications below.
-2. **Share round-trip e2e** (`tests/e2e/plan.spec.ts`, `E2E_SUPABASE=1`): asserts
-   a real row insert + `/plan/{slug}` read against a local Supabase stack. Skipped
-   in CI (no DB) and this session (no Docker). Run with `supabase start` +
-   `E2E_SUPABASE=1 pnpm e2e`.
-3. **Telegram unfurl** (manual): post a `/plan/{slug}` link to a Telegram chat and
-   confirm the OG image renders. Needs a seeded remote (debt 1) + a deployed URL.
-   The OG route builds and the image code is verified locally; the real unfurl is
-   user-assisted.
+   full-content preview on the deployed URL. Verified locally instead this session
+   (Docker came up mid-session): full content imported to the local stack (8/46/4)
+   and the DB-backed share round-trip e2e passed — but the shared production
+   remote was still not touched (needs the user's go-ahead + link).
+2. ✅ **Share round-trip e2e** — done this session against the local stack
+   (`E2E_SUPABASE=1 pnpm e2e plan.spec` → 12 passed). Skipped only in CI (no DB).
+3. **Telegram unfurl** (manual): the OG image is verified rendering locally
+   (Cyrillic loads; see `og-unfurl.png`), but the real Telegram post needs a
+   deployed URL + seeded remote (debt 1) — user-assisted.
 4. **Airplane-mode on a real phone** (manual): the DoD's "at the airport" test.
    Proven under desktop network-offline emulation here; a physical A2HS + offline
    check is user-assisted.
