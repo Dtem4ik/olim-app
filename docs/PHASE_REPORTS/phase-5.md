@@ -4,9 +4,8 @@ Status: **complete** — code (5a · 5b · 5c) + housekeeping, fully verified lo
 (unit, e2e incl. the DB-backed share round-trip, Lighthouse, PWA/offline, shared
 page + OG unfurl — screenshots below), and **Step 0 done**: the first push + seed
 of the shared **production** remote was performed with the user's go-ahead,
-following the neighbor-backup ritual (evidence below). Only interim item: the
-Vercel prod deployment needs a rebuild to bake the now-seeded content (it renders
-fixtures until then — see Step 0).
+following the neighbor-backup ritual (evidence below). Vercel prod now serves the
+real seeded content (8 sections) after the missing env vars were added + a redeploy.
 
 Branch: `phase-5/plan-share-pwa`. Commits:
 - `docs: housekeeping sweep — README status, CONTRIBUTING, phase-5 prompt`
@@ -62,12 +61,14 @@ Evidence, in order:
    RLS) but `GET /plans` returns `[]` (RLS blocks enumeration; only the RPC
    exposes a single row by slug). ✅
 
-**Remaining (interim):** the current Vercel **production** deployment is 13h old —
-built when `public` was still empty, so it serves the committed fixtures (4
-sections) via the repo fallback. Home/Guides bake content at build time (Phase 4
-debt), so **prod shows the full 8/46 content only after the next build** — either a
-`vercel redeploy` of the current production deployment, or naturally when Phase 5
-merges to `main`. The remote data itself is correct and live (verified above).
+7. **Vercel prod serves real content** ✅ — root cause found: the Vercel project
+   had **no environment variables at all**, so `getSupabaseAnon()` returned null in
+   prod and always fell back to fixtures (this, not just build timing, is why prod
+   showed 4 fixture sections). The user added the env (incl. the public
+   `NEXT_PUBLIC_SUPABASE_URL` + `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`) to Vercel
+   and redeployed; `https://olim-app.vercel.app/guides` now renders the full **8**
+   sections (rent / work / transport / mobile-internet appear — fixtures-only had
+   4), matching the live remote counts 8 / 46 / 4.
 
 ## 5a — Plan tracker ✅
 
@@ -175,10 +176,10 @@ Screenshots (mobile, chrome-devtools) in `docs/PHASE_REPORTS/assets/phase-5/`:
 
 ## Deferred / debts (user-assisted or later phase)
 
-1. ✅ **Step 0 — remote push + seed**: done this session (see above). Remaining
-   interim step is a **Vercel prod rebuild** so the statically-baked Home/Guides
-   pick up the seeded content — happens on the Phase 5 merge to `main`, or via an
-   immediate `vercel redeploy` of the current production deployment.
+1. ✅ **Step 0 — remote push + seed**: done this session (see above), incl. Vercel
+   prod now serving the real 8/46 content after the missing env vars were added +
+   redeploy. Note for future deploys: prod content is baked at build time, so new
+   content needs a redeploy (tracked Phase 4 debt — ISR/on-demand revalidate later).
 2. ✅ **Share round-trip e2e** — done this session against the local stack
    (`E2E_SUPABASE=1 pnpm e2e plan.spec` → 12 passed). Skipped only in CI (no DB).
 3. **Telegram unfurl** (manual): the OG image is verified rendering locally
