@@ -34,12 +34,19 @@ export function SectionTile({
       data-dimmed={dimmed ? "" : undefined}
       className={cn(
         "group flex min-h-11 flex-col gap-3 rounded-xl border bg-surface p-4 text-surface-foreground shadow-sm transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-        dimmed && "opacity-60 hover:opacity-100",
+        // De-emphasize without lowering text contrast (AA): a dashed border and a
+        // muted icon signal "no matched steps", text colors stay full-strength.
+        dimmed && "border-dashed shadow-none",
         className,
       )}
     >
       <div className="flex items-center justify-between">
-        <span className="flex size-11 items-center justify-center rounded-lg bg-primary/12 text-primary">
+        <span
+          className={cn(
+            "flex size-11 items-center justify-center rounded-lg",
+            dimmed ? "bg-muted text-muted-foreground" : "bg-primary/12 text-primary",
+          )}
+        >
           <Icon className="size-5" aria-hidden />
         </span>
         {typeof count === "number" && <Badge variant="secondary">{count}</Badge>}

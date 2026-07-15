@@ -75,9 +75,10 @@ Commit the resulting config so every future session gets the shadcn MCP automati
 Populated in Phase 1. Keep current:
 
 ```
-pnpm dev             # start the dev server (http://localhost:3000)
-pnpm build           # production build
+pnpm dev             # start the dev server (Turbopack; SW disabled in dev)
+pnpm build           # production build (next build --webpack — serwist needs webpack)
 pnpm start           # serve the production build
+pnpm icons           # regenerate the PWA icon set (public/icons) from the SVG glyph
 pnpm lint            # Biome lint + format check
 pnpm lint:fix        # Biome autofix (format + safe fixes)
 pnpm typecheck       # tsc --noEmit
