@@ -13,6 +13,7 @@ module.exports = {
         "http://localhost:3000/onboarding",
         "http://localhost:3000/guides",
         "http://localhost:3000/guides/healthcare",
+        "http://localhost:3000/plan",
       ],
       numberOfRuns: 3,
       settings: {

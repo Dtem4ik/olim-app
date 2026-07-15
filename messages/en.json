@@ -30,6 +30,12 @@
     "sections": { "title": "Sections" },
     "edit": "Edit answers"
   },
+  "offline": {
+    "title": "You're offline",
+    "subtitle": "This page isn't saved for offline yet. Your plan and previously opened guides work without a connection.",
+    "planCta": "Open my plan",
+    "retry": "Reload"
+  },
   "nav": {
     "primary": "Primary navigation",
     "home": "Home",
