@@ -1,11 +1,12 @@
 # Phase 5 — My plan, sharing, PWA
 
-Status: **code complete (5a · 5b · 5c) + housekeeping**, fully verified locally
+Status: **complete** — code (5a · 5b · 5c) + housekeeping, fully verified locally
 (unit, e2e incl. the DB-backed share round-trip, Lighthouse, PWA/offline, shared
-page + OG unfurl — screenshots below). One gate is **outstanding and
-user-assisted**: Step 0, the first push + seed of the shared **production** remote,
-was not performed — it needs the user's explicit go-ahead on the shared DB. See
-"Step 0" below.
+page + OG unfurl — screenshots below), and **Step 0 done**: the first push + seed
+of the shared **production** remote was performed with the user's go-ahead,
+following the neighbor-backup ritual (evidence below). Only interim item: the
+Vercel prod deployment needs a rebuild to bake the now-seeded content (it renders
+fixtures until then — see Step 0).
 
 Branch: `phase-5/plan-share-pwa`. Commits:
 - `docs: housekeeping sweep — README status, CONTRIBUTING, phase-5 prompt`
@@ -30,29 +31,43 @@ Scope held: no search/SEO (Phase 6), no accounts/auth (Phase 7).
   (rule 5) was already present and is honored here.
 - Phase 5 kickoff prompt moved into `docs/PROMPTS/`.
 
-## Step 0 — first remote push + seed ⛔ NOT DONE (user-assisted gate)
+## Step 0 — first remote push + seed ✅ (supervised, user-approved)
 
-This is the first time the shared remote would be touched, and per AGENTS.md rules
-6 & 7 + the kickoff it must be a supervised ritual. It was **not** run this session
-because:
+Performed with the user's explicit go-ahead, following the AGENTS.md rules 6 & 7
+ritual exactly. Remote project ref `zlcifmgakksqxkpowzaa` (the shared portfolio
+project). DB-level access used the direct Postgres connection from
+`.env.local` (`POSTGRES_URL_NON_POOLING`); pg tooling ran via a `postgres:17`
+Docker image (local pg 16 can't dump a pg 17 server).
 
-- The remote is **not linked** in this checkout (`supabase/.temp/project-ref`
-  absent), and pushing to the shared production DB needs the user's explicit
-  go-ahead after inspecting the remote `public` schema (the kickoff says: if ANY
-  table exists there, STOP and report). No supervised confirmation was given.
-- Docker came up mid-session, so everything that only needs the **local** stack
-  was completed (full content import 8/46/4, DB-backed share e2e) — but that is
-  the local stack, never the shared remote.
+Evidence, in order:
 
-**To run it (supervised):** start Docker → `pg_dump -n portfolio` snapshot (local,
-never commit) → inspect remote `public` (STOP if non-empty) → verify
-`SHOW server_version` matches `major_version = 17` in `config.toml` →
-`supabase link` + `supabase db push` (the single additive migration
-`20260711145729_init_content_schema.sql`, all objects in `public`) →
-`pnpm content:import --dir ../olim-content/content --allow-remote` → verify
-8 sections / 46+ steps / 4 benefits via REST → confirm the Vercel prod URL serves
-real content. Until then the preview renders the committed fixtures via the repo
-fallback (as in Phase 4).
+1. **Server version** — `SHOW server_version` → **17.6**, matches
+   `major_version = 17` in `config.toml`. ✅
+2. **Neighbor backup** — `pg_dump -n portfolio` snapshot taken (137 KB, 675 lines,
+   **8 tables** captured) into the session scratchpad. **Never committed.** ✅
+3. **Remote `public` inspected BEFORE push** — **0 tables** (empty). The gate's
+   STOP condition (any pre-existing table) did **not** trigger. The `portfolio`
+   schema was present with 8 tables and left untouched. ✅
+4. **Migration pushed** — `supabase db push --db-url …` applied the single
+   additive migration `20260711145729_init_content_schema.sql`. (A non-fatal
+   `pgdelta` catalog-cache warning printed; the DDL applied and was recorded in
+   `supabase_migrations.schema_migrations` = `20260711145729`.) Objects created in
+   `public`: tables `sections`, `steps`, `benefits`, `plans`, `step_reports`;
+   functions `set_updated_at()`, `get_plan_by_share_slug(text)`; plus their
+   indexes, `updated_at` triggers, RLS (enabled on all 5), and role grants.
+   `portfolio` still 8 tables afterwards. ✅
+5. **Seeded** — `pnpm content:import --dir ../olim-content/content --allow-remote`
+   (service-role over REST) → **8 sections / 46 steps / 4 benefits**. ✅
+6. **Verified via anon REST** — counts 8 / 46 / 4; anon reads step titles (public
+   RLS) but `GET /plans` returns `[]` (RLS blocks enumeration; only the RPC
+   exposes a single row by slug). ✅
+
+**Remaining (interim):** the current Vercel **production** deployment is 13h old —
+built when `public` was still empty, so it serves the committed fixtures (4
+sections) via the repo fallback. Home/Guides bake content at build time (Phase 4
+debt), so **prod shows the full 8/46 content only after the next build** — either a
+`vercel redeploy` of the current production deployment, or naturally when Phase 5
+merges to `main`. The remote data itself is correct and live (verified above).
 
 ## 5a — Plan tracker ✅
 
@@ -160,11 +175,10 @@ Screenshots (mobile, chrome-devtools) in `docs/PHASE_REPORTS/assets/phase-5/`:
 
 ## Deferred / debts (user-assisted or later phase)
 
-1. **Step 0 — remote push + seed** (see above): the outstanding gate. Blocks the
-   full-content preview on the deployed URL. Verified locally instead this session
-   (Docker came up mid-session): full content imported to the local stack (8/46/4)
-   and the DB-backed share round-trip e2e passed — but the shared production
-   remote was still not touched (needs the user's go-ahead + link).
+1. ✅ **Step 0 — remote push + seed**: done this session (see above). Remaining
+   interim step is a **Vercel prod rebuild** so the statically-baked Home/Guides
+   pick up the seeded content — happens on the Phase 5 merge to `main`, or via an
+   immediate `vercel redeploy` of the current production deployment.
 2. ✅ **Share round-trip e2e** — done this session against the local stack
    (`E2E_SUPABASE=1 pnpm e2e plan.spec` → 12 passed). Skipped only in CI (no DB).
 3. **Telegram unfurl** (manual): the OG image is verified rendering locally
