@@ -68,9 +68,51 @@ test.describe("plan tracker", () => {
     await expect(page.getByTestId("plan-invite-cta")).toBeVisible();
   });
 
+  test("share button is present once there is a plan", async ({ page }) => {
+    await seedProfile(page);
+    await page.goto("/plan");
+    await expect(page.getByTestId("plan-share")).toBeVisible();
+  });
+
   test("no serious a11y violations on the tracker (both themes)", async ({ page }) => {
     await seedProfile(page);
     await page.goto("/plan");
     await expectNoSeriousA11yViolations(page);
+  });
+});
+
+test.describe("shared plan page", () => {
+  test("unknown slug returns 404", async ({ page }) => {
+    const res = await page.goto("/plan/doesnotexist12345");
+    expect(res?.status()).toBe(404);
+  });
+
+  // Full share round-trip needs a real Supabase stack (row insert + RPC read).
+  // CI runs against the fixtures fallback (no DB), so gate this on an opt-in flag
+  // set locally when `supabase start` is running (see the Phase 5 report).
+  test("share creates a row and /plan/{slug} renders read-only", async ({ page, context }) => {
+    test.skip(process.env.E2E_SUPABASE !== "1", "needs a local Supabase stack");
+    await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+    await seedProfile(page);
+    await page.goto("/plan");
+
+    // Check one step so the shared snapshot has a done-mark.
+    const first = page.getByTestId("plan-step").first();
+    const title = (await first.locator("a").textContent())?.trim();
+    await first.getByRole("checkbox").click();
+
+    await page.getByTestId("plan-share").click();
+    // Desktop chromium has no navigator.share → clipboard fallback + "copied".
+    await expect(page.getByText(/скопирована/i)).toBeVisible();
+    const url = await page.evaluate(() => navigator.clipboard.readText());
+    expect(url).toMatch(/\/plan\/[A-Za-z0-9_-]{12,}$/);
+
+    // The read-only page renders the plan with the done-mark and a CTA.
+    await page.goto(new URL(url).pathname);
+    await expect(page.getByTestId("shared-progress")).toBeVisible();
+    await expect(page.getByTestId("shared-cta")).toBeVisible();
+    if (title) await expect(page.getByText(title, { exact: true }).first()).toBeVisible();
+    // No profile-only chrome (read-only): the tracker's share button is absent.
+    await expect(page.getByTestId("plan-share")).toHaveCount(0);
   });
 });
