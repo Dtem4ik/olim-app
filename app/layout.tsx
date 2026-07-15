@@ -1,3 +1,4 @@
+import { SerwistProvider } from "@serwist/next/react";
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
@@ -23,6 +24,8 @@ export async function generateMetadata(): Promise<Metadata> {
       template: `%s — ${t("name")}`,
     },
     description: t("tagline"),
+    appleWebApp: { capable: true, statusBarStyle: "default", title: t("name") },
+    icons: { apple: "/icons/apple-touch-icon.png" },
   };
 }
 
@@ -42,17 +45,19 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   return (
     <html lang={locale} suppressHydrationWarning>
       <body className={`${inter.variable} min-h-dvh antialiased`}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <NextIntlClientProvider locale={locale} messages={messages}>
-            <AnalyticsProvider />
-            {children}
-          </NextIntlClientProvider>
-        </ThemeProvider>
+        <SerwistProvider swUrl="/sw.js">
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <NextIntlClientProvider locale={locale} messages={messages}>
+              <AnalyticsProvider />
+              {children}
+            </NextIntlClientProvider>
+          </ThemeProvider>
+        </SerwistProvider>
       </body>
     </html>
   );
