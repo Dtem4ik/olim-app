@@ -93,14 +93,14 @@ test.describe("home & sections", () => {
     const planStep = page.locator(`[data-testid="plan-step"][data-slug="${slug}"]`);
     await expect(planStep.getByRole("checkbox")).toBeChecked();
 
-    // "Outdated?" flow shows a thank-you.
+    // Tapping a step raises a bottom sheet with its content; the "outdated?"
+    // flow lives there and shows a thank-you.
     await page.goto("/guides/healthcare");
-    const step = page.getByTestId("step-item").first();
-    await step.getByRole("button").first().click(); // expand
-    await step.getByTestId("report-open").click();
-    await step.getByTestId("report-reason").fill("ссылка не открывается");
-    await step.getByTestId("report-submit").click();
-    await expect(step.getByTestId("report-thanks")).toBeVisible();
+    await page.getByTestId("step-item").first().getByTestId("step-open").click();
+    await page.getByTestId("report-open").click();
+    await page.getByTestId("report-reason").fill("ссылка не открывается");
+    await page.getByTestId("report-submit").click();
+    await expect(page.getByTestId("report-thanks")).toBeVisible();
   });
 
   test("home invites to the quiz without a profile", async ({ page }) => {
@@ -115,8 +115,9 @@ test.describe("home & sections", () => {
     await page.goto("/guides");
     await expectNoSeriousA11yViolations(page);
     await page.goto("/guides/healthcare");
-    await expectNoSeriousA11yViolations(page, async (p) => {
-      await p.getByTestId("step-item").first().getByRole("button").first().click();
-    });
+    await expectNoSeriousA11yViolations(page);
+    // Step bottom sheet.
+    await page.getByTestId("step-item").first().getByTestId("step-open").click();
+    await expectNoSeriousA11yViolations(page);
   });
 });

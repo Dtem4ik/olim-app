@@ -18,13 +18,16 @@ export interface BottomNavProps {
   className?: string;
 }
 
-/** Fixed mobile tab bar. Each tab is a >=44px tap target. */
+/** Floating pill tab bar. Each tab is a >=44px round tap target. */
 export function BottomNav({ items, activeHref, className }: BottomNavProps) {
   const t = useTranslations("nav");
   return (
     <nav
       aria-label={t("primary")}
-      className={cn("flex items-stretch justify-around border-t bg-surface", className)}
+      className={cn(
+        "flex items-center gap-1 rounded-full bg-nav-pill p-1.5 shadow-lg shadow-black/20",
+        className,
+      )}
     >
       {items.map((item) => {
         const isActive = item.href === activeHref;
@@ -36,12 +39,14 @@ export function BottomNav({ items, activeHref, className }: BottomNavProps) {
             prefetch={false}
             aria-current={isActive ? "page" : undefined}
             className={cn(
-              "flex min-h-11 min-w-11 flex-1 flex-col items-center justify-center gap-1 px-2 py-2 text-sm font-medium leading-none transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset",
-              isActive ? "text-primary" : "text-muted-foreground hover:text-foreground",
+              "flex size-12 items-center justify-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-nav-pill-foreground focus-visible:ring-offset-2 focus-visible:ring-offset-nav-pill",
+              isActive
+                ? "bg-nav-pill-foreground text-nav-pill"
+                : "text-nav-pill-foreground/60 hover:text-nav-pill-foreground",
             )}
           >
             <Icon className="size-5" aria-hidden />
-            <span>{item.label}</span>
+            <span className="sr-only">{item.label}</span>
           </Link>
         );
       })}

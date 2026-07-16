@@ -143,7 +143,7 @@ export default function DevUiPage() {
 
         <Group title={t("bottomNav")}>
           <div className="overflow-hidden rounded-xl border">
-            <SiteBottomNav activeHref="/" />
+            <SiteBottomNav />
           </div>
         </Group>
       </div>

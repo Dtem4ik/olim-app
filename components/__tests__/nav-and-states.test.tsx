@@ -1,10 +1,13 @@
 import { Inbox } from "lucide-react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { EmptyState } from "@/components/empty-state";
 import { SiteBottomNav } from "@/components/site-bottom-nav";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { renderWithProviders, screen, userEvent } from "@/test/test-utils";
+
+// SiteBottomNav derives the active tab from the current pathname.
+vi.mock("next/navigation", () => ({ usePathname: () => "/" }));
 
 describe("EmptyState", () => {
   it("renders title, description and action", () => {
@@ -24,7 +27,7 @@ describe("EmptyState", () => {
 
 describe("SiteBottomNav", () => {
   it("renders a primary navigation landmark and marks the active tab", () => {
-    renderWithProviders(<SiteBottomNav activeHref="/" />);
+    renderWithProviders(<SiteBottomNav />);
     expect(screen.getByRole("navigation", { name: "Основная навигация" })).toBeInTheDocument();
 
     const home = screen.getByRole("link", { name: "Главная" });

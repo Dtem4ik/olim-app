@@ -2,7 +2,7 @@
 
 import { Search, X } from "lucide-react";
 import { useTranslations } from "next-intl";
-import type { FormEvent } from "react";
+import { type FormEvent, useEffect, useRef } from "react";
 import {
   InputGroup,
   InputGroupAddon,
@@ -17,14 +17,34 @@ export interface SearchBarProps {
   onSubmit?: (value: string) => void;
   placeholder?: string;
   className?: string;
+  /** Focus the input on mount (e.g. when opening the search screen). */
+  autoFocus?: boolean;
 }
 
 /**
  * Search input with a leading icon and a clear affordance. Composes the shadcn
  * `InputGroup` primitive; the group is bumped to h-11 to stay a >=44px target.
  */
-export function SearchBar({ value, onChange, onSubmit, placeholder, className }: SearchBarProps) {
+export function SearchBar({
+  value,
+  onChange,
+  onSubmit,
+  placeholder,
+  className,
+  autoFocus,
+}: SearchBarProps) {
   const t = useTranslations("search");
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Focus on mount and place the caret after any restored text.
+  useEffect(() => {
+    if (!autoFocus) return;
+    const el = inputRef.current;
+    if (!el) return;
+    el.focus();
+    const end = el.value.length;
+    el.setSelectionRange(end, end);
+  }, [autoFocus]);
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -39,6 +59,7 @@ export function SearchBar({ value, onChange, onSubmit, placeholder, className }:
             <Search aria-hidden />
           </InputGroupAddon>
           <InputGroupInput
+            ref={inputRef}
             type="search"
             value={value}
             onChange={(e) => onChange(e.target.value)}
