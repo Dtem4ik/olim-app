@@ -53,8 +53,8 @@ export const sectionInputSchema = z.object({
   title: z.string().min(1).max(120),
   description: z.string().max(400).nullish(),
   icon: z.string().max(64).nullish(),
-  /** Optional hero photo (absolute URL). Falls back to a colour placeholder. */
-  image_url: z.string().url().max(600).nullish(),
+  /** Optional hero photo (local /img path or absolute URL). Falls back to a colour tile. */
+  image_url: z.string().max(600).nullish(),
   sort_order: nonNegativeInt.default(0),
 });
 export type SectionInput = z.infer<typeof sectionInputSchema>;

@@ -25,8 +25,7 @@ import {
 import { cn } from "@/lib/utils";
 
 /** Tel Aviv seafront — the emotional welcome image (shared with Home). */
-const HERO_SRC =
-  "https://images.unsplash.com/photo-1500990702037-7620ccb6a60a?w=1200&q=70&auto=format&fit=crop";
+const HERO_SRC = "/img/hero-telaviv.webp";
 
 /** Origin countries offered in the quiz (slugs match the content `cond.country`). */
 const COUNTRY_OPTIONS = [

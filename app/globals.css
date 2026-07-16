@@ -29,7 +29,8 @@
   --popover-foreground: var(--surface-foreground);
 
   --muted: oklch(0.96 0.006 264);
-  --muted-foreground: oklch(0.52 0.02 264);
+  /* 0.44 keeps muted text at >=4.5:1 on the cream background (WCAG AA). */
+  --muted-foreground: oklch(0.44 0.02 264);
 
   --primary: oklch(0.5 0.19 262);
   --primary-foreground: oklch(0.99 0.01 258);

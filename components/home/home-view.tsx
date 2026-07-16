@@ -21,8 +21,7 @@ import { sectionIcon } from "@/lib/section-icons";
 const BURNING_KINDS = new Set(["overdue", "today", "soon"]);
 
 /** Tel Aviv seafront — the emotional "you're in Israel" hero (Unsplash CDN). */
-const HERO_SRC =
-  "https://images.unsplash.com/photo-1500990702037-7620ccb6a60a?w=1200&q=70&auto=format&fit=crop";
+const HERO_SRC = "/img/hero-telaviv.webp";
 
 export function HomeView({
   sections,
