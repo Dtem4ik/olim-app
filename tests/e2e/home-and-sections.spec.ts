@@ -9,6 +9,15 @@ async function expectNoSeriousA11yViolations(page: Page, prep?: (page: Page) => 
     await page.evaluate((t) => localStorage.setItem("theme", t), theme);
     await page.reload();
     await prep?.(page);
+    // Instantly settle the entrance fade before axe reads colours. Mid-fade,
+    // muted text blends with the background into a lower-contrast value and
+    // trips a false WCAG-contrast failure; killing animation/transition duration
+    // pins every element at its final (true, passing) colour. The fade still
+    // ships to real users — it just isn't a stable thing to assert against.
+    await page.addStyleTag({
+      content:
+        "*,*::before,*::after{animation-duration:0s !important;animation-delay:0s !important;transition-duration:0s !important}",
+    });
     const results = await new AxeBuilder({ page })
       .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
       .analyze();
