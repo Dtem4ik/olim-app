@@ -1,9 +1,12 @@
 "use client";
 
+import Image from "next/image";
+import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
+import { DeadlineBadge } from "@/components/deadline-badge";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -20,6 +23,10 @@ import {
   saveProfile,
 } from "@/lib/plan/profile";
 import { cn } from "@/lib/utils";
+
+/** Tel Aviv seafront — the emotional welcome image (shared with Home). */
+const HERO_SRC =
+  "https://images.unsplash.com/photo-1500990702037-7620ccb6a60a?w=1200&q=70&auto=format&fit=crop";
 
 /** Origin countries offered in the quiz (slugs match the content `cond.country`). */
 const COUNTRY_OPTIONS = [
@@ -156,13 +163,26 @@ export function OnboardingFlow({ steps }: { steps: EngineStep[] }) {
   if (phase === "intro") {
     return (
       <section
-        className="mx-auto flex min-h-dvh max-w-md flex-col justify-center gap-6 p-6"
+        className="animate-page-enter mx-auto flex min-h-dvh max-w-md flex-col gap-6 p-6"
         data-testid="onboarding-intro"
       >
-        <div className="space-y-2">
-          <h1 className="text-2xl font-semibold text-balance">{t("title")}</h1>
-          <p className="text-muted-foreground">{t("subtitle")}</p>
+        <div className="relative mt-4 overflow-hidden rounded-3xl">
+          <Image
+            src={HERO_SRC}
+            alt=""
+            width={896}
+            height={520}
+            priority
+            sizes="(max-width: 448px) 100vw, 448px"
+            className="h-60 w-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent" />
+          <h1 className="absolute inset-x-0 bottom-0 p-5 text-3xl font-bold tracking-tight text-white text-balance">
+            {t("title")}
+          </h1>
         </div>
+        <p className="px-1 text-muted-foreground text-balance">{t("subtitle")}</p>
+        <div className="flex-1" />
         <Button
           size="lg"
           className="w-full"
@@ -206,10 +226,10 @@ export function OnboardingFlow({ steps }: { steps: EngineStep[] }) {
 
   return (
     <section
-      className="mx-auto flex min-h-dvh max-w-md flex-col gap-6 p-6"
+      className="animate-page-enter mx-auto flex min-h-dvh max-w-md flex-col gap-6 p-6"
       data-testid="onboarding-quiz"
     >
-      <div className="space-y-2">
+      <div className="space-y-2 pt-2">
         <Progress
           value={(stepNumber / visible.length) * 100}
           aria-label={t("progress", { current: stepNumber, total: visible.length })}
@@ -219,8 +239,8 @@ export function OnboardingFlow({ steps }: { steps: EngineStep[] }) {
         </p>
       </div>
 
-      <div className="flex-1 space-y-4">
-        <h1 id={headingId} className="text-xl font-semibold text-balance">
+      <div key={current.id} className="animate-page-enter flex-1 space-y-5">
+        <h1 id={headingId} className="text-2xl font-semibold tracking-tight text-balance">
           {t(`questions.${current.id}.label`)}
         </h1>
 
@@ -250,12 +270,12 @@ export function OnboardingFlow({ steps }: { steps: EngineStep[] }) {
             className="gap-2"
           >
             <OptionRow
-              value="pet-yes"
+              value="yes"
               selected={draft.pet === true}
               label={t("questions.pet.options.yes")}
             />
             <OptionRow
-              value="pet-no"
+              value="no"
               selected={draft.pet === false}
               label={t("questions.pet.options.no")}
             />
@@ -343,8 +363,10 @@ function OptionRow({
     // biome-ignore lint/a11y/noLabelWithoutControl: the label wraps the RadioGroupItem so the whole ≥44px row is the tap target
     <label
       className={cn(
-        "flex min-h-11 cursor-pointer items-center gap-3 rounded-lg border px-4 py-3 text-sm transition-colors",
-        selected ? "border-primary bg-primary/5" : "border-border hover:bg-muted/50",
+        "flex min-h-12 cursor-pointer items-center gap-3 rounded-xl border px-4 py-3.5 text-sm transition-colors",
+        selected
+          ? "border-primary bg-primary/5 ring-1 ring-primary/30"
+          : "border-border hover:bg-muted/50",
       )}
       data-testid="onboarding-option"
     >
@@ -431,38 +453,40 @@ function PlanPreview({
 
   return (
     <section
-      className="mx-auto flex min-h-dvh max-w-md flex-col gap-6 p-6"
+      className="animate-page-enter mx-auto flex min-h-dvh max-w-md flex-col gap-6 p-6"
       data-testid="onboarding-preview"
     >
-      <div className="space-y-2">
-        <h1 className="text-2xl font-semibold">{t("preview.title")}</h1>
+      <div className="space-y-2 pt-2">
+        <h1 className="text-3xl font-bold tracking-tight">{t("preview.title")}</h1>
         <p className="text-muted-foreground">
           {t("preview.subtitle", { count: plan.entries.length })}
         </p>
       </div>
 
       {plan.entries.length === 0 ? (
-        <p className="text-muted-foreground">{t("preview.empty")}</p>
+        <p className="rounded-2xl border border-border px-4 py-6 text-center text-sm text-muted-foreground">
+          {t("preview.empty")}
+        </p>
       ) : (
         <div className="flex-1 space-y-6" data-testid="plan-groups">
           {plan.stages.map((group) => (
             <div key={group.stage ?? "none"} className="space-y-2">
-              <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
+              <h2 className="px-1 text-xs font-semibold text-muted-foreground uppercase tracking-wide">
                 {group.stage ? t(`stages.${group.stage}`) : t("preview.noStage")}
               </h2>
               <ul className="space-y-2">
                 {group.entries.map((entry) => (
                   <li
                     key={entry.step.slug}
-                    className="rounded-lg border border-border px-4 py-3 text-sm"
+                    className="flex items-center justify-between gap-3 rounded-2xl border border-border p-4"
                     data-testid="plan-step"
                     data-slug={entry.step.slug}
                   >
-                    <span>{entry.step.title}</span>
+                    <span className="font-medium leading-snug text-balance">
+                      {entry.step.title}
+                    </span>
                     {entry.warning?.due && (
-                      <span className="mt-1 block text-xs text-muted-foreground">
-                        {t("preview.deadline")}: {entry.warning.due}
-                      </span>
+                      <DeadlineBadge due={new Date(entry.warning.due)} className="shrink-0" />
                     )}
                   </li>
                 ))}
@@ -472,25 +496,34 @@ function PlanPreview({
         </div>
       )}
 
-      <div className="flex gap-3">
-        <Button
-          variant="outline"
-          size="lg"
-          className="flex-1"
-          onClick={onEdit}
-          data-testid="onboarding-edit"
+      <div className="flex flex-col gap-3">
+        <Link
+          href="/"
+          className={buttonVariants({ size: "lg", className: "w-full" })}
+          data-testid="onboarding-open"
         >
-          {t("editAnswers")}
-        </Button>
-        <Button
-          variant="ghost"
-          size="lg"
-          className="flex-1"
-          onClick={onStartOver}
-          data-testid="onboarding-startover"
-        >
-          {t("startOver")}
-        </Button>
+          {t("preview.cta")}
+        </Link>
+        <div className="flex gap-3">
+          <Button
+            variant="outline"
+            size="lg"
+            className="flex-1"
+            onClick={onEdit}
+            data-testid="onboarding-edit"
+          >
+            {t("editAnswers")}
+          </Button>
+          <Button
+            variant="ghost"
+            size="lg"
+            className="flex-1"
+            onClick={onStartOver}
+            data-testid="onboarding-startover"
+          >
+            {t("startOver")}
+          </Button>
+        </div>
       </div>
     </section>
   );
