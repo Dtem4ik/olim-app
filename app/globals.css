@@ -54,6 +54,20 @@
   --ring: oklch(0.54 0.17 258);
 
   --radius: 0.75rem;
+
+  /* Floating "pill" bottom nav — a dark bar in both themes. */
+  --nav-pill: oklch(0.24 0.02 264);
+  --nav-pill-foreground: oklch(0.98 0.01 258);
+
+  /* Per-section pastel fills (light theme). Text on them uses --foreground. */
+  --sec-blue: oklch(0.91 0.05 245);
+  --sec-mint: oklch(0.91 0.07 160);
+  --sec-amber: oklch(0.92 0.08 85);
+  --sec-lavender: oklch(0.9 0.06 300);
+  --sec-rose: oklch(0.91 0.06 20);
+  --sec-sky: oklch(0.92 0.05 220);
+  --sec-teal: oklch(0.91 0.06 190);
+  --sec-peach: oklch(0.92 0.07 55);
 }
 
 .dark {
@@ -87,6 +101,19 @@
   --border: oklch(0.32 0.02 264);
   --input: oklch(0.34 0.02 264);
   --ring: oklch(0.7 0.15 256);
+
+  --nav-pill: oklch(0.3 0.02 264);
+  --nav-pill-foreground: oklch(0.98 0.01 258);
+
+  /* Deep, muted section tints for dark theme; text uses the light --foreground. */
+  --sec-blue: oklch(0.34 0.05 245);
+  --sec-mint: oklch(0.34 0.05 160);
+  --sec-amber: oklch(0.36 0.05 85);
+  --sec-lavender: oklch(0.34 0.06 300);
+  --sec-rose: oklch(0.35 0.06 20);
+  --sec-sky: oklch(0.34 0.05 220);
+  --sec-teal: oklch(0.34 0.05 190);
+  --sec-peach: oklch(0.36 0.05 55);
 }
 
 /* ---------------------------------------------------------------------------
@@ -119,12 +146,73 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
 
+  --color-nav-pill: var(--nav-pill);
+  --color-nav-pill-foreground: var(--nav-pill-foreground);
+
+  --color-sec-blue: var(--sec-blue);
+  --color-sec-mint: var(--sec-mint);
+  --color-sec-amber: var(--sec-amber);
+  --color-sec-lavender: var(--sec-lavender);
+  --color-sec-rose: var(--sec-rose);
+  --color-sec-sky: var(--sec-sky);
+  --color-sec-teal: var(--sec-teal);
+  --color-sec-peach: var(--sec-peach);
+
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+
+  /* Motion: clean, quick fades — no vertical "bounce" between screens. */
+  --animate-page-enter: page-enter 0.2s ease-out both;
+  --animate-rise: rise 0.26s ease-out both;
+  --animate-check-pop: check-pop 0.28s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  --animate-pop-in: pop-in 0.24s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes page-enter {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes check-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  60% {
+    transform: scale(1.15);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 /* ---------------------------------------------------------------------------
@@ -160,6 +248,39 @@
   ::selection {
     background-color: color-mix(in oklch, var(--color-primary) 25%, transparent);
   }
+
+  /* Respect users who ask for less motion: kill animations + transitions. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+/* Left-to-right animated strike-through for completed checklist items. Drawn as
+   a background line so its width can transition (real line-through can't). */
+.strike-anim {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-position: 0 62%;
+  background-repeat: no-repeat;
+  background-size: 0% 1.5px;
+  transition:
+    background-size 0.3s ease,
+    color 0.3s ease;
+}
+.strike-anim[data-done="true"] {
+  background-size: 100% 1.5px;
+}
+
+/* Per-item entrance stagger. Set --i on each item (0,1,2…). */
+.stagger-item {
+  animation: var(--animate-rise);
+  animation-delay: calc(var(--i, 0) * 45ms);
 }
 
 /* Rendered step markdown (lib/markdown → MarkdownBody). Tailwind's preflight

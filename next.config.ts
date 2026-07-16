@@ -23,6 +23,9 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   // typedRoutes is deferred until real routes exist (Phase 4+); enabling it now
   // would reject the placeholder links used across the foundation.
+  images: {
+    remotePatterns: [{ protocol: "https", hostname: "images.unsplash.com" }],
+  },
 };
 
 export default withSerwist(withNextIntl(nextConfig));

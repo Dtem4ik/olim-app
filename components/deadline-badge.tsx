@@ -3,6 +3,7 @@ import { AlertTriangle, CalendarClock, CalendarDays } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
 import { Badge, type badgeVariants } from "@/components/ui/badge";
 import { type DeadlineKind, getDeadlineStatus } from "@/lib/deadline";
+import { cn } from "@/lib/utils";
 
 type BadgeVariant = NonNullable<VariantProps<typeof badgeVariants>["variant"]>;
 
@@ -43,6 +44,22 @@ export function DeadlineBadge({ due, now, className }: DeadlineBadgeProps) {
         : kind === "soon"
           ? t("soon", { days })
           : t("later", { date: format.dateTime(due, { day: "numeric", month: "short" }) });
+
+  // Colour signals urgency only. A far-off deadline is just information, so it
+  // renders as a quiet muted caption instead of a filled badge.
+  if (kind === "later") {
+    return (
+      <span
+        className={cn(
+          "inline-flex items-center gap-1 text-xs font-medium text-muted-foreground",
+          className,
+        )}
+      >
+        <Icon className="size-3.5" aria-hidden />
+        {label}
+      </span>
+    );
+  }
 
   return (
     <Badge variant={kindToVariant[kind]} className={className}>
