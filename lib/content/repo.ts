@@ -18,6 +18,7 @@ export interface ContentSection {
   title: string;
   description: string | null;
   icon: string | null;
+  image_url: string | null;
   sort_order: number;
 }
 
@@ -53,6 +54,7 @@ function fromFixtures(): Content {
     title: s.title,
     description: s.description ?? null,
     icon: s.icon ?? null,
+    image_url: s.image_url ?? null,
     sort_order: s.sort_order,
   }));
   const steps: ContentStep[] = bundle.steps.map((s) => ({
@@ -92,6 +94,7 @@ export async function getContent(): Promise<Content> {
         title: s.title,
         description: s.description,
         icon: s.icon,
+        image_url: s.image_url ?? null,
         sort_order: s.sort_order,
       }));
       const steps: ContentStep[] = stepsRes.data.map((s) => ({

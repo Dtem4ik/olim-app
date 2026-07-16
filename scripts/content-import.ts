@@ -37,6 +37,7 @@ async function main(): Promise<void> {
     title: s.title,
     description: s.description ?? null,
     icon: s.icon ?? null,
+    image_url: s.image_url ?? null,
     sort_order: s.sort_order,
   }));
 
