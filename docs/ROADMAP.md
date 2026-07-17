@@ -71,6 +71,30 @@ Each phase is executed in a separate Claude Code session.
 **Acceptance:** airplane-mode test; link posted to a real Telegram chat.
 
 ### Phase 6 — Search and SEO
+> **Redesign delta (post-5.5):** the native-UI redesign already shipped a `/search`
+> screen shell (autofocus, query-restore on back-nav) and turned each step into an
+> SSR page at `/guides/[section]/[step]` (sheet raised, own `<title>`/description/
+> `<h1>`, URL sync). Phase 6 builds *on* these, it does not rebuild them.
+>
+> **6a. Full-text search** — wire **real** server-side FTS into the existing
+> `/search` screen: Postgres tsvector (russian) + pg_trgm (typo tolerance),
+> debounced autocomplete, results grouped steps → sections in the redesign's
+> photo-tile style; result tap reuses the deep-link that opens the section with the
+> step sheet raised; empty results suggest sections. Keep the existing query-restore
+> working (e2e).
+>
+> **6b. Programmatic SEO** — build on the SSR step sheets: the existing
+> `/guides/[section]/[step]` URLs are the **canonical** step pages (no separate
+> `/gid/...` route — they already SSR full content). Add canonical tags, `sitemap.xml`
+> from the DB (all sections + steps), `robots.txt` (`/plan/*` noindex), honest
+> structured data (HowTo/FAQ per step), and per-page OG images reusing the Phase 5
+> OG infra. **Freshness:** ISR / on-demand revalidation on `content:import` — new
+> content indexes without a redeploy (closes the standing Phase 4 static-baking debt).
+>
+> **DoD:** search responds <150ms locally; step/section pages render with JS
+> disabled and are indexable.
+> **Acceptance:** 10 test queries with typos; Lighthouse SEO ≥95; RU-language SEO.
+
 **6a. Full-text search.** Postgres FTS + trigram (typos), autocomplete, search from home; empty results suggest sections.
 **6b. Programmatic SEO.** Public page per step/section: metadata, sitemap, structured data (FAQ), human URLs (`/guide/banks/open-account`). Free Google traffic channel.
 **DoD:** search responds <150ms; pages indexable.
@@ -90,6 +114,11 @@ Each phase is executed in a separate Claude Code session.
 **Acceptance:** 10 tricky questions including hallucination bait.
 
 ### Phase 9 — Capacitor and app stores
+> **Redesign delta (post-5.5):** the native-mobile redesign (bottom sheets, floating
+> pill nav, app-like transitions/animations, offline plan) already makes the product
+> read as an app rather than a wrapped website — this materially strengthens the
+> Apple Guideline 4.2 case *before* Capacitor's native APIs are even added.
+
 **9a. Wrapper.** Capacitor over the same codebase; native: push deadline reminders (replacing email on mobile), share sheet, haptics, splash/icons. This is the mandatory minimum against Apple Guideline 4.2 ("repackaged website" gets rejected).
 **9b. Release.** Store listings (RU/EN screenshots, copy), TestFlight + Play internal track, review pass.
 **DoD:** app in TestFlight and internal testing; a deadline push arrives on a real phone.
@@ -105,3 +134,17 @@ Each phase is executed in a separate Claude Code session.
 ## Order and dependencies
 
 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9 → 10, strictly. The only parallel track is content (2c keeps being extended by separate Claude content sessions from Phase 2 until the end).
+
+## Redesign debts (from the off-roadmap Phase 5.5 native-UI redesign)
+
+Non-blocking, carried forward; see `docs/PHASE_REPORTS/phase-5.5-redesign.md`.
+
+- **`/dev/ui` showcase is partially stale** — it predates the redesign primitives
+  (bottom sheet, stat tiles, photo section cards). Refresh it (dev-only page).
+- **Card-radius inconsistency** across a few screens — normalize the radii tokens.
+- **`@tailwindcss/oxide` `@layer` ordering bug** — local macOS-arm64 `pnpm build &&
+  pnpm start` mis-colours `<a>`/`<button>` (dev/CI/prod-deploy unaffected). Watch for
+  the oxide patch and drop the workaround note in AGENTS.md → Known traps once fixed.
+- **Bottom sheet vs registry `Drawer`** — custom sheet retained for the deep-link
+  (no-trigger) focus-management case; parity checklist (focus trap/return, iOS body
+  scroll lock, swipe physics) still owed. See the phase-5.5 report's design decision.
