@@ -323,6 +323,20 @@ guides, every section/step, and the sitemap on their next request. The import ho
 is a no-op unless `SITE_REVALIDATE_URL` + `REVALIDATE_SECRET` are set, so local
 imports skip it.
 
+## Client UX: step sheet & navigation feedback (Phase 6)
+
+- **Step sheet is a custom inline drawer, not shadcn's `Drawer`.** The redesign's
+  step view is a bottom sheet (`components/ui/bottom-sheet.tsx`) rendered **inline,
+  without a portal**, so a deep-linked step SSRs its content (h1, body, JSON-LD) for
+  SEO / no-JS. Portal-based drawers (vaul, Base UI) render nothing on the server —
+  tested and rejected (see `docs/PHASE_REPORTS/phase-6.md`). The sheet implements
+  drawer behaviour by hand: velocity drag-to-close, focus trap + return, scroll-lock,
+  Escape, backdrop.
+- **Navigation feedback is one top progress bar** (`components/top-progress-bar.tsx`,
+  in the root layout): a slim accent bar that starts on an internal link click and
+  finishes on the `usePathname` change. It uses only `usePathname` (not
+  `useSearchParams`) so it never forces dynamic rendering.
+
 ## Rendering & performance
 
 Content routes are ISR (see freshness above); other routes are statically

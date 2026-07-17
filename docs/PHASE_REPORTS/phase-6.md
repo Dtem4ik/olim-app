@@ -167,15 +167,55 @@ Screenshots (mobile) in `docs/PHASE_REPORTS/assets/phase-6/`:
 | Search — typo tolerance (болничную) | ![](assets/phase-6/search-typo.png) |
 | SEO step page (SSR sheet, canonical, JSON-LD) | ![](assets/phase-6/seo-step-page.png) |
 
+## Post-review UX polish (owner device testing)
+
+A round of fixes after the owner tested the build on a phone — all kept within the
+SSR/SEO constraints of this phase:
+
+- **Step sheet → drawer-grade, still SSR-safe.** The custom `BottomSheet` was
+  hardened into a proper drawer: velocity-aware drag-to-close with rubber-banding +
+  spring-back, focus trap, focus return, initial focus, body scroll-lock, Escape,
+  backdrop dismiss. It stays **inline (portal-less)** deliberately — see the drawer
+  decision below.
+- **Navigation feedback → one top progress bar.** An accent-coloured
+  `TopProgressBar` (dependency-free, `components/top-progress-bar.tsx`) replaced an
+  earlier attempt with per-tile/per-tab spinners + full-screen route skeletons
+  (which read as noisy). It uses **only `usePathname`** (never `useSearchParams`), so
+  it does not force dynamic rendering — SSR/ISR/SEO untouched.
+- **Onboarding exit.** The intro screen now has a back-to-home button (there was no
+  way to leave the quiz from the intro).
+- **Mobile search keyboard.** Tapping search primes the virtual keyboard by focusing
+  a throwaway input inside the tap gesture, so iOS/Android raise the keyboard before
+  the `/search` field mounts and inherits it (autofocus alone runs outside the
+  gesture). No-op on non-touch devices — **verify on a real device.**
+- **Floating tab bar** lifted ~0.75rem off the bottom safe-area edge.
+
+## Drawer decision (reversal of the 5.5 "revisit shadcn Drawer" debt) — with evidence
+
+The Phase 5.5 report left "bottom sheet: custom vs registry `Drawer`" open. Phase 6
+**closes it: the custom inline sheet is retained**, because a portal-based drawer is
+incompatible with the SSR step content that Phase 6 SEO depends on. Empirically:
+
+- **vaul** (Radix Dialog underneath): the step page's SSR HTML contained no `<h1>`,
+  no `role="dialog"`, and no step body — the content only appears after client mount.
+- **Base UI** (the current shadcn Drawer): `Dialog.Portal` + `keepMounted` rendered
+  **empty on the server** (`renderToStaticMarkup` length 0), and `Dialog.Popup`
+  **refuses to mount without a `Portal`**.
+
+Both would strip the step's h1/body/JSON-LD from the server HTML — breaking the
+canonical step pages, the JS-off requirement, and Lighthouse SEO. A shared step URL
+must SSR its content; opening a step in-app is also client state (not navigation), so
+a portal drawer would add an RSC round-trip per tap. So the sheet is our own inline
+implementation, now with drawer-grade behaviour (above). Both `vaul` and
+`@base-ui-components/react` were installed, tested, and **removed** (no residual dep).
+
 ## shadcn-first audit
 
 **No new shadcn primitives were added in Phase 6.** Search + SEO reuse existing
-pieces: `SearchBar`, `SectionTile` (photo tiles for results/suggestions), `Skeleton`
-(loading), `Button`, and the redesign's `BottomSheet` for the deep-linked step view.
-The **bottom-sheet vs registry `Drawer`** decision remains as recorded in
-`phase-5.5-redesign.md` (custom sheet retained for the deep-link/no-trigger focus
-case; parity checklist still owed). JSON-LD and OG are non-visual (no registry
-equivalent).
+pieces: `SearchBar`, `SectionTile` (photo tiles for results/suggestions), `Skeleton`,
+`Button`, and the redesign's `BottomSheet`. The bottom-sheet vs registry `Drawer`
+question is now resolved (see the Drawer decision above). JSON-LD, OG, and the top
+progress bar are non-visual / have no registry equivalent.
 
 ## Deferred / debts
 
