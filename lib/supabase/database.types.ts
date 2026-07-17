@@ -167,6 +167,7 @@ export type Database = {
           id: string
           last_verified_at: string
           needs_review: boolean
+          search_vector: unknown
           section_slug: string
           slug: string
           sort_order: number
@@ -186,6 +187,7 @@ export type Database = {
           id?: string
           last_verified_at: string
           needs_review?: boolean
+          search_vector?: unknown
           section_slug: string
           slug: string
           sort_order?: number
@@ -205,6 +207,7 @@ export type Database = {
           id?: string
           last_verified_at?: string
           needs_review?: boolean
+          search_vector?: unknown
           section_slug?: string
           slug?: string
           sort_order?: number
@@ -248,6 +251,18 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      search_steps: {
+        Args: { p_limit?: number; p_query: string }
+        Returns: {
+          rank: number
+          section_icon: string
+          section_slug: string
+          section_title: string
+          slug: string
+          summary: string
+          title: string
+        }[]
       }
     }
     Enums: {
