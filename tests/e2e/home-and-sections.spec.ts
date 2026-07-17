@@ -1,5 +1,6 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, type Page, test } from "@playwright/test";
+import { settleAnimations } from "./settle";
 
 async function expectNoSeriousA11yViolations(page: Page, prep?: (page: Page) => Promise<void>) {
   for (const theme of ["light", "dark"] as const) {
@@ -9,19 +10,7 @@ async function expectNoSeriousA11yViolations(page: Page, prep?: (page: Page) => 
     await page.evaluate((t) => localStorage.setItem("theme", t), theme);
     await page.reload();
     await prep?.(page);
-    // Settle the entrance fade before axe reads colours. Mid-fade, muted text
-    // blends with the background into a lower-contrast value and trips a false
-    // WCAG-contrast failure. `animation: none` (not duration:0s, which leaves
-    // the element ambiguously on its first frame) fully removes the animation so
-    // every element reverts to its base opacity:1 / true colour; a double rAF
-    // lets that style recalc land before analyze(). The fade is untouched for
-    // real users.
-    await page.addStyleTag({
-      content: "*,*::before,*::after{animation:none !important;transition:none !important}",
-    });
-    await page.evaluate(
-      () => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))),
-    );
+    await settleAnimations(page);
     const results = await new AxeBuilder({ page })
       .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
       .analyze();
