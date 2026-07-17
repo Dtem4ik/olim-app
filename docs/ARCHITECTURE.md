@@ -263,9 +263,84 @@ Installable, offline-capable app via **serwist** (`@serwist/next`):
   is disabled in dev so it never fights HMR. `public/sw.js` is generated, not
   committed (gitignored).
 
+## Search (Phase 6a)
+
+Full-text search over steps, served by the DB with a dependency-free fallback.
+
+- **DB path.** `steps.search_vector` is a STORED generated `tsvector` (russian
+  config, weighted title > summary > body) with a GIN index, plus pg_trgm GIN
+  indexes on title & summary. The `public.search_steps(query, limit)` RPC
+  (`SECURITY INVOKER`, public-read RLS) ranks FTS matches first
+  (`websearch_to_tsquery` + `ts_rank`) with **word** similarity (`<%` /
+  `word_similarity`, not full-string `%`) as the typo/partial safety net — full
+  similarity dilutes to near-zero on long multi-word titles. Migration
+  `20260717120000_add_step_search.sql`. Because the vector is a generated column it
+  stays correct on every `content:import` upsert with no trigger.
+- **Transliteration.** Domain terms are transliterated Hebrew in Cyrillic (купат
+  холим, рав-кав, теудат зеут); the stemmer keeps them near-verbatim so exact forms
+  match via FTS, and word-similarity covers typos (купат **халим**).
+- **Fallback.** `lib/search/match.ts` is a pure matcher (substring + a JS
+  `word_similarity` analogue) used when no stack is configured — CI e2e, a preview
+  before the remote is seeded, local dev without Docker — so the same exact/partial/
+  typo flows work without a database. `lib/search/search.ts` picks DB-or-fallback.
+- **API + UI.** `GET /api/search?q=` (`lib/search/search.ts`) returns grouped
+  `{ steps, sections }`. `components/search/search-view.tsx` debounces (200ms, an
+  `AbortController` drops stale requests), groups results steps → section photo
+  tiles, suggests sections when empty, keeps query-restore-on-back, and emits
+  `search_performed` through the env-gated analytics facade. Local perf: 6–28ms
+  over the full 46-step set (<150ms target).
+
+## Programmatic SEO (Phase 6b)
+
+Built on the redesign's SSR step sheets — no separate public route was added.
+
+- **Canonical pages.** The existing `/guides/[section]/[step]` URLs (sheet raised,
+  full SSR content, own `<title>`/description/`<h1>`) **are** the canonical step
+  pages; `/guides/[section]` are the section pages. Each sets
+  `alternates.canonical` + OpenGraph. A dedicated `/gid/...` route was rejected: it
+  would duplicate content and split link equity for no gain.
+- **Discovery.** `app/sitemap.ts` builds `sitemap.xml` from the DB (home, guides,
+  every section + step; step `lastModified` from `last_verified_at`).
+  `app/robots.ts` allows the guides, disallows `/plan`, `/api`, and the utility
+  screens; `/plan/[slug]` also carries `noindex`.
+- **Structured data.** `lib/seo/structured-data.ts` emits only honest JSON-LD: a
+  `BreadcrumbList` always; a `HowTo` (steps parsed from the body's list, "bring with
+  you" docs → `HowToSupply`) **only** when the body genuinely lists ≥2 actions; an
+  `ItemList` of steps for sections. Rendered via `components/seo/json-ld.tsx`.
+- **OG images.** Per-page `opengraph-image` routes for section + step reuse the
+  Phase 5 `next/og` infra (`lib/og/guide-image.tsx`: `loadInter`, the rotated-square
+  brand mark, the dark-token palette).
+- **RU-first.** Content and JSON-LD `inLanguage` are Russian (the audience googles
+  in Russian). Lighthouse SEO is 100 on home/guides/section/step locally.
+
+## Content freshness (Phase 6b — closes the Phase 4 static-baking debt)
+
+New content must not require a redeploy. The content routes and the sitemap use
+**ISR** (`export const revalidate = 3600`), and `scripts/content-import.ts` pings an
+on-demand **`POST /api/revalidate`** (shared-secret `REVALIDATE_SECRET`) after a
+successful import, which `revalidatePath("/", "layout")` — regenerating home,
+guides, every section/step, and the sitemap on their next request. The import hook
+is a no-op unless `SITE_REVALIDATE_URL` + `REVALIDATE_SECRET` are set, so local
+imports skip it.
+
+## Client UX: step sheet & navigation feedback (Phase 6)
+
+- **Step sheet is a custom inline drawer, not shadcn's `Drawer`.** The redesign's
+  step view is a bottom sheet (`components/ui/bottom-sheet.tsx`) rendered **inline,
+  without a portal**, so a deep-linked step SSRs its content (h1, body, JSON-LD) for
+  SEO / no-JS. Portal-based drawers (vaul, Base UI) render nothing on the server —
+  tested and rejected (see `docs/PHASE_REPORTS/phase-6.md`). The sheet implements
+  drawer behaviour by hand: velocity drag-to-close, focus trap + return, scroll-lock,
+  Escape, backdrop.
+- **Navigation feedback is one top progress bar** (`components/top-progress-bar.tsx`,
+  in the root layout): a slim accent bar that starts on an internal link click and
+  finishes on the `usePathname` change. It uses only `usePathname` (not
+  `useSearchParams`) so it never forces dynamic rendering.
+
 ## Rendering & performance
 
-Both routes are statically prerendered. Lucide icon components can't cross the
+Content routes are ISR (see freshness above); other routes are statically
+prerendered. Lucide icon components can't cross the
 server/client boundary as props, so nav that needs icons lives in small client
 wrappers (`SiteBottomNav`). Placeholder links use `prefetch={false}` until their
 routes exist. See `docs/PHASE_REPORTS/phase-1.md` for the JS-budget note.

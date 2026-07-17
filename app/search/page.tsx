@@ -5,20 +5,13 @@ import { getContent } from "@/lib/content/repo";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("search");
-  return { title: t("title") };
+  // Search is a utility screen, not an SEO target — keep it out of the index.
+  return { title: t("title"), robots: { index: false, follow: true } };
 }
 
 export default async function SearchPage() {
-  const { sections, steps } = await getContent();
-  return (
-    <SearchView
-      sections={sections.map((s) => ({ slug: s.slug, title: s.title, icon: s.icon }))}
-      steps={steps.map((s) => ({
-        slug: s.slug,
-        section_slug: s.section_slug,
-        title: s.title,
-        summary: s.summary,
-      }))}
-    />
-  );
+  // Only the section list is server-rendered (for the empty-state suggestions and
+  // to resolve result photos/descriptions). Query results come from /api/search.
+  const { sections } = await getContent();
+  return <SearchView sections={sections} />;
 }

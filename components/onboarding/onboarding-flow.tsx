@@ -1,5 +1,6 @@
 "use client";
 
+import { ArrowLeft } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
@@ -107,6 +108,7 @@ type Phase = "intro" | "quiz" | "preview";
 
 export function OnboardingFlow({ steps }: { steps: EngineStep[] }) {
   const t = useTranslations("onboarding");
+  const tNav = useTranslations("nav");
   const [phase, setPhase] = useState<Phase>("intro");
   const [draft, setDraft] = useState<Draft>({});
   const [index, setIndex] = useState(0);
@@ -165,7 +167,17 @@ export function OnboardingFlow({ steps }: { steps: EngineStep[] }) {
         className="animate-page-enter mx-auto flex min-h-dvh max-w-md flex-col gap-6 p-6"
         data-testid="onboarding-intro"
       >
-        <div className="relative mt-4 overflow-hidden rounded-3xl">
+        <div className="flex">
+          <Link
+            href="/"
+            aria-label={tNav("home")}
+            data-testid="onboarding-exit"
+            className="flex size-11 shrink-0 items-center justify-center rounded-full border bg-surface text-surface-foreground transition-transform active:scale-90"
+          >
+            <ArrowLeft className="size-5" aria-hidden />
+          </Link>
+        </div>
+        <div className="relative overflow-hidden rounded-3xl">
           <Image
             src={HERO_SRC}
             alt=""

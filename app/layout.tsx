@@ -7,6 +7,7 @@ import type { ReactNode } from "react";
 import { AnalyticsProvider } from "@/components/analytics-provider";
 import { SiteBottomNav } from "@/components/site-bottom-nav";
 import { ThemeProvider } from "@/components/theme-provider";
+import { TopProgressBar } from "@/components/top-progress-bar";
 import { getSiteUrl } from "@/lib/site-url";
 import "./globals.css";
 
@@ -54,6 +55,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
             disableTransitionOnChange
           >
             <NextIntlClientProvider locale={locale} messages={messages}>
+              <TopProgressBar />
               <AnalyticsProvider />
               {children}
               <SiteBottomNav />

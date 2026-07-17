@@ -89,6 +89,7 @@
     "submit": "Search",
     "title": "Search",
     "hint": "Type to find a step or section.",
+    "suggest": "Sections to start with",
     "empty": "Nothing found for “{query}”.",
     "sections": "Sections",
     "steps": "Steps"

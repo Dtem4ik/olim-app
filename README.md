@@ -4,16 +4,26 @@ Adaptation navigator for new immigrants (olim) in Israel. Personalized home scre
 
 ## Status
 
-Phases 1–4 are in `main`:
+Phases 1–5 + a native-mobile UI redesign are in `main`:
 
 - **Phase 1** — repository foundation, design tokens/themes, UI kit v1.
 - **Phase 2** — Supabase data model + content pipeline (validator, seed script).
 - **Phase 3** — onboarding quiz + the pure condition engine (`buildPlan`, 100% covered).
 - **Phase 4** — personalized home, guides, section & step cards, progress store.
+- **Phase 5** — full plan tracker, plan sharing (`/plan/{slug}` + OG unfurl), PWA/offline.
+- **Phase 5.5** (off-roadmap redesign) — native-mobile UI: photo tiles, bottom-sheet
+  step view with SSR content, floating pill nav, `/search` screen shell.
 
-Phase 5 (in progress) adds the full plan tracker, plan sharing (`/plan/{slug}` +
-OG unfurl), and PWA/offline. See `docs/PHASE_REPORTS/` for per-phase reports and
-`docs/ROADMAP.md` for the full 10-phase plan.
+**Phase 6** (this line of work) adds real full-text search and programmatic SEO:
+
+- **6a** — Postgres FTS (russian tsvector) + trigram typo tolerance behind the
+  `/search` screen; debounced server search, grouped results, section suggestions.
+- **6b** — canonical step/section pages, `sitemap.xml` + `robots.txt` from the DB,
+  honest JSON-LD (HowTo/Breadcrumb), per-page OG images, and ISR + on-demand
+  revalidation so new content indexes without a redeploy.
+
+See `docs/PHASE_REPORTS/` for per-phase reports and `docs/ROADMAP.md` for the full
+10-phase plan.
 
 ## Quick start
 

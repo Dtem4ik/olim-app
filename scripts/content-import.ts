@@ -88,6 +88,30 @@ async function main(): Promise<void> {
   console.log(
     `✓ Imported ${sections.length} sections, ${steps.length} steps, ${benefits.length} benefits.`,
   );
+
+  await triggerRevalidate();
+}
+
+/**
+ * Ping the deployed site's on-demand revalidation endpoint so the freshly imported
+ * content goes live without a redeploy (Phase 6b). No-op unless both
+ * SITE_REVALIDATE_URL and REVALIDATE_SECRET are set — so local imports skip it.
+ * Never fails the import: a revalidation hiccup shouldn't undo a successful upsert.
+ */
+async function triggerRevalidate(): Promise<void> {
+  const url = process.env.SITE_REVALIDATE_URL;
+  const secret = process.env.REVALIDATE_SECRET;
+  if (!url || !secret) return;
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "x-revalidate-secret": secret },
+    });
+    if (res.ok) console.log(`✓ Revalidated ${url}`);
+    else console.warn(`! Revalidate returned ${res.status} (content imported, site may be stale)`);
+  } catch (err) {
+    console.warn(`! Revalidate failed: ${err instanceof Error ? err.message : err}`);
+  }
 }
 
 main().catch((err) => {

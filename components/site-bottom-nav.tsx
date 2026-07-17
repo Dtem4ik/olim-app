@@ -44,7 +44,7 @@ export function SiteBottomNav() {
   if (isHidden(pathname)) return null;
 
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-0 z-40 flex justify-center px-4 pb-[max(env(safe-area-inset-bottom),1rem)]">
+    <div className="pointer-events-none fixed inset-x-0 bottom-0 z-40 flex justify-center px-4 pb-[calc(max(env(safe-area-inset-bottom),1rem)+0.75rem)]">
       <BottomNav
         activeHref={activeHref(pathname)}
         className="pointer-events-auto"

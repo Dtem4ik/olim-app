@@ -126,7 +126,10 @@ documented in `docs/CONTENT_SCHEMA.md`. Real content lives in the private
 `olim-content` repo (clone as a sibling `../olim-content`); the committed
 `content/fixtures/` set powers tests and local dev. `content:import` and
 `content:review-queue` default to the LOCAL stack and refuse a non-local target
-unless `--allow-remote` is passed (shared DB — rules 6 & 7).
+unless `--allow-remote` is passed (shared DB — rules 6 & 7). After a successful
+import, `content:import` pings the deployed site's on-demand revalidation endpoint
+(`POST /api/revalidate`) so new content goes live without a redeploy (Phase 6b) — a
+no-op unless both `SITE_REVALIDATE_URL` and `REVALIDATE_SECRET` are set.
 
 Node ≥20.11, pnpm 10. Git hooks are installed automatically via `pnpm install`
 (lefthook). First-time e2e needs `pnpm e2e:install`.

@@ -28,6 +28,14 @@ export default defineConfig({
         "components/profile/**",
         "components/analytics-provider.tsx",
         "lib/plan/use-progress.ts",
+        // Navigation / browser-integration UI exercised by the Playwright flow, not
+        // unit coverage: the top progress bar (link-click + pathname listeners) and
+        // the search entry button (opens /search, primes the mobile keyboard).
+        "components/top-progress-bar.tsx",
+        "components/search-button.tsx",
+        // next/og image rendering (satori/runtime) — not unit-testable; verified by
+        // the e2e OG fetch (200 image/png) and the shared-plan/SEO screenshots.
+        "lib/og/**",
       ],
       thresholds: {
         lines: 80,
