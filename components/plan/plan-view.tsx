@@ -2,14 +2,15 @@
 
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { useEffect, useMemo, useState } from "react";
+import { type CSSProperties, useEffect, useMemo, useState } from "react";
 import { DeadlineBadge } from "@/components/deadline-badge";
 import { SharePlanButton } from "@/components/plan/share-plan-button";
-import { SiteBottomNav } from "@/components/site-bottom-nav";
-import { ThemeToggle } from "@/components/theme-toggle";
+import { SearchButton } from "@/components/search-button";
+import { StatTile } from "@/components/stat-tile";
 import { buttonVariants } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { capture } from "@/lib/analytics";
 import type { ContentStep } from "@/lib/content/repo";
@@ -35,7 +36,10 @@ export function PlanView({ steps }: { steps: ContentStep[] }) {
   const tOnb = useTranslations("onboarding");
   const tStep = useTranslations("step");
   const { isDone, toggle, done } = useProgress();
-  const [profile, setProfile] = useState<Profile | null>(null);
+  // `undefined` while the client-only profile is still loading (avoids flashing
+  // the invite state before it resolves).
+  const [profile, setProfile] = useState<Profile | null | undefined>(undefined);
+  const loaded = profile !== undefined;
   const [filter, setFilter] = useState<Filter>("all");
   useEffect(() => setProfile(loadProfile()), []);
 
@@ -47,6 +51,7 @@ export function PlanView({ steps }: { steps: ContentStep[] }) {
     [plan, isDone],
   );
   const pct = total > 0 ? Math.round((doneCount / total) * 100) : 0;
+  const burningCount = useMemo(() => (plan ? plan.entries.filter(isBurning).length : 0), [plan]);
 
   // Filter each stage group, then drop groups the filter empties out.
   const groups = useMemo(() => {
@@ -63,15 +68,39 @@ export function PlanView({ steps }: { steps: ContentStep[] }) {
       .filter((group) => group.entries.length > 0);
   }, [plan, filter, isDone]);
 
-  if (!profile || !plan) {
+  if (!loaded) {
     return (
-      <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col pb-24">
+      <div className="animate-page-enter mx-auto flex min-h-dvh w-full max-w-md flex-col pb-28">
         <header className="flex items-center justify-between px-4 pt-6">
           <span className="text-lg font-semibold tracking-tight">{tNav("plan")}</span>
-          <ThemeToggle />
+          <SearchButton />
+        </header>
+        <main className="flex flex-1 flex-col gap-4 px-4 py-4" aria-hidden>
+          <div className="grid grid-cols-3 gap-2">
+            <Skeleton className="h-20 rounded-2xl" />
+            <Skeleton className="h-20 rounded-2xl" />
+            <Skeleton className="h-20 rounded-2xl" />
+          </div>
+          <Skeleton className="h-11 w-full rounded-lg" />
+          <div className="flex flex-col gap-2 pt-4">
+            <Skeleton className="h-14 w-full rounded-xl" />
+            <Skeleton className="h-14 w-full rounded-xl" />
+            <Skeleton className="h-14 w-full rounded-xl" />
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  if (!profile || !plan) {
+    return (
+      <div className="animate-page-enter mx-auto flex min-h-dvh w-full max-w-md flex-col pb-28">
+        <header className="flex items-center justify-between px-4 pt-6">
+          <span className="text-lg font-semibold tracking-tight">{tNav("plan")}</span>
+          <SearchButton />
         </header>
         <main className="flex flex-1 flex-col gap-4 px-4 pt-10">
-          <h1 className="text-2xl font-bold tracking-tight text-balance">
+          <h1 className="text-3xl font-bold tracking-tight text-balance">
             {tHome("invite.title")}
           </h1>
           <p className="text-muted-foreground">{tHome("invite.subtitle")}</p>
@@ -83,23 +112,24 @@ export function PlanView({ steps }: { steps: ContentStep[] }) {
             {tHome("invite.cta")}
           </Link>
         </main>
-        <SiteBottomNav activeHref="/plan" />
       </div>
     );
   }
 
   return (
-    <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col pb-24">
+    <div className="animate-page-enter mx-auto flex min-h-dvh w-full max-w-md flex-col pb-28">
       <header className="flex items-center justify-between px-4 pt-6">
         <span className="text-lg font-semibold tracking-tight">{tPlan("title")}</span>
-        <ThemeToggle />
+        <SearchButton />
       </header>
 
       <main className="flex flex-1 flex-col gap-6 px-4 py-4">
-        <section className="flex flex-col gap-2" aria-label={tPlan("progressLabel")}>
-          <p className="text-sm text-muted-foreground" data-testid="plan-progress">
-            {tPlan("progress", { done: doneCount, total })}
-          </p>
+        <section className="flex flex-col gap-3" aria-label={tPlan("progressLabel")}>
+          <div className="grid grid-cols-3 gap-2">
+            <StatTile label={tPlan("stats.done")} value={doneCount} color="bg-sec-mint" />
+            <StatTile label={tPlan("stats.left")} value={total - doneCount} color="bg-sec-sky" />
+            <StatTile label={tPlan("stats.burning")} value={burningCount} color="bg-sec-amber" />
+          </div>
           <Progress
             value={pct}
             aria-label={tPlan("progressLabel")}
@@ -107,6 +137,9 @@ export function PlanView({ steps }: { steps: ContentStep[] }) {
             aria-valuemin={0}
             aria-valuemax={100}
           />
+          <p className="text-sm text-muted-foreground" data-testid="plan-progress">
+            {tPlan("progress", { done: doneCount, total })}
+          </p>
         </section>
 
         {total > 0 && <SharePlanButton answers={profile} done={done} />}
@@ -122,7 +155,10 @@ export function PlanView({ steps }: { steps: ContentStep[] }) {
 
           <TabsContent value={filter} className="flex flex-col gap-6" data-testid="plan-list">
             {groups.length === 0 ? (
-              <p className="pt-2 text-sm text-muted-foreground" data-testid="plan-empty">
+              <p
+                className="rounded-xl border border-border px-4 py-6 text-center text-sm text-muted-foreground"
+                data-testid="plan-empty"
+              >
                 {tPlan(`empty.${filter}`)}
               </p>
             ) : (
@@ -132,12 +168,13 @@ export function PlanView({ steps }: { steps: ContentStep[] }) {
                     {group.stage ? tOnb(`stages.${group.stage}`) : tOnb("preview.noStage")}
                   </h2>
                   <ul className="flex flex-col gap-2">
-                    {group.entries.map((e) => {
+                    {group.entries.map((e, i) => {
                       const done = isDone(e.step.slug);
                       return (
                         <li
                           key={e.step.slug}
-                          className="flex items-center gap-3 rounded-lg border border-border px-4 py-3"
+                          style={{ "--i": i } as CSSProperties}
+                          className="stagger-item flex items-center gap-3 rounded-xl border border-border px-4 py-3 transition-colors"
                           data-testid="plan-step"
                           data-slug={e.step.slug}
                         >
@@ -150,13 +187,15 @@ export function PlanView({ steps }: { steps: ContentStep[] }) {
                             aria-label={done ? tStep("done") : tStep("todo")}
                           />
                           <Link
-                            href={`/guides/${e.step.section_slug}#${e.step.slug}`}
+                            href={`/guides/${e.step.section_slug}/${e.step.slug}`}
                             className={cn(
-                              "flex-1 text-sm",
-                              done && "text-muted-foreground line-through",
+                              "flex-1 text-sm transition-colors",
+                              done && "text-muted-foreground",
                             )}
                           >
-                            {e.step.title}
+                            <span className="strike-anim" data-done={done}>
+                              {e.step.title}
+                            </span>
                           </Link>
                           {e.warning?.due && <DeadlineBadge due={new Date(e.warning.due)} />}
                         </li>
@@ -169,8 +208,6 @@ export function PlanView({ steps }: { steps: ContentStep[] }) {
           </TabsContent>
         </Tabs>
       </main>
-
-      <SiteBottomNav activeHref="/plan" />
     </div>
   );
 }

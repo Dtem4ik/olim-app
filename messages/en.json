@@ -27,7 +27,7 @@
       "title": "Next steps",
       "allDone": "You've checked off every step. Nice!"
     },
-    "sections": { "title": "Sections" },
+    "sections": { "title": "Sections", "yours": "Your sections" },
     "edit": "Edit answers"
   },
   "offline": {
@@ -48,6 +48,11 @@
     "title": "My plan",
     "progressLabel": "Plan progress",
     "progress": "{done} of {total} {total, plural, one {step} other {steps}}",
+    "stats": {
+      "done": "Done",
+      "left": "Left",
+      "burning": "Burning"
+    },
     "filters": {
       "label": "Filter steps",
       "all": "All",
@@ -81,7 +86,12 @@
     "placeholder": "Search the guides…",
     "label": "Search",
     "clear": "Clear query",
-    "submit": "Search"
+    "submit": "Search",
+    "title": "Search",
+    "hint": "Type to find a step or section.",
+    "empty": "Nothing found for “{query}”.",
+    "sections": "Sections",
+    "steps": "Steps"
   },
   "theme": {
     "toggle": "Toggle theme",
@@ -215,7 +225,8 @@
     },
     "preview": {
       "title": "Your plan",
-      "subtitle": "{count, plural, one {# step} other {# steps}} for your situation. The full plan screen comes later.",
+      "subtitle": "{count, plural, one {# step} other {# steps}} for your situation.",
+      "cta": "Enter the app",
       "empty": "No steps match your answers yet — content is still being filled in.",
       "noStage": "General",
       "deadline": "deadline"
@@ -224,15 +235,20 @@
   "guides": {
     "title": "Sections",
     "subtitle": "Practical adaptation guides.",
-    "personalizedHint": "Showing steps for your situation.",
-    "allHint": "Take the quiz to see steps tailored to you.",
+    "personalizedHint": "Your steps first, the full guide below.",
+    "allHint": "Take the quiz to highlight steps for you.",
+    "yourSteps": "Your steps",
+    "otherSteps": "Full guide",
+    "shareSection": "Share section",
     "stepsCount": "{count, plural, one {# step} other {# steps}}",
     "empty": "No steps in this section yet.",
-    "back": "All sections"
+    "back": "Back"
   },
   "step": {
     "bring": "Bring with you",
     "steps": "What to do",
+    "back": "Back",
+    "share": "Share",
     "tip": "Tip from those who've been there",
     "verified": "Verified {date}",
     "source": "Official source",

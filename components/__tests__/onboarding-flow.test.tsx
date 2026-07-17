@@ -60,8 +60,12 @@ describe("OnboardingFlow", () => {
     expect(screen.getByTestId("onboarding-preview")).toBeInTheDocument();
     expect(screen.getAllByTestId("plan-step")).toHaveLength(2);
     expect(screen.getByText("Счёт в банке")).toBeInTheDocument();
-    // warn_rule surfaces a deadline (2026-07-01 + 90d).
-    expect(screen.getByText(/2026-09-29/)).toBeInTheDocument();
+    // warn_rule surfaces a deadline badge (icon) on that step; the step without a
+    // rule has none. Date-agnostic so it doesn't depend on the current day.
+    const deadlineRow = screen.getByText("Больничная касса").closest("li");
+    const plainRow = screen.getByText("Счёт в банке").closest("li");
+    expect(deadlineRow?.querySelector("svg")).toBeInTheDocument();
+    expect(plainRow?.querySelector("svg")).toBeNull();
   });
 
   it("supports back navigation and children-age chips", async () => {

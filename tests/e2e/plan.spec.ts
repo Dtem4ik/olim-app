@@ -1,5 +1,6 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, type Page, test } from "@playwright/test";
+import { settleAnimations } from "./settle";
 
 /** Seed a just-landed family profile so /plan renders a real tracker. */
 async function seedProfile(page: Page) {
@@ -25,6 +26,7 @@ async function expectNoSeriousA11yViolations(page: Page) {
   for (const theme of ["light", "dark"] as const) {
     await page.evaluate((t) => localStorage.setItem("theme", t), theme);
     await page.reload();
+    await settleAnimations(page);
     const results = await new AxeBuilder({ page })
       .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
       .analyze();

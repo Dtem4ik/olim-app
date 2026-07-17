@@ -1,22 +1,27 @@
 "use client";
 
+import { CheckCircle2 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
 import { DeadlineBadge } from "@/components/deadline-badge";
+import { SearchButton } from "@/components/search-button";
 import { SectionTile } from "@/components/section-tile";
-import { SiteBottomNav } from "@/components/site-bottom-nav";
 import { StepCard } from "@/components/step-card";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { buttonVariants } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import type { ContentSection, ContentStep } from "@/lib/content/repo";
 import { buildPlan, type PlanEntry } from "@/lib/plan/build-plan";
 import { loadProfile, type Profile } from "@/lib/plan/profile";
 import { useProgress } from "@/lib/plan/use-progress";
+import { sectionColor } from "@/lib/section-colors";
 import { sectionIcon } from "@/lib/section-icons";
-import { cn } from "@/lib/utils";
 
 const BURNING_KINDS = new Set(["overdue", "today", "soon"]);
+
+/** Tel Aviv seafront — the emotional "you're in Israel" hero (Unsplash CDN). */
+const HERO_SRC = "/img/hero-telaviv.webp";
 
 export function HomeView({
   sections,
@@ -28,7 +33,11 @@ export function HomeView({
   const t = useTranslations("home");
   const tOnb = useTranslations("onboarding");
   const { isDone } = useProgress();
-  const [profile, setProfile] = useState<Profile | null>(null);
+  // `undefined` = still reading localStorage (SSR + first paint). Distinguishing
+  // it from `null` (loaded, no profile) avoids flashing the invite/all-sections
+  // state before the saved profile resolves on the client.
+  const [profile, setProfile] = useState<Profile | null | undefined>(undefined);
+  const loaded = profile !== undefined;
 
   useEffect(() => setProfile(loadProfile()), []);
 
@@ -53,32 +62,39 @@ export function HomeView({
 
   const stageLabel = (s: Profile["stage"]) => tOnb(`stages.${s}`);
 
+  const contextLine = profile
+    ? [
+        profile.monthsInCountry !== undefined
+          ? t("context.months", { months: profile.monthsInCountry })
+          : null,
+        profile.city ? t("context.city", { city: profile.city }) : null,
+      ]
+        .filter(Boolean)
+        .join(" · ")
+    : "";
+
   return (
-    <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col pb-24">
+    <div className="animate-page-enter mx-auto flex min-h-dvh w-full max-w-md flex-col pb-28">
       <header className="flex items-center justify-between px-4 pt-6">
         <span className="text-lg font-semibold tracking-tight">Olim</span>
-        <ThemeToggle />
+        <SearchButton />
       </header>
 
       <main className="flex flex-1 flex-col gap-8 px-4 py-6">
-        {profile ? (
-          <>
-            <section className="flex flex-col gap-1">
-              <h1 className="text-2xl font-bold tracking-tight text-balance">
-                {t(`greeting.${profile.stage}`)}
-              </h1>
-              <p className="text-sm text-muted-foreground">
-                {[
-                  profile.monthsInCountry !== undefined
-                    ? t("context.months", { months: profile.monthsInCountry })
-                    : null,
-                  profile.city ? t("context.city", { city: profile.city }) : null,
-                ]
-                  .filter(Boolean)
-                  .join(" · ")}
-              </p>
-            </section>
+        <HeroBanner
+          title={profile ? t(`greeting.${profile.stage}`) : t("invite.title")}
+          subtitle={profile ? contextLine : t("invite.subtitle")}
+          loading={!loaded}
+        />
 
+        {!loaded ? (
+          <div className="flex flex-col gap-3" aria-hidden data-testid="home-loading">
+            <Skeleton className="h-4 w-32" />
+            <Skeleton className="h-16 w-full" />
+            <Skeleton className="h-24 w-full" />
+          </div>
+        ) : profile ? (
+          <>
             <section aria-labelledby="burning-h" className="flex flex-col gap-3">
               <h2
                 id="burning-h"
@@ -87,7 +103,10 @@ export function HomeView({
                 {t("burning.title")}
               </h2>
               {burning.length === 0 ? (
-                <p className="text-sm text-muted-foreground">{t("burning.empty")}</p>
+                <div className="flex items-center gap-2 rounded-xl border border-border px-4 py-3 text-sm text-muted-foreground">
+                  <CheckCircle2 className="size-4 shrink-0 text-success" aria-hidden />
+                  {t("burning.empty")}
+                </div>
               ) : (
                 <ul className="flex flex-col gap-2" data-testid="burning-list">
                   {burning.map((e) => (
@@ -96,7 +115,7 @@ export function HomeView({
                       className="flex items-center justify-between gap-3 rounded-lg border border-border px-4 py-3"
                     >
                       <Link
-                        href={`/guides/${e.step.section_slug}#${e.step.slug}`}
+                        href={`/guides/${e.step.section_slug}/${e.step.slug}`}
                         className="text-sm font-medium"
                       >
                         {e.step.title}
@@ -125,7 +144,7 @@ export function HomeView({
                         title={e.step.title}
                         summary={e.step.summary ?? undefined}
                         stage={e.step.stage ? stageLabel(e.step.stage) : undefined}
-                        href={`/guides/${e.step.section_slug}#${e.step.slug}`}
+                        href={`/guides/${e.step.section_slug}/${e.step.slug}`}
                         deadline={
                           e.warning?.due ? (
                             <DeadlineBadge due={new Date(e.warning.due)} />
@@ -139,17 +158,13 @@ export function HomeView({
             </section>
           </>
         ) : (
-          <section className="flex flex-col gap-4 pt-6">
-            <h1 className="text-2xl font-bold tracking-tight text-balance">{t("invite.title")}</h1>
-            <p className="text-muted-foreground">{t("invite.subtitle")}</p>
-            <Link
-              href="/onboarding"
-              className={buttonVariants({ size: "lg", className: "w-full" })}
-              data-testid="home-invite-cta"
-            >
-              {t("invite.cta")}
-            </Link>
-          </section>
+          <Link
+            href="/onboarding"
+            className={buttonVariants({ size: "lg", className: "w-full" })}
+            data-testid="home-invite-cta"
+          >
+            {t("invite.cta")}
+          </Link>
         )}
 
         <section aria-labelledby="sections-h" className="flex flex-col gap-3">
@@ -157,38 +172,70 @@ export function HomeView({
             id="sections-h"
             className="text-sm font-semibold text-muted-foreground uppercase tracking-wide"
           >
-            {t("sections.title")}
+            {profile ? t("sections.yours") : t("sections.title")}
           </h2>
           <div className="grid grid-cols-2 gap-3" data-testid="sections-grid">
-            {sections.map((s) => {
-              const count = countFor(s.slug);
-              return (
-                <SectionTile
-                  key={s.slug}
-                  title={s.title}
-                  description={s.description ?? undefined}
-                  icon={sectionIcon(s.icon)}
-                  href={`/guides/${s.slug}`}
-                  count={count}
-                  dimmed={profile != null && count === 0}
-                />
-              );
-            })}
+            {!loaded
+              ? [0, 1, 2, 3].map((i) => <Skeleton key={i} className="min-h-40 rounded-3xl" />)
+              : sections
+                  .map((s) => ({ s, count: countFor(s.slug) }))
+                  // Home is the personalized screen — only surface sections that have
+                  // steps for this reader. The full catalogue lives under Guides.
+                  .filter(({ count }) => count > 0)
+                  .map(({ s, count }) => (
+                    <SectionTile
+                      key={s.slug}
+                      title={s.title}
+                      description={s.description ?? undefined}
+                      icon={sectionIcon(s.icon)}
+                      href={`/guides/${s.slug}`}
+                      count={count}
+                      color={sectionColor(s.slug)}
+                      imageUrl={s.image_url ?? undefined}
+                    />
+                  ))}
           </div>
         </section>
-
-        {profile && (
-          <Link
-            href="/onboarding"
-            className={cn(buttonVariants({ variant: "outline", size: "sm" }), "self-start")}
-            data-testid="home-edit"
-          >
-            {t("edit")}
-          </Link>
-        )}
       </main>
-
-      <SiteBottomNav activeHref="/" />
     </div>
+  );
+}
+
+/** Full-bleed photo hero with the greeting overlaid — the emotional anchor. */
+function HeroBanner({
+  title,
+  subtitle,
+  loading,
+}: {
+  title: string;
+  subtitle?: string;
+  loading?: boolean;
+}) {
+  return (
+    <section className="relative overflow-hidden rounded-3xl">
+      <Image
+        src={HERO_SRC}
+        alt=""
+        width={896}
+        height={480}
+        priority
+        sizes="(max-width: 448px) 100vw, 448px"
+        className="h-44 w-full object-cover"
+      />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/30 to-transparent" />
+      <div className="absolute inset-x-0 bottom-0 flex flex-col gap-1.5 p-5">
+        {loading ? (
+          <>
+            <div className="h-6 w-2/3 rounded-md bg-white/25" />
+            <div className="h-4 w-1/3 rounded-md bg-white/20" />
+          </>
+        ) : (
+          <>
+            <h1 className="text-2xl font-bold tracking-tight text-white text-balance">{title}</h1>
+            {subtitle && <p className="text-sm text-white/80">{subtitle}</p>}
+          </>
+        )}
+      </div>
+    </section>
   );
 }

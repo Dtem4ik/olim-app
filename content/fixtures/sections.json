@@ -5,6 +5,7 @@
       "title": "Банки и деньги",
       "description": "Счёт в банке, куда придёт корзина абсорбции, и первые деньги.",
       "icon": "landmark",
+      "image_url": "/img/sections/banks-and-money.webp",
       "sort_order": 10
     },
     {
@@ -12,6 +13,7 @@
       "title": "Здоровье и больничная касса",
       "description": "Купат холим, страховка и как попасть к врачу.",
       "icon": "heart-pulse",
+      "image_url": "/img/sections/healthcare.webp",
       "sort_order": 20
     },
     {
@@ -19,6 +21,7 @@
       "title": "Льготы репатрианта",
       "description": "Корзина абсорбции и другие выплаты в первый год.",
       "icon": "hand-coins",
+      "image_url": "/img/sections/olim-benefits.webp",
       "sort_order": 30
     },
     {
@@ -26,6 +29,7 @@
       "title": "Иврит и ульпан",
       "description": "Бесплатный государственный ульпан и как в него попасть.",
       "icon": "graduation-cap",
+      "image_url": "/img/sections/hebrew-ulpan.webp",
       "sort_order": 40
     }
   ]

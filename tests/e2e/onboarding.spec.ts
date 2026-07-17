@@ -1,10 +1,12 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, type Page, test } from "@playwright/test";
+import { settleAnimations } from "./settle";
 
 /** Fail only on the two most severe axe impact levels, in both themes. */
 async function expectNoSeriousA11yViolations(page: Page) {
   for (const colorScheme of ["light", "dark"] as const) {
     await page.emulateMedia({ colorScheme });
+    await settleAnimations(page);
     const results = await new AxeBuilder({ page })
       .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
       .analyze();
@@ -53,8 +55,10 @@ test.describe("onboarding", () => {
     await expect(page.getByTestId("onboarding-preview")).toBeVisible();
     await expect(page.getByTestId("plan-step")).toHaveCount(4);
     await expect(page.getByText("Записаться в больничную кассу")).toBeVisible();
-    // warn_rule (90 days after 2026-07-01 arrival) surfaces a deadline.
-    await expect(page.getByText("2026-09-29")).toBeVisible();
+    // warn_rule (90 days after the 2026-07-01 arrival → 2026-09-29) surfaces a
+    // deadline. The badge renders it as a localized short date ("До 29 сент."),
+    // not an ISO string.
+    await expect(page.getByText("29 сент.")).toBeVisible();
 
     // Reload → profile persists, preview shows immediately (no intro).
     await page.reload();

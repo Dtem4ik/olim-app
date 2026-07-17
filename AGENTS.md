@@ -45,6 +45,30 @@ Stack: Next.js (App Router, TS strict) on Vercel · Supabase (Postgres, Auth, pg
 - A11y: tap targets ≥44px, body text ≥14px, focus states, ARIA.
 - Security: RLS on user-data tables; share slugs nanoid ≥12.
 
+## Known traps (don't re-derive these — they cost days once)
+
+- **Local macOS-arm64 prod build mis-renders `<a>`/`<button>` colours.** In
+  `pnpm build && pnpm start` on Apple Silicon, the Tailwind oxide + Next CSS
+  minifier drops the `@layer theme, base, components, utilities;` order
+  declaration (only `@layer components;` survives), so buttons/links fall back to
+  user-agent colours — grey buttons, periwinkle (`#9e9eff`) links in dark mode.
+  **This is local-only.** `pnpm dev` (turbopack), CI (Linux), and the Vercel
+  deploy all render correctly. Adding the `@layer` declaration to `globals.css`
+  does NOT help (the minifier strips it locally too). So: use `pnpm dev` for any
+  visual / dark-mode check, and **trust CI, not local `pnpm e2e`**, for axe in
+  dark mode — local e2e boots that same broken prod build and will throw false
+  `#9e9eff` contrast failures. Don't chase these; they are not real.
+- **The entrance fade fights the audits — the fix is already in, don't "re-fix"
+  the tokens.** `@keyframes page-enter` starts at `opacity: 0.01`, not `0`, on
+  purpose: a backgrounded Lighthouse audit freezes the animation on its first
+  frame, and a literal `0` scores as NO_FCP. Separately, axe samples colours
+  mid-fade where muted text is semi-transparent and blends lighter — a *false*
+  contrast fail. The real fix is `tests/e2e/settle.ts` (`settleAnimations`,
+  called in every axe helper before `analyze()`), which kills animations so axe
+  reads settled colours. `--muted-foreground: oklch(0.52 …)` already clears AA
+  (~5.4:1) at full opacity — do NOT darken it to "fix contrast"; that only
+  chases the mid-fade artifact.
+
 ## Conventions
 
 - Branches: `phase-N/short-description`. PRs into `main`, green CI required.

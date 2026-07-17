@@ -5,6 +5,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages, getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
 import { AnalyticsProvider } from "@/components/analytics-provider";
+import { SiteBottomNav } from "@/components/site-bottom-nav";
 import { ThemeProvider } from "@/components/theme-provider";
 import { getSiteUrl } from "@/lib/site-url";
 import "./globals.css";
@@ -55,6 +56,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
             <NextIntlClientProvider locale={locale} messages={messages}>
               <AnalyticsProvider />
               {children}
+              <SiteBottomNav />
             </NextIntlClientProvider>
           </ThemeProvider>
         </SerwistProvider>

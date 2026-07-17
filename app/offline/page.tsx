@@ -17,12 +17,12 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function OfflinePage() {
   const t = await getTranslations("offline");
   return (
-    <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col items-center justify-center gap-5 px-6 text-center">
-      <span className="flex size-14 items-center justify-center rounded-2xl bg-muted text-muted-foreground">
-        <WifiOff className="size-7" aria-hidden />
+    <div className="animate-page-enter mx-auto flex min-h-dvh w-full max-w-md flex-col items-center justify-center gap-5 px-6 text-center">
+      <span className="flex size-16 items-center justify-center rounded-3xl bg-sec-sky text-foreground">
+        <WifiOff className="size-8" aria-hidden />
       </span>
       <div className="flex flex-col gap-2">
-        <h1 className="text-2xl font-bold tracking-tight text-balance">{t("title")}</h1>
+        <h1 className="text-3xl font-bold tracking-tight text-balance">{t("title")}</h1>
         <p className="text-muted-foreground text-pretty">{t("subtitle")}</p>
       </div>
       <Link href="/plan" className={buttonVariants({ size: "lg", className: "w-full" })}>

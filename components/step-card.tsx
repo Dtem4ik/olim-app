@@ -1,7 +1,6 @@
 import { ChevronRight } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
@@ -39,14 +38,25 @@ export function StepCard({
       )}
     >
       <div className="flex min-w-0 flex-1 flex-col gap-2">
-        <div className="flex flex-wrap items-center gap-2">
-          {stage && <Badge variant="secondary">{stage}</Badge>}
-          {deadline}
-        </div>
+        {(stage || deadline) && (
+          <div className="flex flex-wrap items-center gap-2">
+            {stage && (
+              <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                {stage}
+              </span>
+            )}
+            {deadline}
+          </div>
+        )}
         <h3
-          className={cn("font-semibold leading-snug", done && "text-muted-foreground line-through")}
+          className={cn(
+            "font-semibold leading-snug transition-colors",
+            done && "text-muted-foreground",
+          )}
         >
-          {title}
+          <span className="strike-anim" data-done={done}>
+            {title}
+          </span>
         </h3>
         {summary && <p className="text-sm text-muted-foreground">{summary}</p>}
       </div>
@@ -59,7 +69,10 @@ export function StepCard({
   if (!href) return body;
 
   return (
-    <Link href={href} className="block rounded-xl focus-visible:outline-none">
+    <Link
+      href={href}
+      className="block rounded-xl transition-transform focus-visible:outline-none active:scale-[0.98]"
+    >
       {body}
     </Link>
   );
