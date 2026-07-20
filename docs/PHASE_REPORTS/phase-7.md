@@ -1,15 +1,15 @@
 # Phase 7 — Accounts and reminders
 
-Status: **code complete and fully verified locally** (lint, typecheck, 239 unit
-tests, 50 e2e incl. the mandatory cross-user RLS denial + Inbucket/Mailpit
-magic-link flow, Lighthouse gates on 8 routes incl. `/profile`, reminder Edge
-Function run on the local stack proving computation + idempotency). **Anonymous-
-first held throughout** — no login walls; an account only adds sync + reminders.
+Status: **complete and fully verified** — code, local suite (lint, typecheck, 239
+unit, 50 e2e incl. the mandatory cross-user RLS denial + Mailpit magic-link flow,
+Lighthouse on 8 routes incl. `/profile`), **the two migrations pushed to the shared
+remote following the neighbor ritual** (evidence below; `portfolio` untouched), and
+**one real reminder email delivered via Resend** to the owner's inbox with
+duplicate-prevention proven. **Anonymous-first held throughout** — no login walls;
+an account only adds sync + reminders.
 
-Two items are **gated on the user** (external services / shared-DB ritual) and are
-called out under *Deferred*: the remote migration push (needs the go-ahead +
-neighbor snapshot), one real Resend email, and the Google OAuth + prod magic-link
-dashboard config.
+Remaining items are dashboard-only and non-blocking (Google OAuth + prod
+magic-link template + the cron schedule); see *Deferred*.
 
 Branch: `phase-7/accounts-and-reminders` (off the Phase 6 tip). Scope held: no
 AI/pgvector (Phase 8), no Capacitor (Phase 9).
@@ -75,14 +75,38 @@ in `docs/ARCHITECTURE.md`.
   (deep link + one-click no-login unsubscribe). Dry-runs without `RESEND_API_KEY`.
 - **Settings**: opt-in toggle + 30/14/7 lead time on the Profile screen
   (`PATCH /api/reminders`), stored on `user_state`.
-- **Local verification** (Mailpit + local stack): a test user due in 4 days →
-  first invoke `considered:1, dryRun:1`; second invoke `considered:0` (deduped by
-  `reminder_log`); exactly one log row. Evidence below.
+- **Verification** (local stack): a test user due in 4 days → first invoke
+  `considered:1`; second invoke `considered:0` (deduped by `reminder_log`); exactly
+  one log row. **One real email delivered** to the owner's inbox via Resend
+  (`sent:1`), and a second invoke did **not** resend (`sent:0`) — duplicate
+  prevention proven with real delivery. Evidence below.
 
 ## Migrations (additive, `public`-only)
 
 - `20260720120000_add_user_state.sql` — `user_state` + owner RLS + `claim_plans`.
 - `20260720130000_add_reminder_log.sql` — `reminder_log` (unique idempotency key).
+
+## Remote migration push (neighbor ritual — AGENTS rules 6 & 7) ✅
+
+Executed with the user's explicit go-ahead against the shared remote (project
+`zlcifmgakksqxkpowzaa`). pg tooling ran through a `postgres:17` Docker image (server
+is 17.6; local `pg_dump` is 16). Evidence, in order:
+
+1. **Remote version** — `show server_version` → **17.6**. ✅
+2. **Neighbor backup** — `pg_dump -n portfolio` snapshot taken (**864 lines, 173 KB,
+   8 tables**) into the session scratchpad. **Never committed.** ✅
+3. **BEFORE** — `portfolio` = 8 tables; `schema_migrations` = `…145729, …16120000,
+   …17120000`; `public.user_state` did not exist.
+4. **Dry run** — `supabase db push --dry-run` listed exactly `20260720120000` +
+   `20260720130000`. ✅
+5. **Pushed** — both applied. (Non-fatal `pgdelta` SSL catalog-cache warning printed
+   — same class as Phase 5/6; the DDL applied and was recorded.) Objects created in
+   `public`: `user_state` (+2 indexes, +4 RLS policies, RLS on), `claim_plans(text[])`
+   + grant, `reminder_log` (+index, +1 RLS policy, grants). Nothing referenced
+   `portfolio`.
+6. **AFTER** — `schema_migrations` now includes `20260720120000` + `20260720130000`;
+   `user_state` + `reminder_log` + `claim_plans` present; `user_state` RLS on with 4
+   policies, `reminder_log` 1 policy; **`portfolio` still 8 tables (untouched)**. ✅
 
 ## Verification
 
@@ -115,22 +139,17 @@ reminder_log → (user, register-kupat-holim, 14)   # exactly one row
 | Signed-in + reminder settings | ![](assets/phase-7/settings.png) |
 | Reminder email (RU template) | ![](assets/phase-7/reminder-email.png) |
 
-## Deferred (gated on the user)
+## Deferred (dashboard-only, non-blocking)
 
-1. **Remote migration push (AGENTS rules 6 & 7).** The two additive migrations are
-   **not yet pushed** to the shared remote — awaiting the user's go-ahead + a fresh
-   `pg_dump -n portfolio` neighbor snapshot + dry-run. Until then the deployed site
-   would use the migrations only after the push. Ritual evidence will be appended
-   here on push.
-2. **One real Resend email.** The send path is written + dry-run-verified; delivery
-   to the user's own inbox needs a free Resend account + `RESEND_API_KEY`
-   (walk-through owed). The duplicate-prevention is already proven via `reminder_log`.
-3. **Google OAuth + prod magic-link template.** Google Cloud Console + Supabase
-   provider config, and the RU magic-link template in the prod dashboard, are
-   dashboard steps (walk-through owed). Magic link works fully locally, so this
-   doesn't block anything.
-4. **Reminder cron schedule** is configured outside the repo (Supabase dashboard
-   Cron or `pg_cron` + `pg_net`); not wired to the shared remote in this phase.
+1. **Google OAuth + prod magic-link template.** Google Cloud Console (OAuth client)
+   + Supabase provider config, and the RU magic-link template in the prod dashboard,
+   are dashboard steps. Magic link works fully locally (RU template in `config.toml`),
+   so nothing is blocked. The app's `signInWithOAuth("google")` path is already wired.
+2. **Reminder cron schedule.** The Edge Function is deployed-ready; scheduling it
+   (Supabase dashboard Cron, or `pg_cron` + `pg_net` POSTing the function URL daily)
+   is a dashboard step. Set `RESEND_API_KEY` as a Supabase function secret in prod.
+3. **Vercel deploy** of this branch so the `/api/*` + `/auth/callback` routes ship
+   (the remote DB is ready). Set the prod auth redirect URLs to the deployed origin.
 
 ## Debts
 
