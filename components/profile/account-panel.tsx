@@ -117,7 +117,7 @@ export function AccountPanel({
             {initial}
           </span>
           <div className="flex min-w-0 flex-col">
-            <span className="text-xs text-foreground/60 uppercase tracking-wide">
+            <span className="text-xs text-foreground/70 uppercase tracking-wide">
               {t("signedInAs")}
             </span>
             <span className="truncate font-semibold" data-testid="account-email">
@@ -212,10 +212,10 @@ export function AccountPanel({
           {phase === "error" && <span className="text-destructive">{t("error")}</span>}
         </p>
       </form>
-      <div className="flex items-center gap-3 text-xs text-foreground/50">
-        <span className="h-px flex-1 bg-foreground/15" />
+      <div className="flex items-center gap-3 text-xs text-foreground/70">
+        <span className="h-px flex-1 bg-foreground/20" />
         {t("or")}
-        <span className="h-px flex-1 bg-foreground/15" />
+        <span className="h-px flex-1 bg-foreground/20" />
       </div>
       <Button
         type="button"
