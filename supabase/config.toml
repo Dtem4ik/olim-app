@@ -245,6 +245,13 @@ otp_expiry = 3600
 # admin_email = "admin@email.com"
 # sender_name = "Admin"
 
+# RU magic-link template (Phase 7a) — keeps LOCAL dev in the product's language;
+# the PROD template is configured in the Supabase dashboard (walk-through in the
+# phase report). {{ .ConfirmationURL }} is filled by GoTrue.
+[auth.email.template.magic_link]
+subject = "Ваша ссылка для входа в Olim App"
+content_path = "./supabase/templates/magic_link.html"
+
 # Uncomment to customize email template
 # [auth.email.template.invite]
 # subject = "You have been invited"
