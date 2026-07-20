@@ -39,6 +39,23 @@ pnpm content:import          # seed the local DB from content/fixtures/
 
 Full command list (tests, lint, lighthouse, content tools) lives in `AGENTS.md`.
 
+### Environment files (local-first)
+
+Copy `.env.example` → `.env.local` and fill it in. The env layout is **local-first**
+so day-to-day dev never touches the shared prod remote (Next.js loads
+`.env.$(NODE_ENV).local` over `.env.local`):
+
+| File | Points at | Used by |
+|---|---|---|
+| `.env.development.local` | local stack (`127.0.0.1:54321`) | `pnpm dev` |
+| `.env.production.local` | local stack too | local `pnpm build && pnpm start` |
+| `.env.local` | the **shared prod remote** + real secrets | prod-facing tooling; base when no `*.local` override applies |
+
+All three are gitignored; Vercel has none of them (it uses its own project env), so
+the split never affects deploys. For local dev use the keys `supabase start` prints.
+Explicit prod-facing work (e.g. a migration push per the ritual below) reads
+`.env.local`.
+
 ### Verify before claiming done
 
 Every phase must show output for: `pnpm lint`, `pnpm typecheck`,
