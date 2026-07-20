@@ -86,3 +86,32 @@ create policy "owners can delete their state"
   on public.user_state for delete
   to authenticated
   using (user_id = (select auth.uid()));
+
+-- ---------------------------------------------------------------------------
+-- claim_plans — on first sign-in, adopt anonymous share-plans this device
+-- created (their slugs are passed by the client). SECURITY DEFINER because the
+-- owner UPDATE policy on `plans` can't match rows whose user_id is still null;
+-- this only ever claims null-owner rows whose unguessable slug the caller knows.
+-- ---------------------------------------------------------------------------
+create or replace function public.claim_plans(p_slugs text[])
+returns integer
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_uid uuid := auth.uid();
+  v_count integer;
+begin
+  if v_uid is null or p_slugs is null then
+    return 0;
+  end if;
+  update public.plans
+    set user_id = v_uid
+    where share_slug = any(p_slugs) and user_id is null;
+  get diagnostics v_count = row_count;
+  return v_count;
+end;
+$$;
+
+grant execute on function public.claim_plans(text[]) to authenticated;

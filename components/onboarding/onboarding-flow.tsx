@@ -15,14 +15,13 @@ import { capture } from "@/lib/analytics";
 import { basisSchema, familySchema, stageSchema } from "@/lib/content/schema";
 import { buildPlan, type EngineStep, type PlanAnswers } from "@/lib/plan/build-plan";
 import {
-  clearProfile,
   hasChildren,
   isInCountry,
   loadProfile,
   type Profile,
   profileSchema,
-  saveProfile,
 } from "@/lib/plan/profile";
+import { setProfileValue } from "@/lib/plan/use-profile";
 import { cn } from "@/lib/utils";
 
 /** Tel Aviv seafront — the emotional welcome image (shared with Home). */
@@ -143,7 +142,7 @@ export function OnboardingFlow({ steps }: { steps: EngineStep[] }) {
     if (index >= visible.length - 1) {
       const built = draftToProfile(draft, new Date());
       if (built) {
-        saveProfile(built);
+        setProfileValue(built);
         setProfile(built);
         capture("quiz_completed", { stage: built.stage, basis: built.basis, family: built.family });
         setPhase("preview");
@@ -220,7 +219,7 @@ export function OnboardingFlow({ steps }: { steps: EngineStep[] }) {
           setPhase("quiz");
         }}
         onStartOver={() => {
-          clearProfile();
+          setProfileValue(null);
           setDraft({});
           setIndex(0);
           setProfile(null);

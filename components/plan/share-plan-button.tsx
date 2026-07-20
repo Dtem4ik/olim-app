@@ -7,6 +7,7 @@ import { sharePlan } from "@/app/plan/actions";
 import { Button } from "@/components/ui/button";
 import { capture } from "@/lib/analytics";
 import type { Profile } from "@/lib/plan/profile";
+import { recordCreatedShare } from "@/lib/share/created-shares";
 
 type Status = "idle" | "sharing" | "copied" | "error";
 
@@ -28,6 +29,8 @@ export function SharePlanButton({ answers, done }: { answers: Profile; done: str
     }
 
     const url = `${window.location.origin}/plan/${result.slug}`;
+    // Remember this slug so it can be claimed by the account on first sign-in.
+    recordCreatedShare(result.slug);
     capture("plan_shared", { slug: result.slug, done: done.length });
 
     // Prefer the native share sheet on mobile; fall back to the clipboard.

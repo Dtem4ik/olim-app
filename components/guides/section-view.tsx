@@ -15,7 +15,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { capture } from "@/lib/analytics";
 import type { ContentSection, ContentStep } from "@/lib/content/repo";
 import { computeWarning, matchesCond, type PlanAnswers } from "@/lib/plan/build-plan";
-import { loadProfile, type Profile } from "@/lib/plan/profile";
+import { useProfile } from "@/lib/plan/use-profile";
 import { useProgress } from "@/lib/plan/use-progress";
 import { sectionColor } from "@/lib/section-colors";
 import { sectionIcon } from "@/lib/section-icons";
@@ -43,7 +43,7 @@ export function SectionView({
   const tStep = useTranslations("step");
   const router = useRouter();
   const { isDone, toggle } = useProgress();
-  const [profile, setProfile] = useState<Profile | null>(null);
+  const profile = useProfile().profile ?? null;
   const [openSlug, setOpenSlug] = useState<string | null>(initialStepSlug ?? null);
 
   // Smart back: return to wherever the reader came from (home, guides, a deeper
@@ -56,7 +56,6 @@ export function SectionView({
     }
   };
 
-  useEffect(() => setProfile(loadProfile()), []);
   useEffect(() => capture("section_opened", { section: section.slug }), [section.slug]);
 
   // Keep the URL in sync with the open sheet (replaceState — no history spam), so

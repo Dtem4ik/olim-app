@@ -267,6 +267,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      claim_plans: { Args: { p_slugs: string[] }; Returns: number }
       get_plan_by_share_slug: {
         Args: { p_share_slug: string }
         Returns: {

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { type CSSProperties, useEffect, useMemo, useState } from "react";
+import { type CSSProperties, useMemo, useState } from "react";
 import { DeadlineBadge } from "@/components/deadline-badge";
 import { SharePlanButton } from "@/components/plan/share-plan-button";
 import { SearchButton } from "@/components/search-button";
@@ -15,7 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { capture } from "@/lib/analytics";
 import type { ContentStep } from "@/lib/content/repo";
 import { buildPlan, type PlanEntry } from "@/lib/plan/build-plan";
-import { loadProfile, type Profile } from "@/lib/plan/profile";
+import { useProfile } from "@/lib/plan/use-profile";
 import { useProgress } from "@/lib/plan/use-progress";
 import { cn } from "@/lib/utils";
 
@@ -38,10 +38,8 @@ export function PlanView({ steps }: { steps: ContentStep[] }) {
   const { isDone, toggle, done } = useProgress();
   // `undefined` while the client-only profile is still loading (avoids flashing
   // the invite state before it resolves).
-  const [profile, setProfile] = useState<Profile | null | undefined>(undefined);
-  const loaded = profile !== undefined;
+  const { profile, loaded } = useProfile();
   const [filter, setFilter] = useState<Filter>("all");
-  useEffect(() => setProfile(loadProfile()), []);
 
   const plan = useMemo(() => (profile ? buildPlan(profile, steps) : null), [profile, steps]);
 

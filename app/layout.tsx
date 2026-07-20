@@ -6,6 +6,7 @@ import { getLocale, getMessages, getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
 import { AnalyticsProvider } from "@/components/analytics-provider";
 import { SiteBottomNav } from "@/components/site-bottom-nav";
+import { SyncProvider } from "@/components/sync-provider";
 import { ThemeProvider } from "@/components/theme-provider";
 import { TopProgressBar } from "@/components/top-progress-bar";
 import { getSiteUrl } from "@/lib/site-url";
@@ -57,6 +58,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
             <NextIntlClientProvider locale={locale} messages={messages}>
               <TopProgressBar />
               <AnalyticsProvider />
+              <SyncProvider />
               {children}
               <SiteBottomNav />
             </NextIntlClientProvider>
