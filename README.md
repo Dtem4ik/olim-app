@@ -14,13 +14,20 @@ Phases 1–5 + a native-mobile UI redesign are in `main`:
 - **Phase 5.5** (off-roadmap redesign) — native-mobile UI: photo tiles, bottom-sheet
   step view with SSR content, floating pill nav, `/search` screen shell.
 
-**Phase 6** (this line of work) adds real full-text search and programmatic SEO:
+- **Phase 6** — real Postgres full-text search (russian tsvector + trigram typos)
+  behind `/search`, and programmatic SEO (canonical step/section pages, sitemap +
+  robots from the DB, JSON-LD, OG images, ISR + on-demand revalidation).
 
-- **6a** — Postgres FTS (russian tsvector) + trigram typo tolerance behind the
-  `/search` screen; debounced server search, grouped results, section suggestions.
-- **6b** — canonical step/section pages, `sitemap.xml` + `robots.txt` from the DB,
-  honest JSON-LD (HowTo/Breadcrumb), per-page OG images, and ISR + on-demand
-  revalidation so new content indexes without a redeploy.
+**Phase 7** (this line of work) adds accounts and deadline reminders — still
+**anonymous-first** (an account is never required; it only adds sync + reminders):
+
+- **7a** — Supabase Auth (magic link + Google) via cookie-based `@supabase/ssr`;
+  a `user_state` row per account with owner-scoped RLS; first-sign-in migration of
+  the localStorage plan + share-plans; cross-device sync (localStorage stays the
+  offline cache); account deletion. See `docs/PRIVACY.md`.
+- **7b** — opt-in email deadline reminders (30/14/7 lead time): a Deno Supabase
+  Edge Function computes upcoming deadlines with shared date math, sends via Resend
+  with a `reminder_log` for idempotency, and a one-click no-login unsubscribe.
 
 See `docs/PHASE_REPORTS/` for per-phase reports and `docs/ROADMAP.md` for the full
 10-phase plan.

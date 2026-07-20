@@ -120,6 +120,8 @@ and destructive commands against the linked remote are forbidden (AGENTS.md rule
 | `benefits` | dated amount tables (sal klita…), unique per `(slug, valid_from)` | public read |
 | `plans` | trackable plan (`share_slug`, `answers`, `done_step_ids`, nullable `user_id`) | insert by anyone; owner read/update; slug read via SECURITY DEFINER `get_plan_by_share_slug()` |
 | `step_reports` | "this step looks outdated" reports | insert-only |
+| `user_state` | one synced row per account (`answers`, `done_step_ids`, reminder prefs, `unsubscribe_token`); Phase 7a | owner read/write/delete (authenticated) |
+| `reminder_log` | reminder idempotency: unique `(user_id, step_slug, threshold_days)`; Phase 7b | owner read; service-role writes |
 
 RLS is on from day one. Content tables are world-readable and take no client
 writes (the import uses the service-role key, which bypasses RLS). Table
@@ -336,6 +338,61 @@ imports skip it.
   in the root layout): a slim accent bar that starts on an internal link click and
   finishes on the `usePathname` change. It uses only `usePathname` (not
   `useSearchParams`) so it never forces dynamic rendering.
+
+## Accounts & sync (Phase 7a)
+
+**Anonymous-first stays.** An account is never required; signing in adds exactly
+two things — cross-device sync and deadline reminders.
+
+- **Auth.** Supabase Auth (magic link + Google OAuth) via `@supabase/ssr`. The
+  browser client (`lib/supabase/browser.ts`) stores the session in **cookies** and
+  is **code-split onto the `/profile` route only** (the auth SDK is ~69KB gz —
+  measured, kept out of the global bundle). The server client
+  (`lib/supabase/server.ts`) reads those cookies in route handlers; the
+  `/auth/callback` route exchanges the code for a session. A service-role admin
+  client (`lib/supabase/admin.ts`, server-only) is used for account deletion.
+  **No global middleware** — content/SEO routes never read auth cookies, so
+  Phase 6's ISR/static rendering is untouched.
+- **Storage model — a dedicated `user_state` table, NOT an overload of `plans`.**
+  `plans` are ephemeral, publicly-readable-by-slug, **sanitized** share snapshots
+  (many per person, no city/dates); the account's live state (full profile
+  answers, checked steps, reminder prefs) is one owner-only row with a different
+  lifecycle and privacy model. `user_state` (`user_id` PK → `auth.users`, `ON
+  DELETE CASCADE`): `answers`, `done_step_ids`, `reminders_enabled`,
+  `reminder_lead_days`, `unsubscribe_token`. Owner-scoped RLS (authenticated only);
+  cross-user denial is e2e-tested.
+- **Migration on first sign-in + sync.** A global `SyncProvider`
+  (`components/sync-provider.tsx`, plain `fetch` — no SDK) bootstraps against
+  `POST /api/state`: server answers win, done-steps are **unioned**, and this
+  device's anonymous share-plans are claimed via the `SECURITY DEFINER`
+  `claim_plans` RPC (their slugs are recorded locally on share). Ongoing local
+  changes write through (`PUT /api/state`, debounced). The profile became a
+  **reactive store** (`lib/plan/use-profile.ts`, mirroring `use-progress.ts`) so a
+  synced plan updates every screen without a reload. localStorage stays the
+  offline cache — the PWA works signed-in and signed-out; sign-out keeps the cache.
+- **Account deletion.** Profile → delete → `POST /api/account/delete` hard-deletes
+  the `auth.users` row (admin API); `user_state` + `reminder_log` cascade, owned
+  share-plans are disassociated (`plans.user_id` → NULL). Documented in
+  `docs/PRIVACY.md`.
+
+## Deadline reminders (Phase 7b)
+
+Opt-in per user (off by default); lead time 30/14/7 days, stored on `user_state`.
+
+- **Shared date math.** `lib/plan/deadline-math.ts` is dependency-free and the
+  **single source of truth** for the app's `computeWarning` (no-extension import)
+  and the Deno reminder Edge Function (relative `.ts` import) — no drift.
+  `lib/reminders/compute.ts` (`computeDueReminders`) is the unit-tested selection
+  reference the Edge Function mirrors.
+- **Engine.** `supabase/functions/send-reminders` (Deno cron, `verify_jwt=false`,
+  excluded from tsc/biome) reads opted-in users + steps with a `warn_rule`,
+  computes deadlines in the lead window, **claims** each `(user, step, threshold)`
+  in `reminder_log` (unique → idempotent, never fires twice), and emails a RU
+  reminder via **Resend** (deep link to the step + one-click, no-login unsubscribe
+  at `/api/reminders/unsubscribe?token=…`). Without `RESEND_API_KEY` it dry-runs
+  (claims + reports, never sends). Cron is scheduled outside the repo (dashboard).
+- **Settings.** `PATCH /api/reminders` (owner-scoped) writes the toggle + lead
+  time; the Profile screen renders them (signed-in only).
 
 ## Rendering & performance
 
