@@ -229,6 +229,39 @@ export type Database = {
           },
         ]
       }
+      user_state: {
+        Row: {
+          answers: Json
+          created_at: string
+          done_step_ids: Json
+          reminder_lead_days: number
+          reminders_enabled: boolean
+          unsubscribe_token: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          answers?: Json
+          created_at?: string
+          done_step_ids?: Json
+          reminder_lead_days?: number
+          reminders_enabled?: boolean
+          unsubscribe_token?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          answers?: Json
+          created_at?: string
+          done_step_ids?: Json
+          reminder_lead_days?: number
+          reminders_enabled?: boolean
+          unsubscribe_token?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
