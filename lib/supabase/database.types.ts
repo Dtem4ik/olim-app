@@ -90,6 +90,30 @@ export type Database = {
         }
         Relationships: []
       }
+      reminder_log: {
+        Row: {
+          id: string
+          sent_at: string
+          step_slug: string
+          threshold_days: number
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          sent_at?: string
+          step_slug: string
+          threshold_days: number
+          user_id: string
+        }
+        Update: {
+          id?: string
+          sent_at?: string
+          step_slug?: string
+          threshold_days?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       sections: {
         Row: {
           created_at: string
