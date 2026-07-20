@@ -292,6 +292,12 @@
     "deletePrompt": "Delete your account and all synced data? This can't be undone. Your local plan on this device stays.",
     "deleteConfirm": "Delete permanently",
     "deleteCancel": "Cancel",
-    "deleting": "Deleting…"
+    "deleting": "Deleting…",
+    "remindersTitle": "Deadline reminders",
+    "remindersSubtitle": "We'll email you when a deadline is near — a license swap, a clinic sign-up.",
+    "remindersEnable": "Send me reminders",
+    "remindersLead": "How early to warn me",
+    "leadDays": "{days} d",
+    "remindersSaved": "Saved"
   }
 }

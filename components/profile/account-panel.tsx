@@ -1,12 +1,21 @@
 "use client";
 
-import { LogOut, Mail } from "lucide-react";
+import { Check, LogOut, Mail } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { type FormEvent, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { getSupabaseBrowser } from "@/lib/supabase/browser";
 import { markSignedOut } from "@/lib/sync/state-sync";
+import type { ReminderLeadDays } from "@/lib/sync/user-state";
+import { cn } from "@/lib/utils";
+
+interface ReminderSettings {
+  enabled: boolean;
+  leadDays: ReminderLeadDays;
+}
+const LEAD_OPTIONS: ReminderLeadDays[] = [30, 14, 7];
 
 type AuthState = { status: "loading" } | { status: "anon" } | { status: "signedIn"; email: string };
 
@@ -33,6 +42,41 @@ export function AccountPanel({
   const [phase, setPhase] = useState<"idle" | "sending" | "sent" | "error" | "invalid">("idle");
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [reminders, setReminders] = useState<ReminderSettings | null>(null);
+  const [savedTick, setSavedTick] = useState(0);
+
+  // Load reminder settings once signed in.
+  useEffect(() => {
+    if (auth.status !== "signedIn") {
+      setReminders(null);
+      return;
+    }
+    let active = true;
+    fetch("/api/state")
+      .then((r) => r.json())
+      .then((d: { state?: { remindersEnabled: boolean; reminderLeadDays: ReminderLeadDays } }) => {
+        if (!active) return;
+        setReminders(
+          d.state
+            ? { enabled: d.state.remindersEnabled, leadDays: d.state.reminderLeadDays }
+            : { enabled: false, leadDays: 14 },
+        );
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, [auth.status]);
+
+  async function saveReminders(next: ReminderSettings) {
+    setReminders(next);
+    await fetch("/api/reminders", {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(next),
+    }).catch(() => {});
+    setSavedTick((t) => t + 1);
+  }
 
   useEffect(() => {
     if (!supabase) {
@@ -134,6 +178,61 @@ export function AccountPanel({
           <LogOut aria-hidden />
           {t("signOut")}
         </Button>
+
+        {reminders && (
+          <section
+            className="flex flex-col gap-3 rounded-2xl border border-border p-4"
+            data-testid="reminders"
+          >
+            <div className="flex flex-col gap-0.5">
+              <h3 className="font-semibold tracking-tight">{t("remindersTitle")}</h3>
+              <p className="text-sm text-muted-foreground">{t("remindersSubtitle")}</p>
+            </div>
+            <label
+              htmlFor="reminders-enable-cb"
+              className="flex min-h-11 items-center justify-between gap-3"
+            >
+              <span className="text-sm">{t("remindersEnable")}</span>
+              <Checkbox
+                id="reminders-enable-cb"
+                checked={reminders.enabled}
+                onCheckedChange={(v) => saveReminders({ ...reminders, enabled: v === true })}
+                data-testid="reminders-enable"
+              />
+            </label>
+            {reminders.enabled && (
+              <div className="flex flex-col gap-2">
+                <span className="text-sm text-muted-foreground">{t("remindersLead")}</span>
+                <div className="flex gap-2">
+                  {LEAD_OPTIONS.map((d) => (
+                    <button
+                      key={d}
+                      type="button"
+                      onClick={() => saveReminders({ ...reminders, leadDays: d })}
+                      aria-pressed={reminders.leadDays === d}
+                      className={cn(
+                        "min-h-11 flex-1 rounded-xl border text-sm transition-colors",
+                        reminders.leadDays === d
+                          ? "border-primary bg-primary/10 font-semibold text-foreground"
+                          : "border-border text-muted-foreground",
+                      )}
+                      data-testid={`reminders-lead-${d}`}
+                    >
+                      {t("leadDays", { days: d })}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+            {savedTick > 0 && (
+              <p className="flex items-center gap-1.5 text-sm text-success" aria-live="polite">
+                <Check className="size-4" aria-hidden />
+                {t("remindersSaved")}
+              </p>
+            )}
+          </section>
+        )}
+
         {confirmingDelete ? (
           <div className="flex flex-col gap-3 rounded-2xl border border-destructive/40 p-4">
             <p className="text-sm text-muted-foreground">{t("deletePrompt")}</p>

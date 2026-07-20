@@ -137,6 +137,20 @@ test.describe("accounts", () => {
     await expect(page.getByTestId("profile-summary")).toBeVisible();
   });
 
+  test("reminder settings persist across reloads", async ({ page, request }) => {
+    const email = uniqueEmail("rem");
+    await signIn(page, request, email);
+
+    await expect(page.getByTestId("reminders")).toBeVisible();
+    await page.getByTestId("reminders-enable").click();
+    await page.getByTestId("reminders-lead-7").click();
+    await expect(page.getByTestId("reminders-lead-7")).toHaveAttribute("aria-pressed", "true");
+
+    await page.reload();
+    await expect(page.getByTestId("reminders-enable")).toBeChecked();
+    await expect(page.getByTestId("reminders-lead-7")).toHaveAttribute("aria-pressed", "true");
+  });
+
   test("sign-in screen has no serious a11y violations (both themes)", async ({ page }) => {
     await page.goto("/profile");
     await expect(page.getByTestId("account-signin")).toBeVisible();
