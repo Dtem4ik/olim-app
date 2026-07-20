@@ -15,6 +15,7 @@ module.exports = {
         "http://localhost:3000/guides/healthcare",
         "http://localhost:3000/guides/banks-and-money/open-bank-account",
         "http://localhost:3000/plan",
+        "http://localhost:3000/profile",
       ],
       numberOfRuns: 3,
       settings: {

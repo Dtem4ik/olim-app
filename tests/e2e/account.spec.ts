@@ -142,8 +142,13 @@ test.describe("accounts", () => {
     await signIn(page, request, email);
 
     await expect(page.getByTestId("reminders")).toBeVisible();
-    await page.getByTestId("reminders-enable").click();
-    await page.getByTestId("reminders-lead-7").click();
+    const savedPatch = () =>
+      page.waitForResponse(
+        (r) => r.url().includes("/api/reminders") && r.request().method() === "PATCH",
+      );
+    // Await each PATCH so the reload below can't abort an in-flight write.
+    await Promise.all([savedPatch(), page.getByTestId("reminders-enable").click()]);
+    await Promise.all([savedPatch(), page.getByTestId("reminders-lead-7").click()]);
     await expect(page.getByTestId("reminders-lead-7")).toHaveAttribute("aria-pressed", "true");
 
     await page.reload();
