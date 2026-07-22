@@ -152,8 +152,12 @@ reminder_log → (user, register-kupat-holim, 14)   # exactly one row
 2. **Reminder cron schedule.** The Edge Function is deployed-ready; scheduling it
    (Supabase dashboard Cron, or `pg_cron` + `pg_net` POSTing the function URL daily)
    is a dashboard step. Set `RESEND_API_KEY` as a Supabase function secret in prod.
-3. **Vercel deploy** of this branch so the `/api/*` + `/auth/callback` routes ship
-   (the remote DB is ready). Set the prod auth redirect URLs to the deployed origin.
+3. **Vercel deploy — done ✅.** Deployed to production (`https://olim-app.vercel.app`);
+   verified live: `/` 200, `/api/state` → `{"signedIn":false}`, `/api/search` returns
+   real FTS, `/profile` 200, unsubscribe → 400 without a token. **Remaining dashboard
+   step for sign-in on prod:** add `https://olim-app.vercel.app` (+ `…/auth/callback`)
+   to Supabase Auth → URL Configuration (Site URL + Redirect URLs), else magic-link /
+   Google redirects are rejected.
 
 ## Debts
 
