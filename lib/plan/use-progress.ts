@@ -46,6 +46,11 @@ function setDone(next: string[]) {
   emit();
 }
 
+/** Set progress from outside React (the sync layer) and notify all screens. */
+export function setProgressValue(done: string[]): void {
+  setDone(done);
+}
+
 export interface ProgressApi {
   done: string[];
   isDone: (slug: string) => boolean;

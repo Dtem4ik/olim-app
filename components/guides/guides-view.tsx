@@ -1,12 +1,12 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { SearchButton } from "@/components/search-button";
 import { SectionTile } from "@/components/section-tile";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { ContentSection, ContentStep } from "@/lib/content/repo";
-import { loadProfile, type Profile } from "@/lib/plan/profile";
+import { useProfile } from "@/lib/plan/use-profile";
 import { sectionColor } from "@/lib/section-colors";
 import { sectionIcon } from "@/lib/section-icons";
 
@@ -18,9 +18,7 @@ export function GuidesView({
   steps: ContentStep[];
 }) {
   const t = useTranslations("guides");
-  const [profile, setProfile] = useState<Profile | null | undefined>(undefined);
-  const loaded = profile !== undefined;
-  useEffect(() => setProfile(loadProfile()), []);
+  const { profile, loaded } = useProfile();
 
   // The guides grid is the browse-everything entry, so counts are the full
   // guide (the section page floats a reader's matched steps to the top).

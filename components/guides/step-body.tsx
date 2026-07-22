@@ -2,7 +2,7 @@
 
 import { Check } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { reportOutdated } from "@/app/guides/actions";
 import { DeadlineBadge } from "@/components/deadline-badge";
 import { MarkdownBody } from "@/components/guides/markdown-body";
@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { capture } from "@/lib/analytics";
 import type { ContentStep } from "@/lib/content/repo";
 import { computeWarning, type PlanAnswers } from "@/lib/plan/build-plan";
-import { loadProfile, type Profile } from "@/lib/plan/profile";
+import { useProfile } from "@/lib/plan/use-profile";
 import { useProgress } from "@/lib/plan/use-progress";
 import { cn } from "@/lib/utils";
 
@@ -24,9 +24,7 @@ export function StepBody({ sectionSlug, step }: { sectionSlug: string; step: Det
   const tOnb = useTranslations("onboarding");
   const { isDone, toggle } = useProgress();
   const done = isDone(step.slug);
-  const [profile, setProfile] = useState<Profile | null>(null);
-
-  useEffect(() => setProfile(loadProfile()), []);
+  const profile = useProfile().profile ?? null;
 
   const warningDue = useMemo(() => {
     if (!step.warn_rule || !profile) return null;

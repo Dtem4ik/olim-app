@@ -15,7 +15,8 @@
       "!**/playwright-report",
       "!**/test-results",
       "!**/app/globals.css",
-      "!**/lib/supabase/database.types.ts"
+      "!**/lib/supabase/database.types.ts",
+      "!**/supabase/functions/send-reminders"
     ]
   },
   "formatter": {

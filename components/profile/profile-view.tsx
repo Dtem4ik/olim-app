@@ -1,22 +1,29 @@
 "use client";
 
 import { Globe, Languages, Palette, User } from "lucide-react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { type ReactNode, useEffect, useState } from "react";
+import type { ReactNode } from "react";
 import { SearchButton } from "@/components/search-button";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { clearProfile, loadProfile, type Profile } from "@/lib/plan/profile";
-import { PROGRESS_STORAGE_KEY } from "@/lib/plan/progress";
+import { useProfile } from "@/lib/plan/use-profile";
+import { setProgressValue } from "@/lib/plan/use-progress";
+
+// Lazy-load the account panel so the Supabase auth SDK (~69 KB gz) stays out of
+// the Profile route's critical path — it self-renders null until auth resolves,
+// so deferring its download costs nothing visually and keeps the perf budget.
+const AccountPanel = dynamic(
+  () => import("@/components/profile/account-panel").then((m) => m.AccountPanel),
+  { ssr: false },
+);
 
 export function ProfileView() {
   const t = useTranslations("profile");
   const tOnb = useTranslations("onboarding");
-  const [profile, setProfile] = useState<Profile | null | undefined>(undefined);
-  const loaded = profile !== undefined;
-  useEffect(() => setProfile(loadProfile()), []);
+  const { profile, loaded, clear } = useProfile();
 
   const rows = profile
     ? [
@@ -46,46 +53,52 @@ export function ProfileView() {
             <Skeleton className="h-24 rounded-3xl" />
             <Skeleton className="h-44 rounded-2xl" />
           </div>
-        ) : profile ? (
-          <>
-            <section className="flex items-center gap-4 rounded-3xl bg-sec-lavender p-5 text-foreground">
-              <span className="flex size-16 shrink-0 items-center justify-center rounded-full bg-surface/70">
-                <User className="size-8" aria-hidden />
-              </span>
-              <div className="flex min-w-0 flex-col">
-                <h2 className="truncate text-xl font-bold tracking-tight">
-                  {tOnb(`stages.${profile.stage}`)}
-                </h2>
-                {subtitle && <p className="truncate text-sm text-foreground/70">{subtitle}</p>}
-              </div>
-            </section>
-
-            <section className="flex flex-col gap-3">
-              <h2 className="px-1 text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-                {t("situation")}
-              </h2>
-              <ul
-                className="flex flex-col divide-y divide-border rounded-2xl border border-border"
-                data-testid="profile-summary"
-              >
-                {rows.map((r) => (
-                  <li key={r} className="px-4 py-3 text-sm">
-                    {r}
-                  </li>
-                ))}
-              </ul>
-              <Link
-                href="/onboarding"
-                className={buttonVariants({ variant: "outline", className: "w-full" })}
-              >
-                {t("edit")}
-              </Link>
-            </section>
-          </>
         ) : (
-          <p className="rounded-2xl border border-border px-4 py-6 text-center text-sm text-muted-foreground">
-            {t("empty")}
-          </p>
+          <>
+            {profile && (
+              <section className="flex items-center gap-4 rounded-3xl bg-sec-lavender p-5 text-foreground">
+                <span className="flex size-16 shrink-0 items-center justify-center rounded-full bg-surface/70">
+                  <User className="size-8" aria-hidden />
+                </span>
+                <div className="flex min-w-0 flex-col">
+                  <h2 className="truncate text-xl font-bold tracking-tight">
+                    {tOnb(`stages.${profile.stage}`)}
+                  </h2>
+                  {subtitle && <p className="truncate text-sm text-foreground/70">{subtitle}</p>}
+                </div>
+              </section>
+            )}
+
+            <AccountPanel />
+
+            {profile ? (
+              <section className="flex flex-col gap-3">
+                <h2 className="px-1 text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+                  {t("situation")}
+                </h2>
+                <ul
+                  className="flex flex-col divide-y divide-border rounded-2xl border border-border"
+                  data-testid="profile-summary"
+                >
+                  {rows.map((r) => (
+                    <li key={r} className="px-4 py-3 text-sm">
+                      {r}
+                    </li>
+                  ))}
+                </ul>
+                <Link
+                  href="/onboarding"
+                  className={buttonVariants({ variant: "outline", className: "w-full" })}
+                >
+                  {t("edit")}
+                </Link>
+              </section>
+            ) : (
+              <p className="rounded-2xl border border-border px-4 py-6 text-center text-sm text-muted-foreground">
+                {t("empty")}
+              </p>
+            )}
+          </>
         )}
 
         <section className="flex flex-col divide-y divide-border rounded-2xl border border-border">
@@ -106,10 +119,8 @@ export function ProfileView() {
             className="self-start text-destructive"
             data-testid="profile-startover"
             onClick={() => {
-              clearProfile();
-              if (typeof window !== "undefined")
-                window.localStorage.removeItem(PROGRESS_STORAGE_KEY);
-              setProfile(null);
+              clear();
+              setProgressValue([]);
             }}
           >
             {t("startOver")}

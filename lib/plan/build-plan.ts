@@ -8,6 +8,7 @@
 
 import type { Basis, Cond, Family, Range, Stage, WarnRule } from "@/lib/content/schema";
 import { type DeadlineStatus, getDeadlineStatus } from "@/lib/deadline";
+import { computeDueISO, parseISODate } from "@/lib/plan/deadline-math";
 
 /** Minimal step shape the engine needs (satisfied by StepInput / StepRow). */
 export interface EngineStep {
@@ -115,44 +116,20 @@ export function matchesCond(cond: Cond, answers: PlanAnswers): boolean {
   return true;
 }
 
-function parseISODate(iso: string): Date {
-  const [y, m, d] = iso.split("-").map(Number) as [number, number, number];
-  return new Date(y, m - 1, d);
-}
-
-function toISODate(date: Date): string {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, "0");
-  const d = String(date.getDate()).padStart(2, "0");
-  return `${y}-${m}-${d}`;
-}
-
-function addDays(date: Date, days: number): Date {
-  const next = new Date(date);
-  next.setDate(next.getDate() + days);
-  return next;
-}
-
 /**
  * Resolve a step's warn_rule against the person's dates into a concrete deadline.
  * Returns a warning with a null `due`/`status` when the required anchor date
  * (flight date / arrival date) is not in the profile — the rule still surfaces.
+ * The date math lives in the framework-free `deadline-math` module shared with
+ * the reminder Edge Function.
  */
 export function computeWarning(rule: WarnRule, answers: PlanAnswers, now: Date): PlanWarning {
-  let anchor: string | undefined;
-  let dueDate: Date | null = null;
-
-  if (rule.type === "deadline_before_flight_days") {
-    anchor = answers.flightDate;
-    if (anchor) dueDate = addDays(parseISODate(anchor), -rule.days);
-  } else {
-    // deadline_after_arrival_days and expires_days both anchor on arrival.
-    anchor = answers.arrivalDate;
-    if (anchor) dueDate = addDays(parseISODate(anchor), rule.days);
-  }
-
-  if (!dueDate) return { rule, due: null, status: null };
-  return { rule, due: toISODate(dueDate), status: getDeadlineStatus(dueDate, now) };
+  const due = computeDueISO(rule, {
+    flightDate: answers.flightDate,
+    arrivalDate: answers.arrivalDate,
+  });
+  if (!due) return { rule, due: null, status: null };
+  return { rule, due, status: getDeadlineStatus(parseISODate(due), now) };
 }
 
 /**

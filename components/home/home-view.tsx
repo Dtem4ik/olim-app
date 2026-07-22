@@ -4,7 +4,7 @@ import { CheckCircle2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { DeadlineBadge } from "@/components/deadline-badge";
 import { SearchButton } from "@/components/search-button";
 import { SectionTile } from "@/components/section-tile";
@@ -13,7 +13,8 @@ import { buttonVariants } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { ContentSection, ContentStep } from "@/lib/content/repo";
 import { buildPlan, type PlanEntry } from "@/lib/plan/build-plan";
-import { loadProfile, type Profile } from "@/lib/plan/profile";
+import type { Profile } from "@/lib/plan/profile";
+import { useProfile } from "@/lib/plan/use-profile";
 import { useProgress } from "@/lib/plan/use-progress";
 import { sectionColor } from "@/lib/section-colors";
 import { sectionIcon } from "@/lib/section-icons";
@@ -36,10 +37,7 @@ export function HomeView({
   // `undefined` = still reading localStorage (SSR + first paint). Distinguishing
   // it from `null` (loaded, no profile) avoids flashing the invite/all-sections
   // state before the saved profile resolves on the client.
-  const [profile, setProfile] = useState<Profile | null | undefined>(undefined);
-  const loaded = profile !== undefined;
-
-  useEffect(() => setProfile(loadProfile()), []);
+  const { profile, loaded } = useProfile();
 
   const plan = useMemo(() => (profile ? buildPlan(profile, steps) : null), [profile, steps]);
 

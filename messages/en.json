@@ -273,5 +273,31 @@
     "languageSoon": "Soon",
     "startOver": "Reset everything",
     "empty": "You haven't taken the quiz yet."
+  },
+  "account": {
+    "anonTitle": "Save your plan to an account",
+    "anonSubtitle": "Cross-device sync and deadline reminders. An account is optional — the app works fully without one.",
+    "emailLabel": "Email",
+    "emailPlaceholder": "you@example.com",
+    "sendLink": "Send me a sign-in link",
+    "sending": "Sending…",
+    "linkSent": "Check your email — we sent a sign-in link.",
+    "or": "or",
+    "google": "Sign in with Google",
+    "signedInAs": "Signed in as",
+    "signOut": "Sign out",
+    "error": "Something went wrong. Please try again.",
+    "invalidEmail": "Enter a valid email.",
+    "delete": "Delete account",
+    "deletePrompt": "Delete your account and all synced data? This can't be undone. Your local plan on this device stays.",
+    "deleteConfirm": "Delete permanently",
+    "deleteCancel": "Cancel",
+    "deleting": "Deleting…",
+    "remindersTitle": "Deadline reminders",
+    "remindersSubtitle": "We'll email you when a deadline is near — a license swap, a clinic sign-up.",
+    "remindersEnable": "Send me reminders",
+    "remindersLead": "How early to warn me",
+    "leadDays": "{days} d",
+    "remindersSaved": "Saved"
   }
 }

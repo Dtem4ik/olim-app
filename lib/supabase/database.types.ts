@@ -90,6 +90,30 @@ export type Database = {
         }
         Relationships: []
       }
+      reminder_log: {
+        Row: {
+          id: string
+          sent_at: string
+          step_slug: string
+          threshold_days: number
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          sent_at?: string
+          step_slug: string
+          threshold_days: number
+          user_id: string
+        }
+        Update: {
+          id?: string
+          sent_at?: string
+          step_slug?: string
+          threshold_days?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       sections: {
         Row: {
           created_at: string
@@ -229,11 +253,45 @@ export type Database = {
           },
         ]
       }
+      user_state: {
+        Row: {
+          answers: Json
+          created_at: string
+          done_step_ids: Json
+          reminder_lead_days: number
+          reminders_enabled: boolean
+          unsubscribe_token: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          answers?: Json
+          created_at?: string
+          done_step_ids?: Json
+          reminder_lead_days?: number
+          reminders_enabled?: boolean
+          unsubscribe_token?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          answers?: Json
+          created_at?: string
+          done_step_ids?: Json
+          reminder_lead_days?: number
+          reminders_enabled?: boolean
+          unsubscribe_token?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      claim_plans: { Args: { p_slugs: string[] }; Returns: number }
       get_plan_by_share_slug: {
         Args: { p_share_slug: string }
         Returns: {

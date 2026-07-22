@@ -159,8 +159,10 @@ enabled = true
 site_url = "http://127.0.0.1:3000"
 # The public URL that Auth serves on. Defaults to the API external URL with `/auth/v1` appended.
 # external_url = ""
-# A list of *exact* URLs that auth providers are permitted to redirect to post authentication.
-additional_redirect_urls = ["https://127.0.0.1:3000"]
+# A list of URLs that auth providers are permitted to redirect to post
+# authentication (supports globs). Covers the /auth/callback route on both the
+# 127.0.0.1 and localhost dev origins.
+additional_redirect_urls = ["http://127.0.0.1:3000/**", "http://localhost:3000/**"]
 # How long tokens are valid for, in seconds. Defaults to 3600 (1 hour), maximum 604,800 (1 week).
 jwt_expiry = 3600
 # JWT issuer URL. If not set, defaults to auth.external_url.
@@ -242,6 +244,13 @@ otp_expiry = 3600
 # pass = "env(SENDGRID_API_KEY)"
 # admin_email = "admin@email.com"
 # sender_name = "Admin"
+
+# RU magic-link template (Phase 7a) — keeps LOCAL dev in the product's language;
+# the PROD template is configured in the Supabase dashboard (walk-through in the
+# phase report). {{ .ConfirmationURL }} is filled by GoTrue.
+[auth.email.template.magic_link]
+subject = "Ваша ссылка для входа в Olim App"
+content_path = "./supabase/templates/magic_link.html"
 
 # Uncomment to customize email template
 # [auth.email.template.invite]
@@ -384,6 +393,11 @@ deno_version = 2
 
 # [edge_runtime.secrets]
 # secret_key = "env(SECRET_VALUE)"
+
+# Deadline-reminder cron (Phase 7b). Invoked by a schedule (dashboard Cron or
+# pg_cron + pg_net calling the function URL); not user-facing, so no JWT.
+[functions.send-reminders]
+verify_jwt = false
 
 [analytics]
 enabled = true

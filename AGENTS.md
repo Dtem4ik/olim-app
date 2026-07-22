@@ -115,6 +115,7 @@ pnpm db:start        # start the local Supabase stack (needs Docker running)
 pnpm db:stop         # stop the local Supabase stack
 pnpm db:reset        # recreate the local DB and re-apply migrations (LOCAL only)
 pnpm db:types        # regenerate lib/supabase/database.types.ts from the local DB
+supabase functions serve send-reminders --no-verify-jwt   # run the Phase 7b reminder cron locally
 pnpm content:validate      # schema + integrity + editorial lint (CI gate)
 pnpm content:import        # validate, then idempotent upsert → LOCAL stack by default
 pnpm content:check-links   # fetch every source_url; report only, never fails
