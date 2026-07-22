@@ -6,12 +6,13 @@ import { lintBundle } from "@/lib/content/lint";
 
 export const DEFAULT_CONTENT_DIR = "content/fixtures";
 
-/** Parse `--dir`, `--url`, `--service-key`, `--allow-remote` from argv. */
+/** Parse `--dir`, `--url`, `--service-key`, `--allow-remote`, `--skip-embeddings`. */
 export function parseCommonArgs(): {
   dir: string;
   url?: string;
   serviceKey?: string;
   allowRemote: boolean;
+  skipEmbeddings: boolean;
 } {
   const { values } = parseArgs({
     options: {
@@ -19,6 +20,7 @@ export function parseCommonArgs(): {
       url: { type: "string" },
       "service-key": { type: "string" },
       "allow-remote": { type: "boolean", default: false },
+      "skip-embeddings": { type: "boolean", default: false },
     },
     allowPositionals: false,
   });
@@ -27,6 +29,7 @@ export function parseCommonArgs(): {
     url: values.url,
     serviceKey: values["service-key"],
     allowRemote: values["allow-remote"] ?? false,
+    skipEmbeddings: values["skip-embeddings"] ?? false,
   };
 }
 

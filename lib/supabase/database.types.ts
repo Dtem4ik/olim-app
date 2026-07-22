@@ -188,6 +188,7 @@ export type Database = {
           cond: Json
           created_at: string
           docs: Json
+          embedding: string | null
           id: string
           last_verified_at: string
           needs_review: boolean
@@ -208,6 +209,7 @@ export type Database = {
           cond?: Json
           created_at?: string
           docs?: Json
+          embedding?: string | null
           id?: string
           last_verified_at: string
           needs_review?: boolean
@@ -228,6 +230,7 @@ export type Database = {
           cond?: Json
           created_at?: string
           docs?: Json
+          embedding?: string | null
           id?: string
           last_verified_at?: string
           needs_review?: boolean
@@ -309,6 +312,22 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      match_steps: {
+        Args: {
+          p_limit?: number
+          p_min_similarity?: number
+          p_query_embedding: string
+        }
+        Returns: {
+          section_icon: string
+          section_slug: string
+          section_title: string
+          similarity: number
+          slug: string
+          summary: string
+          title: string
+        }[]
       }
       search_steps: {
         Args: { p_limit?: number; p_query: string }
