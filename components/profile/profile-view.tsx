@@ -1,16 +1,24 @@
 "use client";
 
 import { Globe, Languages, Palette, User } from "lucide-react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
-import { AccountPanel } from "@/components/profile/account-panel";
 import { SearchButton } from "@/components/search-button";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useProfile } from "@/lib/plan/use-profile";
 import { setProgressValue } from "@/lib/plan/use-progress";
+
+// Lazy-load the account panel so the Supabase auth SDK (~69 KB gz) stays out of
+// the Profile route's critical path — it self-renders null until auth resolves,
+// so deferring its download costs nothing visually and keeps the perf budget.
+const AccountPanel = dynamic(
+  () => import("@/components/profile/account-panel").then((m) => m.AccountPanel),
+  { ssr: false },
+);
 
 export function ProfileView() {
   const t = useTranslations("profile");
