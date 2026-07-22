@@ -1,9 +1,10 @@
 "use client";
 
-import { ArrowLeft, ChevronRight } from "lucide-react";
+import { ArrowLeft, ChevronRight, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
+import { AskBox } from "@/components/search/ask-box";
 import { SearchBar } from "@/components/search-bar";
 import { SectionTile } from "@/components/section-tile";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -17,7 +18,13 @@ import { cn } from "@/lib/utils";
 const EMPTY: SearchResults = { steps: [], sections: [], source: "fixtures" };
 const DEBOUNCE_MS = 200;
 
-export function SearchView({ sections }: { sections: ContentSection[] }) {
+export function SearchView({
+  sections,
+  aiEnabled,
+}: {
+  sections: ContentSection[];
+  aiEnabled: boolean;
+}) {
   const t = useTranslations("search");
   const tNav = useTranslations("nav");
   const [query, setQuery] = useState("");
@@ -92,6 +99,8 @@ export function SearchView({ sections }: { sections: ContentSection[] }) {
       </header>
 
       <main className="flex flex-1 flex-col gap-6 px-4 py-4" aria-live="polite" aria-busy={loading}>
+        {aiEnabled ? <AskBox sections={sections} /> : <AskSoon />}
+
         {q.length === 0 ? (
           <SuggestSections sections={sections} label={t("suggest")} />
         ) : loading && !hasResults ? (
@@ -171,6 +180,20 @@ function SuggestSections({ sections, label }: { sections: ContentSection[]; labe
           />
         ))}
       </div>
+    </section>
+  );
+}
+
+/** Key-absent degradation: a calm "AI answers coming soon" card. Keyword search still works. */
+function AskSoon() {
+  const t = useTranslations("search.ask");
+  return (
+    <section className="rounded-3xl border border-dashed border-border bg-surface/40 p-4">
+      <div className="flex items-center gap-2 px-1 text-sm font-semibold text-muted-foreground">
+        <Sparkles className="size-4" aria-hidden />
+        {t("soon")}
+      </div>
+      <p className="mt-1 px-1 text-xs text-muted-foreground">{t("soonHint")}</p>
     </section>
   );
 }

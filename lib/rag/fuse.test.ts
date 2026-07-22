@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { fuseRankings } from "./fuse";
 
+type Ranked = { slug: string; score: number };
+/** Score at a position, or NaN when out of range — keeps assertions non-null-safe. */
+const scoreAt = (out: Ranked[], i: number): number => out[i]?.score ?? Number.NaN;
+
 describe("fuseRankings (RRF)", () => {
   it("returns an empty ranking for no lists / empty lists", () => {
     expect(fuseRankings([])).toEqual([]);
@@ -10,7 +14,7 @@ describe("fuseRankings (RRF)", () => {
   it("ranks a single list by position", () => {
     const out = fuseRankings([["a", "b", "c"]]);
     expect(out.map((r) => r.slug)).toEqual(["a", "b", "c"]);
-    expect(out[0]!.score).toBeGreaterThan(out[1]!.score);
+    expect(scoreAt(out, 0)).toBeGreaterThan(scoreAt(out, 1));
   });
 
   it("rewards agreement across lists (an item high in both wins)", () => {
@@ -19,7 +23,7 @@ describe("fuseRankings (RRF)", () => {
       ["a", "b", "c"],
       ["b", "c", "a"],
     ]);
-    expect(out[0]!.slug).toBe("b");
+    expect(out[0]?.slug).toBe("b");
   });
 
   it("dedupes slugs across lists into a single fused score", () => {
@@ -29,14 +33,14 @@ describe("fuseRankings (RRF)", () => {
     ]);
     expect(out.filter((r) => r.slug === "a")).toHaveLength(1);
     // 'a' appears in both lists → highest.
-    expect(out[0]!.slug).toBe("a");
+    expect(out[0]?.slug).toBe("a");
   });
 
   it("a smaller k sharpens the advantage of top ranks", () => {
     const sharp = fuseRankings([["a", "b"]], 1);
     const flat = fuseRankings([["a", "b"]], 1000);
-    const sharpGap = sharp[0]!.score - sharp[1]!.score;
-    const flatGap = flat[0]!.score - flat[1]!.score;
+    const sharpGap = scoreAt(sharp, 0) - scoreAt(sharp, 1);
+    const flatGap = scoreAt(flat, 0) - scoreAt(flat, 1);
     expect(sharpGap).toBeGreaterThan(flatGap);
   });
 

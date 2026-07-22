@@ -49,14 +49,14 @@ afterEach(() => vi.unstubAllGlobals());
 
 describe("SearchView", () => {
   it("suggests sections before any query", () => {
-    renderWithProviders(<SearchView sections={sections} />);
+    renderWithProviders(<SearchView sections={sections} aiEnabled={false} />);
     expect(screen.getByText(/Разделы для старта/i)).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /Банки и деньги/ })).toBeInTheDocument();
   });
 
   it("shows grouped step + section results for a query", async () => {
     const user = userEvent.setup();
-    renderWithProviders(<SearchView sections={sections} />);
+    renderWithProviders(<SearchView sections={sections} aiEnabled={false} />);
 
     await user.type(screen.getByRole("searchbox"), "банк");
 
@@ -69,8 +69,19 @@ describe("SearchView", () => {
 
   it("reports when nothing matches", async () => {
     const user = userEvent.setup();
-    renderWithProviders(<SearchView sections={sections} />);
+    renderWithProviders(<SearchView sections={sections} aiEnabled={false} />);
     await user.type(screen.getByRole("searchbox"), "zzzнетничего");
     expect(await screen.findByText(/Ничего не найдено/i)).toBeInTheDocument();
+  });
+
+  it("shows the AI ask box when the key is present", () => {
+    renderWithProviders(<SearchView sections={sections} aiEnabled={true} />);
+    expect(screen.getByRole("region", { name: /Спроси об Израиле/i })).toBeInTheDocument();
+    expect(screen.getByPlaceholderText(/Задай вопрос/i)).toBeInTheDocument();
+  });
+
+  it("degrades to 'AI-ответы скоро' when the key is absent", () => {
+    renderWithProviders(<SearchView sections={sections} aiEnabled={false} />);
+    expect(screen.getByText(/AI-ответы скоро/i)).toBeInTheDocument();
   });
 });
