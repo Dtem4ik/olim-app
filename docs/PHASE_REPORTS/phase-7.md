@@ -141,10 +141,14 @@ reminder_log → (user, register-kupat-holim, 14)   # exactly one row
 
 ## Deferred (dashboard-only, non-blocking)
 
-1. **Google OAuth + prod magic-link template.** Google Cloud Console (OAuth client)
-   + Supabase provider config, and the RU magic-link template in the prod dashboard,
-   are dashboard steps. Magic link works fully locally (RU template in `config.toml`),
-   so nothing is blocked. The app's `signInWithOAuth("google")` path is already wired.
+1. **Google OAuth — configured ✅ (verify on the https deploy).** With the user: a
+   Google Cloud OAuth Web client was created (redirect URI
+   `https://zlcifmgakksqxkpowzaa.supabase.co/auth/v1/callback`) and the Google
+   provider was enabled in Supabase with the Client ID + Secret. The app's
+   `signInWithOAuth("google")` + `/auth/callback` path is already wired, so it will
+   work on the deployed https origin (Google rejects http localhost; final check is
+   on Vercel). The **prod RU magic-link template** (Auth → Email Templates) is still
+   a dashboard copy-paste (local RU template lives in `config.toml`).
 2. **Reminder cron schedule.** The Edge Function is deployed-ready; scheduling it
    (Supabase dashboard Cron, or `pg_cron` + `pg_net` POSTing the function URL daily)
    is a dashboard step. Set `RESEND_API_KEY` as a Supabase function secret in prod.
