@@ -111,14 +111,18 @@ export function AskBox({ sections }: { sections: ContentSection[] }) {
   return (
     <section
       aria-label={t("title")}
-      className="rounded-3xl border border-border bg-surface/60 p-4 shadow-sm"
+      className="rounded-3xl border border-border bg-gradient-to-b from-surface to-surface/50 p-4 shadow-sm"
     >
-      <form onSubmit={ask} className="flex flex-col gap-2">
-        <div className="flex items-center gap-2 px-1 text-sm font-semibold">
-          <Sparkles className="size-4 text-primary" aria-hidden />
-          {t("title")}
+      <form onSubmit={ask} className="flex flex-col gap-2.5">
+        <div className="flex items-center gap-2 px-0.5">
+          <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary/12 text-primary">
+            <Sparkles className="size-4" aria-hidden />
+          </span>
+          <span className="text-sm font-semibold">{t("title")}</span>
         </div>
-        <div className="flex items-end gap-2">
+
+        {/* Reads like the search input at rest (one line, h-11); grows with the text. */}
+        <div className="flex items-end gap-1.5 rounded-2xl border bg-background py-1 pr-1 pl-3 transition-colors focus-within:border-ring focus-within:ring-2 focus-within:ring-ring/40">
           <label htmlFor="ask-input" className="sr-only">
             {t("title")}
           </label>
@@ -137,41 +141,48 @@ export function AskBox({ sections }: { sections: ContentSection[] }) {
             placeholder={t("placeholder")}
             enterKeyHint="send"
             rows={1}
-            className="max-h-40 min-h-11 min-w-0 flex-1 resize-none rounded-2xl border border-input bg-background px-4 py-2.5 text-base leading-relaxed outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="max-h-40 min-h-9 min-w-0 flex-1 resize-none self-center bg-transparent py-1.5 text-base leading-6 outline-none placeholder:text-muted-foreground"
           />
           <Button
             type="submit"
-            size="icon"
+            size="icon-sm"
+            className="shrink-0 rounded-full"
             disabled={busy || question.trim().length === 0}
             aria-label={t("submit")}
           >
             {busy ? (
-              <Loader2 className="size-5 animate-spin" aria-hidden />
+              <Loader2 className="size-4 animate-spin" aria-hidden />
             ) : (
-              <SendHorizontal className="size-5" aria-hidden />
+              <SendHorizontal className="size-4" aria-hidden />
             )}
           </Button>
         </div>
-        <p className="px-1 text-xs text-muted-foreground">{t("hint")}</p>
+        <p className="px-0.5 text-xs text-muted-foreground">{t("hint")}</p>
       </form>
 
       {status !== "idle" && (
         <div className="mt-3 flex flex-col gap-3" aria-live="polite" aria-busy={busy}>
-          {status === "thinking" && (
-            <p className="flex items-center gap-2 px-1 text-sm text-muted-foreground">
-              <Loader2 className="size-4 animate-spin" aria-hidden />
-              {t("thinking")}
+          {status === "thinking" && <ThinkingRow label={t("thinking")} />}
+
+          {status === "rate_limited" && (
+            <p className="rounded-2xl bg-background px-4 py-3 text-sm text-muted-foreground">
+              {t("rateLimited")}
+            </p>
+          )}
+          {status === "error" && (
+            <p className="rounded-2xl bg-background px-4 py-3 text-sm text-muted-foreground">
+              {t("error")}
             </p>
           )}
 
-          {status === "rate_limited" && (
-            <p className="px-1 text-sm text-muted-foreground">{t("rateLimited")}</p>
-          )}
-          {status === "error" && <p className="px-1 text-sm text-muted-foreground">{t("error")}</p>}
-
           {answer.length > 0 && status !== "refused" && (
-            <div className="whitespace-pre-wrap rounded-2xl bg-background px-4 py-3 text-sm leading-relaxed">
-              {answer}
+            <div className="rounded-2xl border border-primary/15 bg-primary/[0.06] px-4 py-3.5">
+              <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">
+                {answer}
+                {status === "streaming" && (
+                  <span className="ml-0.5 inline-block h-4 w-[2px] translate-y-0.5 animate-pulse bg-primary align-middle" />
+                )}
+              </p>
             </div>
           )}
 
@@ -192,7 +203,9 @@ export function AskBox({ sections }: { sections: ContentSection[] }) {
 
           {status === "refused" && (
             <div className="flex flex-col gap-3">
-              <p className="px-1 text-sm text-muted-foreground">{t("refused")}</p>
+              <p className="rounded-2xl bg-background px-4 py-3 text-sm text-muted-foreground">
+                {t("refused")}
+              </p>
               {closeSections.length > 0 && (
                 <div className="grid grid-cols-2 gap-3">
                   {closeSections.map((s) => (
@@ -213,6 +226,20 @@ export function AskBox({ sections }: { sections: ContentSection[] }) {
         </div>
       )}
     </section>
+  );
+}
+
+/** Streaming placeholder: a soft label with three pulsing dots. */
+function ThinkingRow({ label }: { label: string }) {
+  return (
+    <div className="flex items-center gap-2.5 rounded-2xl border border-primary/15 bg-primary/[0.06] px-4 py-3.5 text-sm text-muted-foreground">
+      <span className="flex gap-1" aria-hidden>
+        <span className="size-1.5 animate-bounce rounded-full bg-primary [animation-delay:-0.3s]" />
+        <span className="size-1.5 animate-bounce rounded-full bg-primary [animation-delay:-0.15s]" />
+        <span className="size-1.5 animate-bounce rounded-full bg-primary" />
+      </span>
+      {label}
+    </div>
   );
 }
 
