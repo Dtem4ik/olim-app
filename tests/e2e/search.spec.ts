@@ -85,3 +85,92 @@ test.describe("search", () => {
     });
   });
 });
+
+/** SSE frame as /api/ask emits it. */
+const sse = (event: string, data: unknown) => `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`;
+
+// The AI ask box only renders when GEMINI_API_KEY is present at build time. In a
+// keyless build (CI default) /search degrades to "AI-ответы скоро", so these tests
+// skip. The answer stream itself is mocked, so no real key/model is ever called.
+test.describe("ask (grounded AI answer)", () => {
+  const askInput = (page: Page) => page.getByPlaceholder(/Задай вопрос/i);
+
+  test("known question → streamed answer with a tappable source card", async ({ page }) => {
+    await page.goto("/search");
+    if (
+      !(await askInput(page)
+        .isVisible()
+        .catch(() => false))
+    )
+      test.skip();
+
+    await page.route("**/api/ask", (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: "text/event-stream",
+        body:
+          sse("sources", {
+            sources: [
+              {
+                slug: "open-bank-account",
+                section_slug: "banks-and-money",
+                title: "Открыть счёт в банке",
+                section_title: "Банки и деньги",
+                section_icon: "landmark",
+                source_url: "https://gov.il/x",
+                last_verified_at: "2026-01-01",
+              },
+            ],
+          }) +
+          sse("text", { text: "Открой счёт в отделении банка." }) +
+          sse("done", { refused: false, citedSlugs: ["open-bank-account"], model: "gemini" }),
+      }),
+    );
+
+    await askInput(page).fill("как открыть счёт");
+    await page.getByRole("button", { name: /Спросить/i }).click();
+
+    await expect(page.getByText(/Открой счёт в отделении банка/)).toBeVisible();
+    const card = page.getByTestId("ask-source");
+    await expect(card).toHaveAttribute("href", "/guides/banks-and-money/open-bank-account");
+  });
+
+  test("out-of-scope question → honest refusal + closest sections", async ({ page }) => {
+    await page.goto("/search");
+    if (
+      !(await askInput(page)
+        .isVisible()
+        .catch(() => false))
+    )
+      test.skip();
+
+    await page.route("**/api/ask", (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: "text/event-stream",
+        body:
+          sse("sources", {
+            sources: [
+              {
+                slug: "get-and-load-rav-kav",
+                section_slug: "transport",
+                title: "Завести карту Рав-Кав",
+                section_title: "Транспорт",
+                section_icon: "bus",
+                source_url: "https://gov.il/y",
+                last_verified_at: "2026-01-01",
+              },
+            ],
+          }) + sse("done", { refused: true, citedSlugs: [], model: "gemini" }),
+      }),
+    );
+
+    await askInput(page).fill("какая погода завтра");
+    await page.getByRole("button", { name: /Спросить/i }).click();
+
+    const askRegion = page.getByRole("region", { name: /Спроси об Израиле/i });
+    await expect(askRegion.getByText(/Не нашёл точного ответа/i)).toBeVisible();
+    // The closest section is offered inside the ask region (not the suggestions grid below).
+    await expect(askRegion.getByRole("link", { name: /Транспорт/ })).toBeVisible();
+  });
+});
