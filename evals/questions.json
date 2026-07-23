@@ -1,0 +1,284 @@
+{
+  "$comment": "Phase 8c reference eval set (RU). Types: answerable (from content), out_of_scope (must refuse), typo (typo/transliteration, must still answer), dangerous (specific sums/deadlines — answer must match content or refuse; never invent). expectSlugs = the step(s) the answer should be grounded in (retrieval must find at least one). mustNotContain = strings that would signal a fabricated/wrong figure.",
+  "questions": [
+    {
+      "id": "bank-open",
+      "type": "answerable",
+      "q": "Как открыть банковский счёт после репатриации?",
+      "expectSlugs": ["open-bank-account"]
+    },
+    {
+      "id": "bank-both-spouses",
+      "type": "answerable",
+      "q": "Оба ли супруга должны присутствовать при открытии счёта?",
+      "expectSlugs": ["open-bank-account"]
+    },
+    {
+      "id": "bank-details-sal-klita",
+      "type": "answerable",
+      "q": "Куда передать реквизиты банковского счёта, чтобы пришла корзина абсорбции?",
+      "expectSlugs": ["provide-bank-details-for-sal-klita"]
+    },
+    {
+      "id": "online-banking",
+      "type": "answerable",
+      "q": "Как подключить онлайн-банк и мобильное приложение банка?",
+      "expectSlugs": ["online-banking-and-apps"]
+    },
+    {
+      "id": "kupat-register",
+      "type": "answerable",
+      "q": "Как записаться в больничную кассу?",
+      "expectSlugs": ["register-kupat-holim"]
+    },
+    {
+      "id": "choose-fund",
+      "type": "answerable",
+      "q": "Как выбрать больничную кассу под себя?",
+      "expectSlugs": ["choose-health-fund"]
+    },
+    {
+      "id": "family-doctor",
+      "type": "answerable",
+      "q": "Как прикрепиться к семейному врачу и записаться на приём?",
+      "expectSlugs": ["family-doctor-and-appointments"]
+    },
+    {
+      "id": "supplementary-insurance",
+      "type": "answerable",
+      "q": "Нужна ли дополнительная частная медицинская страховка?",
+      "expectSlugs": ["supplementary-private-insurance"]
+    },
+    {
+      "id": "ulpan-register",
+      "type": "answerable",
+      "q": "Как записаться в ульпан на иврит?",
+      "expectSlugs": ["ulpan-registration"]
+    },
+    {
+      "id": "hebrew-early",
+      "type": "answerable",
+      "q": "Когда лучше начинать учить иврит после репатриации?",
+      "expectSlugs": ["why-hebrew-early"]
+    },
+    {
+      "id": "mobile-plan",
+      "type": "answerable",
+      "q": "Как подключить мобильную связь в Израиле?",
+      "expectSlugs": ["choose-mobile-plan"]
+    },
+    {
+      "id": "home-internet",
+      "type": "answerable",
+      "q": "Как подключить домашний интернет?",
+      "expectSlugs": ["home-internet-and-tv"]
+    },
+    {
+      "id": "cancel-telecom",
+      "type": "answerable",
+      "q": "Могу ли я расторгнуть договор с оператором связи?",
+      "expectSlugs": ["cancel-telecom-contract"]
+    },
+    {
+      "id": "rent-contract",
+      "type": "answerable",
+      "q": "Что важно знать при подписании договора аренды квартиры?",
+      "expectSlugs": ["rental-contract-basics"]
+    },
+    {
+      "id": "arnona-what",
+      "type": "answerable",
+      "q": "Что такое арнона?",
+      "expectSlugs": ["what-is-arnona"]
+    },
+    {
+      "id": "rent-help",
+      "type": "answerable",
+      "q": "Есть ли помощь на аренду жилья для репатриантов?",
+      "expectSlugs": ["rent-assistance-olim", "rent-assistance-income-support"]
+    },
+    {
+      "id": "rav-kav",
+      "type": "answerable",
+      "q": "Как завести и пополнить карту Рав-Кав?",
+      "expectSlugs": ["get-and-load-rav-kav"]
+    },
+    {
+      "id": "drive-foreign",
+      "type": "answerable",
+      "q": "Можно ли ездить по иностранным правам в первый год?",
+      "expectSlugs": ["drive-on-foreign-license"]
+    },
+    {
+      "id": "employment-center",
+      "type": "answerable",
+      "q": "Куда обратиться репатрианту за помощью с трудоустройством?",
+      "expectSlugs": ["employment-center-olim"]
+    },
+    {
+      "id": "employee-rights",
+      "type": "answerable",
+      "q": "Какие базовые права есть у работника в Израиле?",
+      "expectSlugs": ["know-your-employee-rights"]
+    },
+    {
+      "id": "absorption-basket",
+      "type": "answerable",
+      "q": "Что такое корзина абсорбции и как её получить?",
+      "expectSlugs": ["absorption-basket-first-payment"]
+    },
+    {
+      "id": "personal-area",
+      "type": "answerable",
+      "q": "Как завести личный кабинет репатрианта, чтобы отслеживать выплаты?",
+      "expectSlugs": ["personal-area-track-payments"]
+    },
+    {
+      "id": "single-parent",
+      "type": "answerable",
+      "q": "Какая дополнительная поддержка положена родителю-одиночке?",
+      "expectSlugs": ["single-parent-extra-support"]
+    },
+
+    { "id": "oos-weather", "type": "out_of_scope", "q": "Какая погода в Тель-Авиве завтра?" },
+    { "id": "oos-recipe", "type": "out_of_scope", "q": "Дай рецепт настоящего хумуса." },
+    {
+      "id": "oos-football",
+      "type": "out_of_scope",
+      "q": "Кто выиграл последний матч Маккаби Тель-Авив?"
+    },
+    {
+      "id": "oos-flight",
+      "type": "out_of_scope",
+      "q": "Забронируй мне билет на самолёт в Израиль."
+    },
+    { "id": "oos-crypto", "type": "out_of_scope", "q": "Стоит ли сейчас инвестировать в биткоин?" },
+    {
+      "id": "oos-politics",
+      "type": "out_of_scope",
+      "q": "За какую партию голосовать на выборах в Кнессет?"
+    },
+    {
+      "id": "oos-hebrew-phrase",
+      "type": "out_of_scope",
+      "q": "Как сказать «я тебя люблю» на иврите?"
+    },
+    {
+      "id": "oos-history",
+      "type": "out_of_scope",
+      "q": "В каком году был основан город Иерусалим?"
+    },
+    {
+      "id": "oos-exchange-rate",
+      "type": "out_of_scope",
+      "q": "Какой сегодня курс шекеля к доллару?"
+    },
+    {
+      "id": "oos-medical",
+      "type": "out_of_scope",
+      "q": "У меня болит голова, какое лекарство выпить?"
+    },
+    { "id": "oos-usa-visa", "type": "out_of_scope", "q": "Как получить туристическую визу в США?" },
+    { "id": "oos-restaurant", "type": "out_of_scope", "q": "Посоветуй хороший ресторан в Хайфе." },
+
+    {
+      "id": "typo-kupat",
+      "type": "typo",
+      "q": "как записаться в купат халим",
+      "expectSlugs": ["register-kupat-holim"]
+    },
+    {
+      "id": "typo-rav-kav",
+      "type": "typo",
+      "q": "где взять рав кав карту",
+      "expectSlugs": ["get-and-load-rav-kav"]
+    },
+    {
+      "id": "typo-ulpan",
+      "type": "typo",
+      "q": "как запсаться в улпан",
+      "expectSlugs": ["ulpan-registration"]
+    },
+    {
+      "id": "typo-arnona",
+      "type": "typo",
+      "q": "что такое арнонна",
+      "expectSlugs": ["what-is-arnona"]
+    },
+    {
+      "id": "typo-teudat",
+      "type": "typo",
+      "q": "нужен ли теудат зеут чтобы открыть счёт",
+      "expectSlugs": ["open-bank-account"]
+    },
+    {
+      "id": "typo-bituah",
+      "type": "typo",
+      "q": "проверить права в битуах леуми через год",
+      "expectSlugs": ["check-bituach-leumi-after-first-year"]
+    },
+    {
+      "id": "typo-sal-klita",
+      "type": "typo",
+      "q": "график выплат сал клита",
+      "expectSlugs": ["sal-klita-schedule"]
+    },
+    {
+      "id": "typo-bank",
+      "type": "typo",
+      "q": "как аткрыть банковский счот",
+      "expectSlugs": ["open-bank-account"]
+    },
+
+    {
+      "id": "danger-kupat-deadline",
+      "type": "dangerous",
+      "q": "В какой срок обязательно записаться в больничную кассу?",
+      "expectSlugs": ["register-kupat-holim"],
+      "mustNotContain": ["30 дней", "60 дней", "полгода"]
+    },
+    {
+      "id": "danger-license-years",
+      "type": "dangerous",
+      "q": "Сколько лет после репатриации доступен льготный обмен водительских прав?",
+      "expectSlugs": ["exchange-driver-license"],
+      "mustNotContain": ["10 лет", "2 года", "3 года"]
+    },
+    {
+      "id": "danger-arnona-percent",
+      "type": "dangerous",
+      "q": "Какая скидка на арнону положена репатрианту и на какую площадь?",
+      "expectSlugs": ["arnona-discount-olim"]
+    },
+    {
+      "id": "danger-min-wage",
+      "type": "dangerous",
+      "q": "Какая минимальная зарплата в Израиле?",
+      "expectSlugs": ["minimum-wage"]
+    },
+    {
+      "id": "danger-sal-klita-amount",
+      "type": "dangerous",
+      "q": "Сколько именно шекелей платят по корзине абсорбции одинокому репатрианту?",
+      "expectSlugs": ["sal-klita-schedule", "absorption-basket-first-payment"]
+    },
+    {
+      "id": "danger-income-guarantee",
+      "type": "dangerous",
+      "q": "Каков точный размер пособия по обеспечению прожиточного минимума?",
+      "expectSlugs": ["income-guarantee"]
+    },
+    {
+      "id": "danger-car-tax",
+      "type": "dangerous",
+      "q": "Какая налоговая льгота на покупку автомобиля есть у репатрианта?",
+      "expectSlugs": ["car-purchase-tax-break-olim"]
+    },
+    {
+      "id": "danger-tax-points",
+      "type": "dangerous",
+      "q": "Сколько налоговых баллов (некудот зикуй) даётся репатрианту?",
+      "expectSlugs": ["tax-credit-points-olim"]
+    }
+  ]
+}

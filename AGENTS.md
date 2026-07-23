@@ -108,6 +108,7 @@ pnpm lint:fix        # Biome autofix (format + safe fixes)
 pnpm typecheck       # tsc --noEmit
 pnpm test            # Vitest unit run
 pnpm test:coverage   # Vitest with v8 coverage
+pnpm eval            # Phase 8 AI grounding gate (≥90%, 0 fabricated/contradicted); needs GEMINI_API_KEY + a seeded DB, self-skips otherwise
 pnpm e2e             # Playwright smoke + axe (both themes); builds first locally
 pnpm e2e:install     # install the Playwright chromium browser
 pnpm lighthouse      # Lighthouse CI (perf ≥90, a11y ≥95)
@@ -117,7 +118,7 @@ pnpm db:reset        # recreate the local DB and re-apply migrations (LOCAL only
 pnpm db:types        # regenerate lib/supabase/database.types.ts from the local DB
 supabase functions serve send-reminders --no-verify-jwt   # run the Phase 7b reminder cron locally
 pnpm content:validate      # schema + integrity + editorial lint (CI gate)
-pnpm content:import        # validate, then idempotent upsert → LOCAL stack by default
+pnpm content:import        # validate, upsert → LOCAL by default; computes step embeddings when GEMINI_API_KEY is set (--skip-embeddings to opt out)
 pnpm content:check-links   # fetch every source_url; report only, never fails
 pnpm content:review-queue  # list steps still needs_review = true
 ```

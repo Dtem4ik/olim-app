@@ -92,7 +92,21 @@
     "suggest": "Sections to start with",
     "empty": "Nothing found for “{query}”.",
     "sections": "Sections",
-    "steps": "Steps"
+    "steps": "Steps",
+    "ask": {
+      "title": "Ask about Israel",
+      "placeholder": "Ask a question in your own words…",
+      "submit": "Ask",
+      "hint": "The AI answers only from the app's own material and shows its sources.",
+      "thinking": "Searching the guides…",
+      "sources": "Sources",
+      "refused": "Couldn't find a precise answer in the guides. Here are the closest sections:",
+      "error": "Something went wrong. Please try again.",
+      "rateLimited": "Too many requests — try again in a minute. Keyword search below still works.",
+      "disclaimer": "The AI can be wrong — verify against the official source in the card.",
+      "soon": "AI answers coming soon",
+      "soonHint": "Smart answers from the guides will appear here. Keyword search below works for now."
+    }
   },
   "theme": {
     "toggle": "Toggle theme",

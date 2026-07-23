@@ -74,6 +74,43 @@ jobs:
       - name: Validate content
         run: pnpm content:validate
 
+  evals:
+    name: AI evals (grounding gate)
+    # Opt-in only. For now the grounding gate is run LOCALLY (`pnpm eval`); this job
+    # stays defined but is skipped in CI until you flip it on, to avoid spending the
+    # Gemini free-tier RPD on every PR. To enable: set the repo variable
+    # RUN_AI_EVALS=true and the secrets GEMINI_API_KEY + EVAL_SUPABASE_URL +
+    # EVAL_SUPABASE_KEY (a DB seeded with embeddings). Even when enabled, `pnpm eval`
+    # self-skips (exit 0) if the key/DB are missing.
+    if: ${{ vars.RUN_AI_EVALS == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # `pnpm eval` self-skips (exit 0) when GEMINI_API_KEY is absent OR no seeded
+      # eval DB is configured (content falls back to the 2-step fixtures). To run
+      # the real gate, set the repo secrets GEMINI_API_KEY + EVAL_SUPABASE_URL +
+      # EVAL_SUPABASE_KEY (pointing at a stack seeded via content:import with
+      # embeddings). Gate: ≥90% pass, 0 fabricated-source, 0 contradicted-fact.
+      - name: Run AI evals
+        run: pnpm eval
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.EVAL_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.EVAL_SUPABASE_KEY }}
+
   e2e:
     name: e2e · axe (both themes)
     runs-on: ubuntu-latest

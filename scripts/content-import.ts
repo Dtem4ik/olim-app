@@ -7,16 +7,22 @@
  *   pnpm content:import --dir ../olim-content/content
  */
 
+import { isAiConfigured } from "@/lib/rag/config";
+import { embedDocuments, toVectorLiteral } from "@/lib/rag/embeddings";
+import { buildStepEmbeddingText } from "@/lib/rag/step-text";
 import type { Database, Json } from "@/lib/supabase/database.types";
 import { gatherContent, parseCommonArgs, reportIssues } from "./_content";
 import { createServiceClient, resolveTarget } from "./_supabase";
+
+/** Gemini's batchEmbedContents is generous; 46 steps fit trivially. Chunk anyway. */
+const EMBED_BATCH = 100;
 
 type SectionRow = Database["public"]["Tables"]["sections"]["Insert"];
 type StepRow = Database["public"]["Tables"]["steps"]["Insert"];
 type BenefitRow = Database["public"]["Tables"]["benefits"]["Insert"];
 
 async function main(): Promise<void> {
-  const { dir, url, serviceKey, allowRemote } = parseCommonArgs();
+  const { dir, url, serviceKey, allowRemote, skipEmbeddings } = parseCommonArgs();
 
   // 1. Validate first — never import invalid content.
   const { bundle, issues } = gatherContent(dir);
@@ -58,6 +64,13 @@ async function main(): Promise<void> {
     sort_order: s.sort_order,
   }));
 
+  // Embeddings for hybrid AI retrieval (Phase 8a). Computed at import time only —
+  // never per query. Gated on GEMINI_API_KEY: absent (or --skip-embeddings) → the
+  // column is left untouched (upsert omits it), so existing vectors are preserved
+  // and a keyless import (CI/local without a key) still succeeds. A transient
+  // embedding failure is a warning, not a failed import.
+  await attachEmbeddings(steps, bundle.steps, skipEmbeddings);
+
   const benefits: BenefitRow[] = bundle.benefits.map((b) => ({
     slug: b.slug,
     title: b.title,
@@ -90,6 +103,45 @@ async function main(): Promise<void> {
   );
 
   await triggerRevalidate();
+}
+
+/**
+ * Compute and attach embeddings to the step rows in place. Batches to keep a
+ * single import call cheap and resilient. No-op (with a printed reason) when the
+ * key is missing or `--skip-embeddings` is passed.
+ */
+async function attachEmbeddings(
+  rows: StepRow[],
+  inputs: { title: string; summary?: string | null; body_md: string }[],
+  skip: boolean,
+): Promise<void> {
+  if (skip) {
+    console.log("• Skipping embeddings (--skip-embeddings).");
+    return;
+  }
+  if (!isAiConfigured()) {
+    console.log("• GEMINI_API_KEY not set — skipping embeddings (existing vectors preserved).");
+    return;
+  }
+  try {
+    const texts = inputs.map(buildStepEmbeddingText);
+    let done = 0;
+    for (let i = 0; i < texts.length; i += EMBED_BATCH) {
+      const batch = texts.slice(i, i + EMBED_BATCH);
+      const vectors = await embedDocuments(batch);
+      vectors.forEach((v, j) => {
+        const row = rows[i + j];
+        if (row) row.embedding = toVectorLiteral(v);
+      });
+      done += batch.length;
+    }
+    console.log(`✓ Embedded ${done} steps (gemini-embedding-001, 768d).`);
+  } catch (err) {
+    console.warn(
+      `! Embedding failed (${err instanceof Error ? err.message : err}) — importing without ` +
+        "updated vectors. Re-run once the key/quota is available.",
+    );
+  }
 }
 
 /**
