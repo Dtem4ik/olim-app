@@ -394,6 +394,55 @@ Opt-in per user (off by default); lead time 30/14/7 days, stored on `user_state`
 - **Settings.** `PATCH /api/reminders` (owner-scoped) writes the toggle + lead
   time; the Profile screen renders them (signed-in only).
 
+## AI search — grounded RAG (Phase 8)
+
+"Спроси об Израиле": a natural-language answer that may **only** speak from the
+app's own steps. It augments the Phase 6 keyword search — never replaces it. The
+whole stack is **Gemini-only** and **env-gated on `GEMINI_API_KEY`** (server-only,
+never `NEXT_PUBLIC_*`): absent → the ask box degrades to a friendly "AI-ответы
+скоро" and keyword search still works, so CI/preview/local без ключа не падают.
+
+- **Embeddings & model.** `gemini-embedding-001` truncated to **768 dims**
+  (`outputDimensionality`, cosine — scale-invariant, no renormalization) for
+  retrieval; **`gemini-3.1-flash-lite`** for the answer, with a fallback ladder
+  (`→ -preview → gemini-2.5-flash-lite`) tried on quota/404/error. Via the Vercel
+  AI SDK (`ai`, `@ai-sdk/google`). Config in `lib/rag/config.ts`.
+- **Retrieval (8a), hybrid.** Migration `20260722140000_add_step_embeddings.sql`
+  (additive, `public`-only): `vector` extension into `extensions`, a
+  `steps.embedding vector(768)` column, an **HNSW** cosine index, and a
+  `public.match_steps()` similarity RPC. Embeddings are computed **at import time**
+  (`content:import`, batched, gated on the key, `--skip-embeddings` to opt out) —
+  never per query; only the user's query is embedded at request time
+  (`RETRIEVAL_QUERY` vs the documents' `RETRIEVAL_DOCUMENT` task type).
+  `lib/rag/retrieve.ts` fuses the Phase 6 FTS arm (`search_steps`) with the vector
+  arm via **Reciprocal Rank Fusion** (`lib/rag/fuse.ts`, pure + tested), then
+  hydrates the fused top-k from the content repo (full body + source metadata).
+  Degrades to FTS-only без ключа, and to the in-memory matcher без стека.
+- **Answer (8b), grounded + streamed.** `lib/rag/prompt.ts` is the guardrail: the
+  model answers only from the provided context, never invents numbers / sums /
+  deadlines / Hebrew terms / URLs, cites the step slugs it used, and emits a bare
+  `NO_ANSWER` when the context is insufficient. `lib/rag/answer.ts` shares one
+  prompt + model-ladder between a non-streaming path (evals) and an async-generator
+  streaming path. **`POST /api/ask`** streams the answer over SSE (Node runtime,
+  key stays server-side), **rate-limited per-IP AND with a global RPM ceiling** to
+  protect the free Gemini quota (`lib/rag/config.ts` `ASK_RATE`). The `/search` ask
+  box (`components/search/ask-box.tsx`) streams the answer, renders tappable source
+  cards that deep-link to the SSR step sheet, and on the "не знаю" path shows the
+  closest sections. The LLM client never reaches the browser bundle (verified: no
+  `@ai-sdk/*` in `.next/static`), so the JS budget and Lighthouse gates hold.
+- **Evals (8c), the acceptance gate.** `evals/questions.json` — 51 RU reference
+  questions across answerable / out-of-scope / typo-transliteration / dangerous
+  (sums & deadlines). `pnpm eval` (`scripts/eval.ts`) runs the real pipeline and
+  asserts: cited slugs are real retrieved steps (no fabricated sources),
+  out-of-scope refuses, answerable/typo answer + cite, dangerous refuse or answer
+  without a fabricated/contradicted figure (an LLM judge scoped to the harm class:
+  contradictions + invented figures/dates). **Gate: ≥90% pass, 0 fabricated-source,
+  0 contradicted-fact.** Self-skips (exit 0) без ключа или без seeded eval-DB, wired
+  as a CI job (`secrets.GEMINI_API_KEY` + `EVAL_SUPABASE_*`).
+- **Cost.** ~46 short steps; embeddings are a one-time ~few-thousand-token batch at
+  import. Per query: 1 query embedding + 1 flash-lite answer (~1–3k input tokens) —
+  well within the free tier; the global RPM cap is the real spend guard.
+
 ## Rendering & performance
 
 Content routes are ISR (see freshness above); other routes are statically

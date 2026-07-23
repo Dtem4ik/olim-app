@@ -18,16 +18,26 @@ Phases 1–5 + a native-mobile UI redesign are in `main`:
   behind `/search`, and programmatic SEO (canonical step/section pages, sitemap +
   robots from the DB, JSON-LD, OG images, ISR + on-demand revalidation).
 
-**Phase 7** (this line of work) adds accounts and deadline reminders — still
-**anonymous-first** (an account is never required; it only adds sync + reminders):
+- **Phase 7** — accounts + deadline reminders, still **anonymous-first**: Supabase
+  Auth (magic link + Google), a `user_state` row per account with owner-scoped RLS,
+  first-sign-in plan migration + cross-device sync, account deletion
+  (`docs/PRIVACY.md`); opt-in email deadline reminders via a Deno Edge Function +
+  Resend with idempotent `reminder_log`.
 
-- **7a** — Supabase Auth (magic link + Google) via cookie-based `@supabase/ssr`;
-  a `user_state` row per account with owner-scoped RLS; first-sign-in migration of
-  the localStorage plan + share-plans; cross-device sync (localStorage stays the
-  offline cache); account deletion. See `docs/PRIVACY.md`.
-- **7b** — opt-in email deadline reminders (30/14/7 lead time): a Deno Supabase
-  Edge Function computes upcoming deadlines with shared date math, sends via Resend
-  with a `reminder_log` for idempotency, and a one-click no-login unsubscribe.
+**Phase 8** (this line of work) adds **AI search** — "Спроси об Израиле", a grounded
+answer that may only speak from the app's own steps (it augments the keyword search,
+never replaces it):
+
+- **8a** — hybrid retrieval: pgvector embeddings on `steps` (Gemini
+  `gemini-embedding-001`, 768d, HNSW cosine), computed at content-import time, fused
+  with the Phase 6 full-text search via Reciprocal Rank Fusion.
+- **8b** — a streamed, sourced answer (`POST /api/ask`, SSE): the model answers only
+  from retrieved steps, cites them as tappable source cards, and honestly says
+  "не нашёл — вот близкие разделы" when it can't. Gemini-only, **env-gated** on
+  `GEMINI_API_KEY` (server-side); without it the ask box degrades to "AI-ответы
+  скоро" and keyword search still works.
+- **8c** — a committed 51-question eval set + `pnpm eval` grounding gate
+  (≥90% pass, 0 fabricated-source, 0 contradicted-fact; local run 98%).
 
 See `docs/PHASE_REPORTS/` for per-phase reports and `docs/ROADMAP.md` for the full
 10-phase plan.

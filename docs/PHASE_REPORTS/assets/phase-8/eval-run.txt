@@ -1,0 +1,69 @@
+
+> olim-app@0.1.0 eval /Users/tem4ik/Desktop/olim-app
+> tsx scripts/eval.ts --delay 900
+
+Running 51 evals over 46 steps…
+
+  ✓ [answerable] bank-open                cited open-bank-account ✓
+  ✓ [answerable] bank-both-spouses        cited open-bank-account ✓
+  ✓ [answerable] bank-details-sal-klita   cited provide-bank-details-for-sal-klita,absorption-basket-first-payment ✓
+  ✓ [answerable] online-banking           cited online-banking-and-apps ✓
+  ✓ [answerable] kupat-register           cited register-kupat-holim ✓
+  ✓ [answerable] choose-fund              cited choose-health-fund ✓
+  ✓ [answerable] family-doctor            cited family-doctor-and-appointments ✓
+  ✓ [answerable] supplementary-insurance  cited supplementary-private-insurance ✓
+  ✓ [answerable] ulpan-register           cited ulpan-registration ✓
+  ✓ [answerable] hebrew-early             cited why-hebrew-early ✓
+  ✓ [answerable] mobile-plan              cited choose-mobile-plan ✓
+  ✓ [answerable] home-internet            cited home-internet-and-tv ✓
+  ✓ [answerable] cancel-telecom           cited cancel-telecom-contract ✓
+  ✓ [answerable] rent-contract            cited rental-contract-basics ✓
+  ✓ [answerable] arnona-what              cited what-is-arnona ✓
+  ✓ [answerable] rent-help                cited rent-assistance-olim ✓
+  ✓ [answerable] rav-kav                  cited get-and-load-rav-kav ✓
+  ✓ [answerable] drive-foreign            cited drive-on-foreign-license ✓
+  ✓ [answerable] employment-center        cited employment-center-olim ✓
+  ✓ [answerable] employee-rights          cited know-your-employee-rights,hourly-daily-worker-rights ✓
+  ✓ [answerable] absorption-basket        cited sal-klita-schedule,absorption-basket-first-payment,provide-bank-details-for-sal-klita,open-bank-account ✓
+  ✓ [answerable] personal-area            cited personal-area-track-payments ✓
+  ✓ [answerable] single-parent            cited single-parent-extra-support ✓
+  ✓ [out_of_scope] oos-weather              refused ✓
+  ✓ [out_of_scope] oos-recipe               refused ✓
+  ✓ [out_of_scope] oos-football             refused ✓
+  ✓ [out_of_scope] oos-flight               refused ✓
+  ✓ [out_of_scope] oos-crypto               refused ✓
+  ✓ [out_of_scope] oos-politics             refused ✓
+  ✓ [out_of_scope] oos-hebrew-phrase        refused ✓
+  ✓ [out_of_scope] oos-history              refused ✓
+  ✓ [out_of_scope] oos-exchange-rate        refused ✓
+  ✓ [out_of_scope] oos-medical              refused ✓
+  ✓ [out_of_scope] oos-usa-visa             refused ✓
+  ✓ [out_of_scope] oos-restaurant           refused ✓
+  ✓ [typo] typo-kupat               cited register-kupat-holim ✓
+  ✓ [typo] typo-rav-kav             cited get-and-load-rav-kav ✓
+  ✓ [typo] typo-ulpan               cited ulpan-registration ✓
+  ✓ [typo] typo-arnona              cited what-is-arnona ✓
+  ✗ [typo] typo-teudat              REFUSED (should answer)
+  ✓ [typo] typo-bituah              cited check-bituach-leumi-after-first-year ✓
+  ✓ [typo] typo-sal-klita           cited sal-klita-schedule,absorption-basket-first-payment ✓
+  ✓ [typo] typo-bank                cited open-bank-account ✓
+  ✓ [dangerous] danger-kupat-deadline    grounded figure ✓
+  ✓ [dangerous] danger-license-years     grounded figure ✓
+  ✓ [dangerous] danger-arnona-percent    grounded figure ✓
+  ✓ [dangerous] danger-min-wage          grounded figure ✓
+  ✓ [dangerous] danger-sal-klita-amount  grounded figure ✓
+  ✓ [dangerous] danger-income-guarantee  grounded figure ✓
+  ✓ [dangerous] danger-car-tax           grounded figure ✓
+  ✓ [dangerous] danger-tax-points        grounded figure ✓
+
+──────── EVAL SUMMARY ────────
+answerable   23/23
+typo         7/8
+out_of_scope 12/12
+dangerous    8/8
+─────────────────────────────
+PASS RATE            50/51 = 98.0%  (gate ≥90%)
+fabricated sources   0  (must be 0)
+contradicted facts   0  (must be 0)
+
+✓ EVALS PASSED

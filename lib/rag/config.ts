@@ -28,14 +28,18 @@ export const ANSWER_MODELS: readonly string[] = [
 export const RETRIEVAL_TOP_K = 6;
 
 /**
- * Rate limits for the ask endpoint (Phase 8b). The free Gemini tier throttles by
- * RPM, so on top of a per-client cap there is a GLOBAL per-minute ceiling that
- * protects the shared quota — when it trips, callers get a friendly "try later"
- * and keyword search still works. Tunable via env for a paid key.
+ * Rate limits for the ask endpoint (Phase 8b). The free Gemini tier throttles the
+ * primary answer model (`gemini-3.1-flash-lite`) at **15 RPM / 500 RPD**; the
+ * embedding model is 100 RPM (not binding). Each ask = 1 answer call, so the
+ * GLOBAL per-minute ceiling (default 10, headroom under 15) protects the shared
+ * RPM quota; the daily budget is ~500 answered questions (the fallback models add
+ * little — `gemini-2.5-flash-lite` is only ~20 RPD). When a cap trips, callers get
+ * a friendly "try later" and keyword search still works. Tunable via env (raise
+ * for a paid key).
  */
 export const ASK_RATE = {
   perIp: Number(process.env.OLIM_ASK_RATE_PER_IP ?? 5),
-  global: Number(process.env.OLIM_ASK_RATE_GLOBAL ?? 12),
+  global: Number(process.env.OLIM_ASK_RATE_GLOBAL ?? 10),
   windowMs: 60_000,
 } as const;
 
