@@ -36,6 +36,14 @@ export default defineConfig({
         // next/og image rendering (satori/runtime) — not unit-testable; verified by
         // the e2e OG fetch (200 image/png) and the shared-plan/SEO screenshots.
         "lib/og/**",
+        // Phase 8 AI modules that call the live Gemini / Supabase services — covered
+        // by the eval gate (`pnpm eval`), the mocked-SSE ask e2e, and live session
+        // verification, not unit coverage. The pure helpers (fuse, prompt, stream-clean,
+        // config, types, step-text) stay unit-tested.
+        "lib/rag/provider.ts",
+        "lib/rag/embeddings.ts",
+        "lib/rag/retrieve.ts",
+        "lib/rag/answer.ts",
       ],
       thresholds: {
         lines: 80,
