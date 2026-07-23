@@ -157,9 +157,12 @@ runs the primary briefly peaked at 18/15 RPM — the runner's 429 backoff absorb
 1. **Live prod verification of `/api/ask`** ships when this branch deploys to Vercel
    (set `GEMINI_API_KEY` as a Vercel env var). The remote DB (pgvector + embeddings)
    is already live and verified; a keyless preview is green (ask box degrades).
-2. **CI eval secrets.** The `evals` CI job self-skips until `GEMINI_API_KEY` +
-   `EVAL_SUPABASE_URL` + `EVAL_SUPABASE_KEY` (a seeded DB) are set as repo secrets.
-   The authoritative gate run is local/this session (98%, 0/0), recorded above.
+2. **Eval gate is local-only for now (by owner's choice).** `pnpm eval` is the gate;
+   the `evals` CI job is defined but **opt-in** — gated on `vars.RUN_AI_EVALS == 'true'`
+   so it is skipped in CI until enabled (to spare the Gemini free-tier RPD on every
+   PR). Turn it on later with that repo variable + the secrets `GEMINI_API_KEY`,
+   `EVAL_SUPABASE_URL`, `EVAL_SUPABASE_KEY` (a DB seeded with embeddings). The
+   authoritative gate run is local/this session (98%, 0/0), recorded above.
 3. **Grounding tightness on tiny models.** flash-lite tends to add benign true
    generalizations (e.g. "бесплатно"); mitigated by the final-line reminder and
    caught by the judge's harm-class scoping. A larger answer model would tighten it
