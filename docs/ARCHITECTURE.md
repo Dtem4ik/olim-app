@@ -439,9 +439,14 @@ never `NEXT_PUBLIC_*`): absent → the ask box degrades to a friendly "AI-отв
   contradictions + invented figures/dates). **Gate: ≥90% pass, 0 fabricated-source,
   0 contradicted-fact.** Self-skips (exit 0) без ключа или без seeded eval-DB, wired
   as a CI job (`secrets.GEMINI_API_KEY` + `EVAL_SUPABASE_*`).
-- **Cost.** ~46 short steps; embeddings are a one-time ~few-thousand-token batch at
-  import. Per query: 1 query embedding + 1 flash-lite answer (~1–3k input tokens) —
-  well within the free tier; the global RPM cap is the real spend guard.
+- **Cost / free-tier limits (measured).** ~46 short steps; embeddings are a one-time
+  batch at import (`gemini-embedding-001`: 100 RPM / 1000 RPD — not binding). Per
+  query: 1 query embedding + 1 answer. The binding limit is the answer model
+  `gemini-3.1-flash-lite` at **15 RPM / 500 RPD** on the free tier — so the daily
+  ceiling is ~**500 answered questions/day**, and the global RPM cap (`ASK_RATE.global`,
+  default 10) keeps bursts under 15. The fallback models relieve transient RPM only
+  (`gemini-2.5-flash-lite` is ~20 RPD). At paid `flash-lite` rates an answer is on the
+  order of ~$0.0002–0.0005; the RPD ceiling, not per-call cost, is the real budget.
 
 ## Rendering & performance
 

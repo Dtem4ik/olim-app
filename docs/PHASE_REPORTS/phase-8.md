@@ -127,14 +127,22 @@ Executed with the owner's explicit go-ahead against the shared remote (project
 | Local FTS+vector | `db:reset` → `content:import` → `match_steps` | ✅ 46/46 embedded; 0.73–0.77 on relevant, ~0.57 on out-of-scope |
 | Lighthouse (mobile) | `pnpm lighthouse` | 6/7 gated routes pass; the **per-route JS-byte budget passed on every route** (the only failing assertion is `/` composite `performance` at ~0.85–0.86 locally under the running Docker stack). Phase 8 adds nothing to the home bundle (ask box is `/search`-only, AI SDK server-only; only ~12 next-intl keys added), so the budget-holds result confirms no bundle growth — the score dip is CPU-timing contention, not a regression; CI is the gate. `/search` is (as before) excluded from the perf gate as a utility route. |
 
-## Cost per query (estimate)
+## Cost / free-tier limits (measured on the owner's key)
 
-Gemini free tier; ~46 short steps. **Embeddings** are a one-time batch at import
-(~a few thousand tokens total). **Per ask:** 1 query embedding (`gemini-embedding-001`,
-~tens of tokens) + 1 answer (`gemini-3.1-flash-lite`, ~1–3k input / ~150 output
-tokens). At paid `flash-lite` rates this is on the order of **~$0.0002–0.0005 per
-answer**; on the free tier it is $0, and the **global RPM ceiling** (`OLIM_ASK_RATE_GLOBAL`,
-default 12/min) is the real spend/quota guard, not per-call cost.
+| Model | Role | RPM | RPD | TPM |
+|---|---|---|---|---|
+| `gemini-3.1-flash-lite` | answer (primary) | **15** | **500** | 250K |
+| `gemini-2.5-flash-lite` | answer fallback | 10 | **20** | 250K |
+| `gemini-embedding-001` | embeddings | 100 | 1000 | 30K |
+
+Each ask = 1 query embedding + 1 answer. The **binding limit is the answer model's
+15 RPM / 500 RPD** — so the free tier sustains ~**500 answered questions/day**; the
+embedding model (100 RPM) is never the bottleneck, and the fallback relieves only
+transient RPM (its 20 RPD is tiny). The **global RPM ceiling** (`OLIM_ASK_RATE_GLOBAL`,
+default **10**, headroom under 15) plus the per-IP cap (5/min) are the real guards.
+At paid `flash-lite` rates an answer is ~**$0.0002–0.0005**; on the free tier it is
+$0 and the RPD ceiling is the budget, not per-call cost. (During this session's eval
+runs the primary briefly peaked at 18/15 RPM — the runner's 429 backoff absorbed it.)
 
 ## Screenshots (mobile)
 
