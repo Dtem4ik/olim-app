@@ -150,11 +150,62 @@ Tone (not machine-checked, but the bar): a friend who already went through it.
 Short answer first, then "bring with you", then the steps. No officialese, no
 guarantees, always "check the official source".
 
+## Writing for the app's features (search · SEO · AI)
+
+The content isn't just displayed — since Phases 6–8 the app **searches, indexes,
+and answers questions from it**. A step written with these in mind works far
+better. What each field feeds:
+
+**Full-text search (Phase 6).** `search_steps` ranks by a weighted tsvector:
+**title > summary > body**. So the words a person would actually type must appear,
+especially in the title/summary. Include transliterated-Hebrew terms verbatim
+(«купат холим», «рав-кав», «теудат зеут», «сал клита», «арнона», «ульпан») — the
+Russian stemmer keeps them near-literal and trigram search covers typos, but only
+if the term is written somewhere in the step.
+
+**Programmatic SEO (Phase 6b).** Every step is a real SSR page (`/guides/[section]/[step]`)
+with its own `<title>`/description/`<h1>` and JSON-LD. Structured data is parsed
+**from the body**: if `body_md` genuinely lists **≥2 actions as a numbered/bulleted
+list**, it emits a `HowTo` (and the `docs` "bring with you" become `HowToSupply`).
+So write the steps as a clear ordered list, not one prose blob — it helps the
+reader, the AI, and Google. `source_url` + `last_verified_at` render as the trust
+footer, so keep them accurate and fresh.
+
+**AI answer — "Спроси об Израиле" (Phase 8).** This is the strict one, because a
+hallucinated deadline or sum can harm a real person:
+
+- **Retrieval** embeds `title + summary + body` (Gemini, 768-dim). Clear,
+  natural-language titles/summaries = the AI finds the right step. Computed at
+  **import time** (needs `GEMINI_API_KEY`); re-import after editing so vectors refresh.
+- **The AI answers ONLY from `body_md`, verbatim, or refuses.** It is forbidden to
+  add anything not written in the step — no "free", "fast", "automatic", no invented
+  number/date. Tested by the eval gate (`pnpm eval`). Practical consequences:
+  - Want the AI to state a **deadline/rule** → write it explicitly in the body
+    («записаться в течение **90 дней** после репатриации»). It won't infer it.
+  - Don't write something you don't want quoted as fact — if the source says
+    "reduced tariff", write that, not "free".
+- **Amounts live in `benefits`, not in the body — and the AI does NOT read the
+  benefits table.** So on "сколько платят по корзине абсорбции" the AI honestly says
+  "зависит от состава семьи, см. официальный источник" instead of guessing a figure.
+  That is the intended safe behaviour. Only put a figure in `body_md` if you truly
+  want the AI to quote it (you then lose the dated-versioning that `benefits` gives).
+
+**Checklist for a good step:** title + summary carry the real search terms
+(incl. transliterated Hebrew) · body is a clear ordered list of concrete actions ·
+every deadline/rule you want answerable is written verbatim in the body · amounts
+stay in `benefits` · `source_url` allowlisted + `last_verified_at` fresh · no
+guarantees. After importing new/edited steps, re-run `content:import` **with
+`GEMINI_API_KEY` set** so the AI can retrieve them.
+
+> When steps are added/renamed, update the app-side eval set
+> (`evals/questions.json`) so its referenced slugs stay valid and new content is
+> covered — otherwise `pnpm eval` reports "expected step not retrieved".
+
 ## Commands
 
 ```
 pnpm content:validate       # schema + integrity + lint (CI gate). --dir to point elsewhere
-pnpm content:import         # validate, then idempotent upsert → LOCAL stack by default
+pnpm content:import         # validate + upsert → LOCAL by default; also computes step embeddings when GEMINI_API_KEY is set (--skip-embeddings to opt out)
 pnpm content:check-links    # fetch every source_url; report only, never fails
 pnpm content:review-queue   # list steps still needs_review = true
 ```
