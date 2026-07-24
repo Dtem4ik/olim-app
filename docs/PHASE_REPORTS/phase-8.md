@@ -187,3 +187,62 @@ pnpm eval                            # 50/51 = 98%, 0 fabricated, 0 contradicted
 rm -rf .next && pnpm exec playwright test search.spec   # keyword + ask flow + axe
 pnpm lighthouse                      # gated content routes
 ```
+
+---
+
+## Content-stream addendum (2026-07-24) — horizontal growth
+
+Parallel to the phased feature work (vertical growth), a dedicated content+research
+session grew the guide **horizontally** — broadening topic coverage, which is the
+actual product value for olim. Two batches, both fact-checked against the official
+allowlist (gov.il / btl.gov.il / kolzchut.org.il / oref.org.il / jewishagency.org)
+and imported to **local + shared prod** Supabase.
+
+**Batch A — 8 new sections, 48 steps.** documents-and-status, children-and-school,
+taxes-pension-social, housing-purchase, diplomas-and-licenses, pets,
+community-and-adaptation, safety-and-emergency. This made the onboarding quiz
+meaningful: before it, **no** step used `basis`, `country`, `children_ages`, `pet`,
+or `months_in_country` (5 of 7 dimensions were inert). Persona check now shows plans
+diverging 10↔76 steps with correct targeting.
+
+**Batch B — 12 steps into the thin original sections.** banks (horaat keva, credit
+vs debit, checks), rent (utilities, vaad bayit, tenant rights/deposit), work
+(unemployment/dmei avtala, severance/pitzuim, maternity/dmei leda), transport (car
+insurance, annual test), ulpan (continue after alef).
+
+**Corpus now: 16 sections / 111 steps / 7 benefits** (was 8 / 51 / 4). Benefit
+amounts for 2026 filled and verified (child allowance 173/219, child savings 58,
+osek-patur ceiling 122,833). One existing step re-targeted (`pregnancy-monitoring`
++ `cond.family`). App-side: `oref.org.il` added to the source allowlist (#12); 8
+section hero photos + icon map fix (#13).
+
+### Debt / open items for the next plan
+
+- **Embedding backfill (blocking AI coverage of the 12 newest steps).** They are
+  live for FTS + SSR pages but have NULL embeddings, so "Спроси об Израиле" cannot
+  retrieve them yet. Gemini free tier is 100 embeds/day and the corpus is now 111 —
+  a full re-embed no longer fits the free daily quota. Fix: a paid Gemini key (clean
+  full re-embed) OR a targeted mini-bundle import (sections + only the missing steps
+  ≈ 12 requests). Then re-run `pnpm eval`.
+- **Eval set is stale for new topics.** `evals/questions.json` still references only
+  the original corpus — add questions for pets / documents / safety / work benefits
+  so the grounding gate actually covers the new content.
+- **Content is now the product's main growth axis.** Recommend a standing content
+  cadence (a recurring content session per sprint) over more features. Biggest
+  remaining topic gaps to consider: adult dental / women's health screening; buying
+  a used car; number portability (needs a vetted source — moc.gov.il?); students /
+  MASA; pensioners; medical-professional licensing depth.
+- **Quiz vocabulary is too coarse in two places** (app change, not content): no
+  age/pension-status dimension (hurts targeting `old-age-allowance-olim`) and no
+  pregnancy/gender dimension (pregnancy targeted only via `family`). Consider for a
+  future onboarding phase.
+
+### Question from the product owner to the team lead
+
+**"When can I start telling olim chat groups this app exists?"** i.e. what is the
+gate for a soft launch (Phase 10-style) into real communities. Suggested checklist
+before sharing: (1) embedding backfill so AI search covers all 111 steps; (2) a
+human editorial spot-check of the legal-adjacent steps (deadlines/amounts) even
+though `needs_review` is cleared; (3) the "not legal advice" disclaimer visible;
+(4) eval green on the expanded set. Web/PWA sharing does **not** need Phase 9
+(stores). Team lead to confirm the gate and sequence the launch.
