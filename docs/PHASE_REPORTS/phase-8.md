@@ -218,12 +218,12 @@ section hero photos + icon map fix (#13).
 
 ### Debt / open items for the next plan
 
-- **Embedding backfill (blocking AI coverage of the 12 newest steps).** They are
-  live for FTS + SSR pages but have NULL embeddings, so "Спроси об Израиле" cannot
-  retrieve them yet. Gemini free tier is 100 embeds/day and the corpus is now 111 —
-  a full re-embed no longer fits the free daily quota. Fix: a paid Gemini key (clean
-  full re-embed) OR a targeted mini-bundle import (sections + only the missing steps
-  ≈ 12 requests). Then re-run `pnpm eval`.
+- **Embedding backfill — DONE (2026-07-24).** The 12 newest steps initially had NULL
+  embeddings (the Gemini free tier is ~100 requests/**minute**, so a single 111-step
+  re-embed burst tripped the rate limit). Backfilled via a targeted mini-bundle
+  (sections + only the 12 missing steps = 12 requests, well under the per-minute cap);
+  prod now has 0 null embeddings across all 111 steps and AI search covers the full
+  corpus. Remaining: re-run `pnpm eval` after updating the eval set (below).
 - **Eval set is stale for new topics.** `evals/questions.json` still references only
   the original corpus — add questions for pets / documents / safety / work benefits
   so the grounding gate actually covers the new content.
