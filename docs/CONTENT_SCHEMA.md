@@ -134,6 +134,7 @@ vetted):
 - `nativ.gov.il` — Nativ
 - `kolzchut.org.il` — Kol Zchut (rights encyclopedia, has Russian)
 - `jewishagency.org` — The Jewish Agency (Sochnut)
+- `oref.org.il` — Home Front Command / Pikud HaOref (official emergency guidance)
 
 ## Editorial lint rules
 

@@ -21,6 +21,7 @@ export const ALLOWED_SOURCE_DOMAINS = [
   "nativ.gov.il", // Nativ
   "kolzchut.org.il", // Kol Zchut rights encyclopedia
   "jewishagency.org", // The Jewish Agency (Sochnut)
+  "oref.org.il", // Home Front Command (Pikud HaOref) — official emergency guidance
 ] as const;
 
 /**
