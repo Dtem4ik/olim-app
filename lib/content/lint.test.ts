@@ -29,6 +29,7 @@ describe("source_url allowlist", () => {
     "https://www.btl.gov.il/x",
     "https://www.kolzchut.org.il/he/x",
     "https://www.jewishagency.org/x",
+    "https://www.oref.org.il/x",
   ])("accepts trusted %s", (source_url) => {
     expect(codes(bundleWithStep({ source_url }))).not.toContain("untrusted-source");
   });
