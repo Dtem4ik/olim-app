@@ -1,13 +1,21 @@
 import {
+  Award,
+  Backpack,
   BookOpen,
   Briefcase,
   Bus,
   GraduationCap,
   HandCoins,
+  HeartHandshake,
   HeartPulse,
+  House,
+  IdCard,
   KeyRound,
   Landmark,
   type LucideIcon,
+  PawPrint,
+  PiggyBank,
+  ShieldAlert,
   Smartphone,
 } from "lucide-react";
 
@@ -21,6 +29,14 @@ const ICONS: Record<string, LucideIcon> = {
   bus: Bus,
   smartphone: Smartphone,
   "graduation-cap": GraduationCap,
+  "id-card": IdCard,
+  backpack: Backpack,
+  "piggy-bank": PiggyBank,
+  house: House,
+  award: Award,
+  "paw-print": PawPrint,
+  "heart-handshake": HeartHandshake,
+  "shield-alert": ShieldAlert,
 };
 
 export function sectionIcon(name: string | null): LucideIcon {
