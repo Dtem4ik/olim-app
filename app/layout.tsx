@@ -5,6 +5,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages, getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
 import { AnalyticsProvider } from "@/components/analytics-provider";
+import { InstallPromptProvider } from "@/components/pwa/install-prompt-provider";
 import { SiteBottomNav } from "@/components/site-bottom-nav";
 import { SyncProvider } from "@/components/sync-provider";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -59,7 +60,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
               <TopProgressBar />
               <AnalyticsProvider />
               <SyncProvider />
-              {children}
+              <InstallPromptProvider>{children}</InstallPromptProvider>
               <SiteBottomNav />
             </NextIntlClientProvider>
           </ThemeProvider>

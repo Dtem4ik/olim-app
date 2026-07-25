@@ -313,5 +313,18 @@
     "remindersLead": "How early to warn me",
     "leadDays": "{days} d",
     "remindersSaved": "Saved"
+  },
+  "install": {
+    "title": "Install the app",
+    "androidBody": "Add the navigator to your home screen — it opens like an app and works offline.",
+    "iosIntro": "To add it to your Home Screen:",
+    "iosStep1": "Tap Share in the browser bar",
+    "iosStep2": "Choose “Add to Home Screen”",
+    "iosStep3": "Tap “Add”",
+    "genericBody": "Open your browser menu and choose “Install app”.",
+    "cta": "Install",
+    "dismiss": "Not now",
+    "gotIt": "Got it",
+    "profileEntry": "Install the app"
   }
 }
