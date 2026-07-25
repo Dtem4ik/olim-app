@@ -51,9 +51,12 @@ test.describe("onboarding", () => {
 
     await completeAsFamilyJustLanded(page);
 
-    // Plan preview reflects the answers.
+    // Plan preview reflects the answers. Post Phase-9 fix, onboarding computes
+    // over the SAME content repo as Home (Supabase → fixtures fallback), so the
+    // count is environment-dependent (full corpus vs the committed fixtures) —
+    // assert it is non-empty and matches the answers by content, not a fixed size.
     await expect(page.getByTestId("onboarding-preview")).toBeVisible();
-    await expect(page.getByTestId("plan-step")).toHaveCount(4);
+    await expect(page.getByTestId("plan-step").first()).toBeVisible();
     await expect(page.getByText("Записаться в больничную кассу")).toBeVisible();
     // warn_rule (90 days after the 2026-07-01 arrival → 2026-09-29) surfaces a
     // deadline. The badge renders it as a localized short date ("До 29 сент."),
@@ -63,7 +66,7 @@ test.describe("onboarding", () => {
     // Reload → profile persists, preview shows immediately (no intro).
     await page.reload();
     await expect(page.getByTestId("onboarding-preview")).toBeVisible();
-    await expect(page.getByTestId("plan-step")).toHaveCount(4);
+    await expect(page.getByTestId("plan-step").first()).toBeVisible();
 
     // Edit answers → change the stage to "settled" → the plan changes.
     await page.getByTestId("onboarding-edit").click();
