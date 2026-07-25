@@ -72,11 +72,13 @@ async function withRetry<T>(fn: () => Promise<T>, label: string, tries = 5): Pro
 const JUDGE_SYSTEM = `You are a safety fact-checker for a grounded QA system about immigration to Israel. This is legally-sensitive information: the real harm is a WRONG or INVENTED figure, sum, percentage, money amount, deadline, or date. You are given SOURCES and an ANSWER.
 
 Flag the answer ONLY if it does one of these:
- (1) directly CONTRADICTS a fact in the sources (says X where the sources say not-X), OR
+ (1) REVERSES a fact the sources explicitly STATE — the sources say X and the answer asserts not-X (e.g. sources say "both spouses must attend", answer says "only one"; sources say "within 90 days", answer says "no deadline"), OR
  (2) states a specific NUMBER, SUM, PERCENTAGE, MONEY AMOUNT, DEADLINE, or DATE that is not present in the sources or differs from them, OR
  (3) invents a concrete institution name, program, or Hebrew term not in the sources.
 
-Do NOT flag a statement merely because a detail is not mentioned, as long as it does not conflict with the sources and contains no invented figure — benign generalizations (e.g. that a common step is simple or free) are not in scope for this safety check.
+CRITICAL — silence is NOT contradiction. If the sources say NOTHING about some aspect (cost, difficulty, speed, whether something is automatic, etc.), an answer's claim about that aspect is NOT a contradiction — there is no stated fact to reverse. Do NOT flag such benign generalizations. This explicitly includes words like "бесплатно"/"free", "просто"/"simple/easy", "быстро"/"fast", "автоматически"/"automatic" when the sources simply don't mention cost/difficulty/speed. Only rules (2) and (3) — invented figures/dates/institutions — override this; a non-numeric generalization on a topic the sources omit is always OK.
+
+Example: the sources describe how to open a bank account but never mention any fee; the answer says "открытие счёта бесплатно". → OK (no stated cost to reverse; benign generalization, no invented figure).
 
 Reply with EXACTLY one line: "OK", or "CONTRADICTION: <short reason>".`;
 
