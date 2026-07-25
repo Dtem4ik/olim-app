@@ -267,6 +267,7 @@
     "tip": "Tip from those who've been there",
     "verified": "Verified {date}",
     "source": "Official source",
+    "disclaimer": "This isn't legal advice — verify against the official source.",
     "done": "Done",
     "todo": "Mark as done",
     "outdated": {
@@ -326,5 +327,24 @@
     "dismiss": "Not now",
     "gotIt": "Got it",
     "profileEntry": "Install the app"
+  },
+  "about": {
+    "title": "About",
+    "metaDescription": "What Olim is, where the data comes from, and how to reach us. A free, independent adaptation navigator for new immigrants in Israel.",
+    "lead": "Olim is a free adaptation navigator for new immigrants to Israel. Take a short quiz and get a personal plan: what to do, and when, after your move.",
+    "independentTitle": "Free and independent",
+    "independentBody": "This is a non-commercial project, not affiliated with any government body. We sell nothing and guarantee nothing — we only help you get oriented and point you to official sources.",
+    "sourcesTitle": "Where the information comes from",
+    "sourcesBody": "We rely on official sources and show a verification date on every step:",
+    "sourceGov": "gov.il — Israeli ministries (Aliyah & Integration and others)",
+    "sourceKolzchut": "Kol Zchut — the rights encyclopedia (has Russian)",
+    "sourceBituach": "Bituach Leumi — the National Insurance Institute",
+    "sourceNativ": "Nativ — consular checks for FSU countries",
+    "disclaimerTitle": "This isn't legal advice",
+    "disclaimerBody": "Deadlines, sums and rules change. Always verify against the official source — we link it on every step.",
+    "feedbackTitle": "Feedback",
+    "feedbackBody": "What's unclear, what's missing, what's annoying — tell us:",
+    "feedbackEmail": "Email",
+    "feedbackTelegram": "Telegram"
   }
 }

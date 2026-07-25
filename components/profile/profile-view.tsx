@@ -1,6 +1,6 @@
 "use client";
 
-import { Download, Globe, Languages, Palette, User } from "lucide-react";
+import { Download, Globe, Info, Languages, Palette, User } from "lucide-react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
@@ -25,6 +25,7 @@ export function ProfileView() {
   const t = useTranslations("profile");
   const tOnb = useTranslations("onboarding");
   const tInstall = useTranslations("install");
+  const tAbout = useTranslations("about");
   const { profile, loaded, clear } = useProfile();
   const { canInstall, open: openInstall } = useInstallPrompt();
 
@@ -127,6 +128,16 @@ export function ProfileView() {
               {tInstall("profileEntry")}
             </button>
           )}
+          <Link
+            href="/about"
+            data-testid="profile-about"
+            className="flex min-h-11 w-full items-center gap-3 px-4 py-3 text-sm transition-colors hover:bg-muted/50"
+          >
+            <span className="flex size-9 items-center justify-center rounded-full bg-muted text-muted-foreground">
+              <Info className="size-4" aria-hidden />
+            </span>
+            {tAbout("title")}
+          </Link>
         </section>
 
         {profile && (
