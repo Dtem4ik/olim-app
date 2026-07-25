@@ -113,7 +113,17 @@ Each phase is executed in a separate Claude Code session.
 **DoD:** evals ≥90% pass; an answer without a source is impossible (guardrail is tested).
 **Acceptance:** 10 tricky questions including hallucination bait.
 
-### Phase 9 — Capacitor and app stores
+### Phase 9 — Launch prep (web/PWA) — *executed as launch-prep, not stores*
+> **Reframe (this phase):** the owner's launch plan (see `docs/LAUNCH_CHECKLIST.md`)
+> puts the **web + PWA "add to home screen"** first and **defers app stores** (the
+> $99/yr Apple fee + slow review) until the web version proves demand. So Phase 9
+> was executed as **launch readiness**, not Capacitor: the onboarding-preview bug
+> fix, a PWA install prompt (Android event + iOS instructions), the trust surface
+> (step-card disclaimer + SSR `/about`), sampled/masked PostHog session replay + a
+> documented event catalogue, auth code-path verification, and an expanded AI eval
+> set. See `docs/PHASE_REPORTS/phase-9.md`. **Capacitor + app stores** (the original
+> 9a/9b below) are carried forward as a later, demand-gated step.
+
 > **Redesign delta (post-5.5):** the native-mobile redesign (bottom sheets, floating
 > pill nav, app-like transitions/animations, offline plan) already makes the product
 > read as an app rather than a wrapped website — this materially strengthens the

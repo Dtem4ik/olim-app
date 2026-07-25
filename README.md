@@ -39,8 +39,22 @@ never replaces it):
 - **8c** — a committed 51-question eval set + `pnpm eval` grounding gate
   (≥90% pass, 0 fabricated-source, 0 contradicted-fact; local run 98%).
 
-See `docs/PHASE_REPORTS/` for per-phase reports and `docs/ROADMAP.md` for the full
-10-phase plan.
+**Phase 9** (this line of work) is **launch prep** for the web/PWA (app stores via
+Capacitor are deliberately deferred — see the launch checklist):
+
+- Fixed the onboarding quiz to compute its preview over the full content (Supabase
+  repo) instead of the 5 committed fixtures.
+- A dismissible **PWA install prompt** (Android `beforeinstallprompt` + iOS Safari
+  Share→Home-Screen instructions), shown once, with a manual entry on Profile.
+- **Trust & safety:** the not-legal-advice disclaimer on the step-card footer, and
+  an SSR, indexable **/about** page (what the app is, sources, feedback contacts).
+- **Analytics:** PII-masked, sampled PostHog **session replay** (~15%, lazy) and a
+  documented launch **event catalogue**, all events verified through the facade.
+- Auth callback code-path verification (open-redirect guard) and an expanded eval
+  set covering the new sections (pets, documents, safety, taxes, children, work).
+
+See `docs/LAUNCH_CHECKLIST.md` for the launch gate, `docs/PHASE_REPORTS/` for
+per-phase reports, and `docs/ROADMAP.md` for the full 10-phase plan.
 
 ## Quick start
 
