@@ -1,7 +1,12 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { AskBox } from "@/components/search/ask-box";
 import type { ContentSection } from "@/lib/content/repo";
-import { renderWithProviders, screen, userEvent } from "@/test/test-utils";
+import { renderWithProviders, screen, userEvent, waitFor } from "@/test/test-utils";
+
+// Spy on the analytics facade so we can assert the launch event `ai_answered`
+// fires end-to-end (Phase 9d wiring sanity).
+const captureSpy = vi.hoisted(() => vi.fn());
+vi.mock("@/lib/analytics", () => ({ capture: captureSpy }));
 
 const sections: ContentSection[] = [
   {
@@ -38,7 +43,10 @@ function frame(event: string, data: unknown): string {
   return `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`;
 }
 
-afterEach(() => vi.unstubAllGlobals());
+afterEach(() => {
+  vi.unstubAllGlobals();
+  captureSpy.mockClear();
+});
 
 describe("AskBox", () => {
   it("streams a grounded answer and renders a tappable source card", async () => {
@@ -98,6 +106,39 @@ describe("AskBox", () => {
     expect(await screen.findByText(/Не нашёл точного ответа/i)).toBeInTheDocument();
     // The closest section (behind the retrieved step) is offered as a tile.
     expect(await screen.findByRole("link", { name: /Транспорт/ })).toBeInTheDocument();
+  });
+
+  it("emits the ai_answered analytics event once an answer completes", async () => {
+    const source = {
+      slug: "open-bank-account",
+      section_slug: "banks-and-money",
+      title: "Открыть счёт в банке",
+      section_title: "Банки и деньги",
+      section_icon: "landmark",
+      source_url: "https://gov.il/x",
+      last_verified_at: "2026-01-01",
+    };
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () =>
+        sseResponse([
+          frame("sources", { sources: [source] }),
+          frame("text", { text: "Открой счёт в отделении банка." }),
+          frame("done", { refused: false, citedSlugs: ["open-bank-account"], model: "gemini" }),
+        ]),
+      ),
+    );
+
+    renderWithProviders(<AskBox sections={sections} />);
+    await userEvent.type(screen.getByPlaceholderText(/Задай вопрос/i), "как открыть счёт");
+    await userEvent.click(screen.getByRole("button", { name: /Спросить/i }));
+
+    await waitFor(() =>
+      expect(captureSpy).toHaveBeenCalledWith(
+        "ai_answered",
+        expect.objectContaining({ refused: false, cited: 1, model: "gemini" }),
+      ),
+    );
   });
 
   it("surfaces the rate-limit message on HTTP 429", async () => {
