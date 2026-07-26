@@ -68,6 +68,20 @@ The gate that protects real people from acting on a wrong date/sum.
 - [ ] **(OWNER)** Vercel env: add `GEMINI_API_KEY` (server-side) → Redeploy. Verify `/search` AI answer works on prod (not the "AI-ответы скоро" fallback).
 - [ ] **(OWNER)** Phone test / sign-in gate: on the live https site — (1) magic-link → land signed-in; (2) Google → land signed-in; (3) an anonymous plan created before sign-in survives and syncs (open it on a second device); (4) ask the AI a question; (5) check a step; (6) share your plan and open the Telegram unfurl.
 
+## Domain day — attach the custom domain (a 15-minute, 3-step change)
+
+> **Code-complete (Phase 10, B0):** every server-rendered absolute URL (canonical,
+> `sitemap.xml`, `robots.txt`, OG image URLs, JSON-LD) is built from ONE resolver
+> (`lib/site-url.ts`); client links (share, `/plan/{slug}`, auth callback) use
+> `window.location.origin` and follow the domain automatically. So the swap is
+> **one variable**, not a codebase hunt. The product NAME stays "Olim" — nothing is
+> renamed.
+
+- [ ] **(OWNER)** Vercel → olim-app → Settings → Domains: add the domain; then Settings → Environment Variables → set `NEXT_PUBLIC_SITE_URL=https://your-domain` (Production) → Redeploy.
+- [ ] **(OWNER)** Supabase → Auth → URL Configuration: change Site URL to `https://your-domain` and add `https://your-domain/auth/callback` to Redirect URLs (else magic-link / Google sign-in break on the new host).
+- [ ] **(OWNER)** Resend → verify the sending domain (add its SPF + DKIM DNS records) and set the reminder Edge Function secret `SITE_URL=https://your-domain` (`supabase secrets set SITE_URL=…`) so reminder deep links point at the domain.
+- [ ] **(OWNER, if using a cheap TLD)** Prefer `.com`/`.app` (or send email from a subdomain of an established domain): magic-link + reminder deliverability is materially worse from `.space`/`.top`-style TLDs — they land in spam far more often.
+
 ## Priority 4 — Soft launch (узкий круг)
 
 - [ ] Send the link to 5–10 friends/acquaintances who made aliyah (or are about to). Ask: "что непонятно? чего не хватило? что бесит?"
