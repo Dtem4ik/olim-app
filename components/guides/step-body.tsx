@@ -127,6 +127,9 @@ function TrustFooter({ step }: { step: DetailStep }) {
         </a>
       </div>
 
+      {/* Always-visible, calm not-legal-advice note where deadlines/sums live. */}
+      <p data-testid="step-disclaimer">{t("disclaimer")}</p>
+
       {sent ? (
         <p data-testid="report-thanks">{t("outdated.thanks")}</p>
       ) : reporting ? (

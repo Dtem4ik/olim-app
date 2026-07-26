@@ -1,0 +1,85 @@
+
+> olim-app@0.1.0 eval /Users/tem4ik/Desktop/olim-app
+> tsx scripts/eval.ts
+
+Running 66 evals over 111 steps…
+
+  ✓ [answerable] bank-open                cited open-bank-account ✓
+  ✓ [answerable] bank-both-spouses        cited open-bank-account ✓
+  ✓ [answerable] bank-details-sal-klita   cited provide-bank-details-for-sal-klita,absorption-basket-first-payment ✓
+  ✓ [answerable] online-banking           cited online-banking-and-apps ✓
+  ✓ [answerable] kupat-register           cited register-kupat-holim ✓
+  ✓ [answerable] choose-fund              cited choose-health-fund ✓
+  ✓ [answerable] family-doctor            cited family-doctor-and-appointments ✓
+  ✓ [answerable] supplementary-insurance  cited supplementary-private-insurance ✓
+  ✓ [answerable] ulpan-register           cited ulpan-registration ✓
+  ✓ [answerable] hebrew-early             cited why-hebrew-early ✓
+  ✓ [answerable] mobile-plan              cited choose-mobile-plan ✓
+  ✓ [answerable] home-internet            cited home-internet-and-tv ✓
+  ✓ [answerable] cancel-telecom           cited cancel-telecom-contract ✓
+  ✓ [answerable] rent-contract            cited rental-contract-basics,tenant-rights-deposit ✓
+  ✓ [answerable] arnona-what              cited what-is-arnona ✓
+  ✓ [answerable] rent-help                cited rent-assistance-olim,rent-assistance-income-support ✓
+  ✓ [answerable] rav-kav                  cited get-and-load-rav-kav ✓
+  ✓ [answerable] drive-foreign            cited drive-on-foreign-license ✓
+  ✓ [answerable] employment-center        cited employment-center-olim,olim-organizations-communities ✓
+  ✗ [answerable] employee-rights          expected know-your-employee-rights not retrieved
+  ✓ [answerable] absorption-basket        cited sal-klita-schedule,absorption-basket-first-payment,provide-bank-details-for-sal-klita,open-bank-account ✓
+  ✓ [answerable] personal-area            cited personal-area-track-payments ✓
+  ✓ [answerable] single-parent            cited single-parent-extra-support ✓
+  ✓ [out_of_scope] oos-weather              refused ✓
+  ✓ [out_of_scope] oos-recipe               refused ✓
+  ✓ [out_of_scope] oos-football             refused ✓
+  ✓ [out_of_scope] oos-flight               refused ✓
+  ✓ [out_of_scope] oos-crypto               refused ✓
+  ✓ [out_of_scope] oos-politics             refused ✓
+  ✓ [out_of_scope] oos-hebrew-phrase        refused ✓
+  ✓ [out_of_scope] oos-history              refused ✓
+  ✓ [out_of_scope] oos-exchange-rate        refused ✓
+  ✓ [out_of_scope] oos-medical              refused ✓
+  ✓ [out_of_scope] oos-usa-visa             refused ✓
+  ✓ [out_of_scope] oos-restaurant           refused ✓
+  ✓ [typo] typo-kupat               cited register-kupat-holim ✓
+  ✓ [typo] typo-rav-kav             cited get-and-load-rav-kav ✓
+  ✓ [typo] typo-ulpan               cited ulpan-registration ✓
+  ✓ [typo] typo-arnona              cited what-is-arnona ✓
+  ✓ [typo] typo-teudat              cited open-bank-account,documents-first-days-airport ✓
+  ✓ [typo] typo-bituah              cited check-bituach-leumi-after-first-year ✓
+  ✓ [typo] typo-sal-klita           cited sal-klita-schedule ✓
+  ✓ [typo] typo-bank                cited open-bank-account ✓
+  ✓ [dangerous] danger-kupat-deadline    grounded figure ✓
+  ✓ [dangerous] danger-license-years     grounded figure ✓
+  ✓ [dangerous] danger-arnona-percent    grounded figure ✓
+  ✗ [dangerous] danger-min-wage          expected step not retrieved
+  ✓ [dangerous] danger-sal-klita-amount  grounded figure ✓
+  ✓ [dangerous] danger-income-guarantee  grounded figure ✓
+  ✓ [dangerous] danger-car-tax           grounded figure ✓
+  ✗ [dangerous] danger-tax-points        expected step not retrieved
+  ✓ [answerable] pets-import              cited import-pet-to-israel,banned-dog-breeds,pet-rabies-titer-quarantine ✓
+  ✓ [answerable] pets-banned-breeds       cited banned-dog-breeds ✓
+  ✓ [answerable] docs-teudat-zehut        cited teudat-zehut-misrad-hapnim ✓
+  ✓ [answerable] safety-siren             cited alerts-and-siren-behavior ✓
+  ✓ [answerable] safety-emergency-numbers cited emergency-and-urgent-care,emergency-phone-numbers,psychological-support,family-doctor-and-appointments ✓
+  ✓ [answerable] taxes-bituach-leumi      cited register-bituach-leumi ✓
+  ✓ [answerable] taxes-osek-patur         cited open-osek-patur ✓
+  ✓ [answerable] children-kindergarten    cited register-kindergarten-gan ✓
+  ✓ [answerable] work-unemployment        cited unemployment-benefit ✓
+  ✓ [answerable] work-maternity           cited maternity-leave ✓
+  ✓ [dangerous] danger-pet-rabies        grounded figure ✓
+  ✓ [dangerous] danger-olim-tax-exemption grounded figure ✓
+  ✓ [dangerous] danger-child-savings-age grounded figure ✓
+  ✓ [out_of_scope] oos-flight-deals         refused ✓
+  ✓ [out_of_scope] oos-math-homework        refused ✓
+
+──────── EVAL SUMMARY ────────
+answerable   32/33
+typo         8/8
+out_of_scope 14/14
+dangerous    9/11
+─────────────────────────────
+PASS RATE            63/66 = 95.5%  (gate ≥90%)
+fabricated sources   0  (must be 0)
+contradicted facts   0  (must be 0)
+
+✓ EVALS PASSED
+EXIT=0

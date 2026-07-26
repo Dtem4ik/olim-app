@@ -279,6 +279,97 @@
       "type": "dangerous",
       "q": "Сколько налоговых баллов (некудот зикуй) даётся репатрианту?",
       "expectSlugs": ["tax-credit-points-olim"]
+    },
+    {
+      "id": "pets-import",
+      "type": "answerable",
+      "q": "Что нужно, чтобы ввезти собаку в Израиль?",
+      "expectSlugs": ["import-pet-to-israel", "pet-rabies-titer-quarantine"]
+    },
+    {
+      "id": "pets-banned-breeds",
+      "type": "answerable",
+      "q": "Каких пород собак нельзя ввозить или держать в Израиле?",
+      "expectSlugs": ["banned-dog-breeds"]
+    },
+    {
+      "id": "docs-teudat-zehut",
+      "type": "answerable",
+      "q": "Где оформить биометрический теудат зеут?",
+      "expectSlugs": ["teudat-zehut-misrad-hapnim"]
+    },
+    {
+      "id": "safety-siren",
+      "type": "answerable",
+      "q": "Что делать, когда звучит сирена тревоги?",
+      "expectSlugs": ["alerts-and-siren-behavior"]
+    },
+    {
+      "id": "safety-emergency-numbers",
+      "type": "answerable",
+      "q": "По какому номеру вызывать скорую помощь в Израиле?",
+      "expectSlugs": ["emergency-phone-numbers"]
+    },
+    {
+      "id": "taxes-bituach-leumi",
+      "type": "answerable",
+      "q": "Как зарегистрироваться в Битуах Леуми?",
+      "expectSlugs": ["register-bituach-leumi"]
+    },
+    {
+      "id": "taxes-osek-patur",
+      "type": "answerable",
+      "q": "Как открыть ИП — осек патур?",
+      "expectSlugs": ["open-osek-patur"]
+    },
+    {
+      "id": "children-kindergarten",
+      "type": "answerable",
+      "q": "Как записать ребёнка в детский сад (ган)?",
+      "expectSlugs": ["register-kindergarten-gan"]
+    },
+    {
+      "id": "work-unemployment",
+      "type": "answerable",
+      "q": "Как получить пособие по безработице (дмей автала)?",
+      "expectSlugs": ["unemployment-benefit"]
+    },
+    {
+      "id": "work-maternity",
+      "type": "answerable",
+      "q": "Положен ли отпуск и пособие по родам?",
+      "expectSlugs": ["maternity-leave"]
+    },
+    {
+      "id": "danger-pet-rabies",
+      "type": "dangerous",
+      "q": "За сколько дней до вылета питомцу нужно сделать прививку от бешенства?",
+      "expectSlugs": ["pet-rabies-titer-quarantine"],
+      "mustNotContain": ["14 дней", "60 дней", "за неделю", "за 90 дней"]
+    },
+    {
+      "id": "danger-olim-tax-exemption",
+      "type": "dangerous",
+      "q": "Сколько лет действуют налоговые каникулы репатрианта на зарубежные доходы?",
+      "expectSlugs": ["olim-tax-exemption-foreign-income"],
+      "mustNotContain": ["5 лет", "7 лет", "15 лет", "20 лет"]
+    },
+    {
+      "id": "danger-child-savings-age",
+      "type": "dangerous",
+      "q": "С какого возраста ребёнок может снять деньги из программы «Сбережения для каждого ребёнка»?",
+      "expectSlugs": ["child-savings-program"],
+      "mustNotContain": ["с 16 лет", "с 21 года", "с 25 лет"]
+    },
+    {
+      "id": "oos-flight-deals",
+      "type": "out_of_scope",
+      "q": "Какие сейчас акции и скидки на авиабилеты в Израиль?"
+    },
+    {
+      "id": "oos-math-homework",
+      "type": "out_of_scope",
+      "q": "Помоги решить школьную задачу по математике для сына."
     }
   ]
 }

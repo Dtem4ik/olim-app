@@ -1,10 +1,11 @@
 "use client";
 
-import { Globe, Languages, Palette, User } from "lucide-react";
+import { Download, Globe, Info, Languages, Palette, User } from "lucide-react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
+import { useInstallPrompt } from "@/components/pwa/install-prompt-provider";
 import { SearchButton } from "@/components/search-button";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -23,7 +24,10 @@ const AccountPanel = dynamic(
 export function ProfileView() {
   const t = useTranslations("profile");
   const tOnb = useTranslations("onboarding");
+  const tInstall = useTranslations("install");
+  const tAbout = useTranslations("about");
   const { profile, loaded, clear } = useProfile();
+  const { canInstall, open: openInstall } = useInstallPrompt();
 
   const rows = profile
     ? [
@@ -111,6 +115,29 @@ export function ProfileView() {
               RU · {t("languageSoon")}
             </span>
           </SettingRow>
+          {canInstall && (
+            <button
+              type="button"
+              onClick={openInstall}
+              data-testid="profile-install"
+              className="flex min-h-11 w-full items-center gap-3 px-4 py-3 text-left text-sm transition-colors hover:bg-muted/50"
+            >
+              <span className="flex size-9 items-center justify-center rounded-full bg-muted text-muted-foreground">
+                <Download className="size-4" aria-hidden />
+              </span>
+              {tInstall("profileEntry")}
+            </button>
+          )}
+          <Link
+            href="/about"
+            data-testid="profile-about"
+            className="flex min-h-11 w-full items-center gap-3 px-4 py-3 text-sm transition-colors hover:bg-muted/50"
+          >
+            <span className="flex size-9 items-center justify-center rounded-full bg-muted text-muted-foreground">
+              <Info className="size-4" aria-hidden />
+            </span>
+            {tAbout("title")}
+          </Link>
         </section>
 
         {profile && (

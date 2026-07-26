@@ -211,9 +211,38 @@ Hardened in Phase 5: the comment is zod-validated + length-capped server-side
 (mirrors the DB CHECK) and writes are rate limited (`lib/rate-limit.ts`, per IP).
 
 **Analytics & errors** (`components/analytics-provider.tsx`, `lib/analytics.ts`):
-PostHog (`quiz_completed`, `step_done`, `section_opened`, `report_outdated`,
-`plan_shared`, pageviews) and Sentry, both dynamically imported and **env-gated**
-— silently disabled without their `NEXT_PUBLIC_*` keys (local/CI), enabled in prod.
+PostHog and Sentry, both **dynamically imported from an effect** (afterInteractive,
+never render-blocking) and **env-gated** — silently disabled without their
+`NEXT_PUBLIC_*` keys (local/CI), enabled in prod. Call sites emit through the thin
+`capture()` facade, which is a no-op until `window.posthog` exists, so no site
+needs to guard on the key.
+
+**Event catalogue** (the launch-relevant events; all fire through the facade and
+are covered by tests — e2e `tests/e2e/analytics-events.spec.ts`, plus unit tests
+for `ai_answered` and `plan_shared`):
+
+| Event | Where | Props |
+|---|---|---|
+| `quiz_completed` | onboarding finish | `stage`, `basis`, `family` |
+| `step_done` | check a step (home / section / plan) | `slug`, `section?` |
+| `plan_shared` | Share-plan success | `slug`, `done` (count) |
+| `search_performed` | keyword search | `query`, `step_results`, `section_results`, `source` |
+| `ai_answered` | AI answer completes | `refused`, `cited`, `model` |
+| `report_outdated` | "информация устарела?" | `slug` |
+| `install_prompt_shown` | install sheet shown (auto/manual) | `platform` |
+| `install_accepted` | install accepted / `appinstalled` | `platform` |
+| `section_opened` | open a section | `section` |
+| `$pageview` | route change | `path` |
+
+**Session replay** (Phase 9a-bis, `lib/session-replay.ts`): enabled with privacy
++ performance care. **Masking** — `maskAllInputs: true`, so PII is never recorded
+(the city, arrival/flight dates, children ages and any free-text quiz answer are
+all inputs); `maskTextSelector: "[data-ph-mask]"` is an opt-in hook for future
+sensitive display text. **Sampling** — a sticky per-session decision at
+`SESSION_REPLAY_SAMPLE_RATE = 0.15` (~15%, in the 10–20% band), persisted in a
+versioned localStorage key; sampled-out sessions start with recording disabled so
+the recorder chunk never even downloads. Combined with the effect-based load, this
+keeps replay off the first-paint critical path.
 
 ## Sharing (Phase 5b)
 
