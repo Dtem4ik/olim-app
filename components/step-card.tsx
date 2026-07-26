@@ -71,7 +71,7 @@ export function StepCard({
   return (
     <Link
       href={href}
-      className="block rounded-xl transition-transform focus-visible:outline-none active:scale-[0.98]"
+      className="block rounded-2xl transition-transform focus-visible:outline-none active:scale-[0.98]"
     >
       {body}
     </Link>
