@@ -26,7 +26,9 @@ The gate that protects real people from acting on a wrong date/sum.
 - [ ] **(OWNER)** PostHog: create a free project at posthog.com → copy the Project API Key.
 - [ ] **(OWNER)** Sentry: create a free project at sentry.io (Next.js) → copy the DSN.
 - [ ] **(OWNER)** Vercel → olim-app → Settings → Environment Variables → add `NEXT_PUBLIC_POSTHOG_KEY`, `NEXT_PUBLIC_POSTHOG_HOST` (usually `https://eu.i.posthog.com`), `NEXT_PUBLIC_SENTRY_DSN` → Redeploy.
-- [ ] **(OWNER)** Verify: open prod, do a quiz, check the event shows up in PostHog Live Events. (Enable session replay + set the sample rate in the PostHog project settings if needed; the client already masks inputs.)
+- [ ] **(OWNER)** Verify PostHog events: open prod, do a quiz, check the event shows up in PostHog Live Events.
+- [ ] **(OWNER)** Verify Sentry ingestion (Phase 10, B2): open **`/dev/sentry-check` on a PREVIEW deploy** (the route 404s on production by design), click "Send a test error", then confirm the issue appears in Sentry → Issues within a minute.
+- [ ] **(OWNER)** Verify session replay (Phase 10, B2): in PostHog → **Session Replay**, open a recent recording and confirm (a) recordings exist and (b) every input (city, dates, children ages, free-text) is **masked** — the app sets `maskAllInputs`. Recording is sampled at ~15% per session; the **single lever** is `SESSION_REPLAY_SAMPLE_RATE` in `lib/session-replay.ts` (not a PostHog dashboard toggle) — change it there and redeploy to adjust volume.
 
 ## Priority 3 — Working sign-in + AI on prod (две главные фичи после контента)
 
