@@ -13,7 +13,7 @@
  */
 
 import { getContent } from "@/lib/content/repo";
-import { isAiConfigured } from "@/lib/rag/config";
+import { isAiConfigured, RETRIEVAL_TOP_K } from "@/lib/rag/config";
 import { embedQuery, toVectorLiteral } from "@/lib/rag/embeddings";
 import { fuseRankings } from "@/lib/rag/fuse";
 import type { RetrievedStep } from "@/lib/rag/types";
@@ -22,7 +22,10 @@ import { getSupabaseAnon } from "@/lib/supabase/client";
 
 const ARM_LIMIT = 20;
 
-export async function retrieveSteps(query: string, topK = 6): Promise<RetrievedStep[]> {
+export async function retrieveSteps(
+  query: string,
+  topK = RETRIEVAL_TOP_K,
+): Promise<RetrievedStep[]> {
   const trimmed = query.trim();
   if (trimmed.length === 0) return [];
 
