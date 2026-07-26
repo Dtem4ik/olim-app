@@ -1,7 +1,7 @@
 "use client";
 
 import { Check } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useFormatter, useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { reportOutdated } from "@/app/guides/actions";
 import { DeadlineBadge } from "@/components/deadline-badge";
@@ -107,9 +107,19 @@ export function StepBody({ sectionSlug, step }: { sectionSlug: string; step: Det
 
 function TrustFooter({ step }: { step: DetailStep }) {
   const t = useTranslations("step");
+  const format = useFormatter();
   const [reporting, setReporting] = useState(false);
   const [sent, setSent] = useState(false);
   const [reason, setReason] = useState("");
+
+  // last_verified_at is a plain "YYYY-MM-DD"; build the Date from its parts so
+  // no timezone shift moves it a day, then render it locale-aware (ru → 26.07.2026).
+  const [vy, vm, vd] = step.last_verified_at.split("-").map(Number) as [number, number, number];
+  const verifiedDate = format.dateTime(new Date(vy, vm - 1, vd), {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
 
   async function submit() {
     if (step.id) await reportOutdated(step.id, reason.trim() || null);
@@ -121,7 +131,7 @@ function TrustFooter({ step }: { step: DetailStep }) {
   return (
     <div className="flex flex-col gap-2 border-t border-border pt-4 text-xs text-muted-foreground">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <span>{t("verified", { date: step.last_verified_at })}</span>
+        <span>{t("verified", { date: verifiedDate })}</span>
         <a href={step.source_url} target="_blank" rel="noopener noreferrer" className="underline">
           {t("source")}
         </a>
