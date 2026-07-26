@@ -31,12 +31,17 @@ prevent). B1 is classified in the ledger below.
   what unblocks the RU magic-link template (`supabase/templates/magic_link.html`, already
   in the repo) **and** real sending volume. A commented Resend reference added to
   `supabase/config.toml` (local keeps Mailpit).
-- **Owner-gated remainder (raised in chat):** actually scheduling on prod needs (a) the
-  migration applied to the shared remote — deferred to the owner via the neighbor ritual
-  (not pushed this session; see Ritual note), and (b) two Vault secrets +
-  `RESEND_API_KEY`. Exact steps are in LAUNCH_CHECKLIST → "Reminder cron" and "Resend as
-  the Auth SMTP". After that, the DoD's "a real reminder + magic-link email arrive" is a
-  single key-paste away.
+- **Now LIVE on prod (applied later in the session with the owner's explicit go-ahead).**
+  The migration was pushed to the shared remote (neighbor ritual done — see Ritual note),
+  the Edge Function was already deployed (verified HTTP 200), the owner set the two Vault
+  secrets (`send_reminders_url`, `service_role_key`) + `RESEND_API_KEY`. **End-to-end
+  verified:** the exact cron command (read Vault → `net.http_post` → function) returned
+  `200 {"ok":true,"sent":0,"considered":0}` (0 opted-in users on prod yet, so 0 sends —
+  expected). The daily 06:00 UTC job will now fire for real.
+- **Only remaining email gap (owner, not code):** without a verified Resend **sending
+  domain**, Resend test mode delivers reminder + magic-link email **only to the owner's
+  own address**. Real delivery to users needs a domain (deferred by owner — see the
+  domain-day steps in LAUNCH_CHECKLIST).
 
 ## A2 — Benefit amounts: no blanks in front of users ✅ (built as content-inline, owner-chosen)
 
@@ -179,12 +184,24 @@ pnpm build                           # production build compiles (all routes inc
 
 ## Neighbor ritual (AGENTS.md rules 6 & 7)
 
-**No migration was pushed to the shared remote this session**, so no `pg_dump -n
-portfolio` snapshot was taken (the rule is "no snapshot — no push"; there was no push).
-The one new migration (A1 cron schedule) is additive and touches only the `cron` / `net`
-/ `vault` schemas (never `portfolio`); it was applied and verified on the **local stack
-only**. Applying it to the shared remote is owner-gated (needs the ritual + the owner's
-Vault secrets) and is listed as an owner step in LAUNCH_CHECKLIST.
+The A1 cron migration **was pushed to the shared remote** later in the session, with the
+owner's explicit go-ahead, following the ritual:
+
+- **Snapshot taken:** `supabase db dump --schema portfolio` of the neighbor's schema
+  (8.4 KB, kept in the local scratchpad, **never committed**). `pg_dump` locally was v16
+  vs server v17, so the CLI's container dump was used.
+- **Objects the migration touches (additive, `public`-adjacent only, never `portfolio`):**
+  `create extension if not exists pg_cron` / `pg_net`; one `cron.schedule('send-reminders-daily', …)`
+  row in `cron.job`. `supabase migration list` confirmed only `20260726120000` was pending.
+- **Applied** via `supabase db push --db-url $POSTGRES_URL_NON_POOLING` (CLI not logged in,
+  so a direct connection string was used — this still records the migration in
+  `schema_migrations`). **Verified on remote:** migration recorded, `pg_cron`+`pg_net`
+  present, `cron.job` lists `send-reminders-daily` (`0 6 * * *`, active), and the full
+  cron path returned HTTP 200.
+- **Content re-import to prod** (same session, `--allow-remote`): min-wage now live inline
+  on the step page; benefits normalized to 7 rows (2 stale NULL min-wage *versions* — a
+  side effect of the `(slug, valid_from)` unique key when `valid_from` moved to April —
+  were deleted); 0 null embeddings across 111 steps.
 
 ## Screenshots
 
@@ -211,11 +228,11 @@ and 9. No third category.
 | 6.2 | `.env.local` points at prod (local-first dev) | **DONE** | `.env.example` documents the `.env.development.local` local-first split. |
 | 6.3 | Local prod-build gotchas (oxide colours, `rm -rf .next`) | **NOT-MVP** | Local-only; CI (Linux) builds clean and is the gate. Documented in AGENTS Known traps. |
 | 6.4 | Per-photo Unsplash URLs in IMAGES.md | **NOT-MVP** | URLs never captured + not recoverable truthfully; Unsplash License needs no attribution; inventory + license cover the MVP (B3). |
-| 7.1 | Google OAuth verify on https | **DONE (code)** | Provider configured; code path verified (Phase 9e). Live https check is an owner launch step. |
-| 7.2 / 7.4 | Reminder cron scheduling (in dashboard, not repo) | **DONE** | A1: additive `pg_cron`+`pg_net` migration in the repo, verified locally. |
-| 7.3 | Supabase Auth URL config on prod | **OWNER-MANUAL** | Dashboard step, documented (LAUNCH_CHECKLIST P3 + domain day). Not code. |
-| 7.5 | Prod RU magic-link template | **DONE** | Template in repo (`supabase/templates/magic_link.html`) + exact Resend-SMTP paste steps documented (A1). |
-| 8.1 | Live prod `/api/ask` (GEMINI key) | **OWNER-MANUAL** | Code ready + env-gated; owner adds `GEMINI_API_KEY` + redeploy (LAUNCH_CHECKLIST P3). |
+| 7.1 | Google OAuth verify on https | **DONE** | Provider configured; code path verified (Phase 9e); owner set the prod Auth URLs this session. Final live click-through is part of the phone test. |
+| 7.2 / 7.4 | Reminder cron scheduling (in dashboard, not repo) | **DONE** | A1 migration in the repo; **pushed to prod + end-to-end verified this session** (cron path → HTTP 200). |
+| 7.3 | Supabase Auth URL config on prod | **DONE** | Owner configured Site URL + `/auth/callback` redirect this session. |
+| 7.5 | Prod RU magic-link template | **DONE (code)** | Template in repo + Resend-SMTP steps documented (A1). Pasting the template needs custom SMTP, which needs a sending domain (owner, deferred — built-in sender works for a few friends meanwhile). |
+| 8.1 | Live prod `/api/ask` (GEMINI key) | **DONE** | Owner set `GEMINI_API_KEY` on prod this session; code env-gated + eval-verified. |
 | 8.2 | Eval gate opt-in in CI | **DONE** | A4: path-triggered `evals` job on RAG/eval/schema changes. |
 | 8.3 | Grounding tightness on tiny models | **NOT-MVP** | Benign true generalizations only; the judge scopes harm-class; gate holds 0 fabricated / 0 contradicted at 100%. |
 | 8-add.1 | Embedding backfill for late steps | **DONE** | Prod 0 nulls (Phase 8 addendum); local 0 nulls this session; verified via probe. |
@@ -224,26 +241,31 @@ and 9. No third category.
 | 8-add.4 / LC | Quiz vocabulary gaps (age/pension + pregnancy) | **NOT-MVP** (scheduled 10b) | The quiz already personalizes on 5 dimensions; these sharpen targeting for niche cases (pensioners, pregnancy) whose content stays reachable via `family` / sections / search. An enhancement, not a blocker; owner-scheduled as phase 10b. |
 | 9.1 | Capacitor + app stores | **NOT-MVP** | Deferred by owner launch plan ($99/yr Apple fee unjustified pre-demand); web/PWA first. |
 | 9.2 | Retrieval tuning (3 eval misses) | **DONE** | A3: 66/66 = 100%, 0/0. |
-| 9.3 | Owner-manual launch items (keys/dashboards/phone test) | **OWNER-MANUAL** | All ticked in LAUNCH_CHECKLIST; code side ready. |
+| 9.3 | Owner-manual launch items (keys/dashboards/phone test) | **DONE / OWNER-MANUAL** | Keys, Auth URLs, RESEND + Vault, cron all set this session; **remaining: verified Resend sending domain, the eval CI repo-secrets, and the live phone test** (owner). |
 | — | JS first-load 280KB guard (inherited every phase) | **NOT-MVP** | C decision: user-facing gates pass with margin; byte count is an internal proxy. |
-| — | PostHog/Sentry keyless (inherited) | **OWNER-MANUAL** | Env-gated; owner adds keys + redeploy (LAUNCH_CHECKLIST P2). Sentry provable via `/dev/sentry-check` (B2). |
+| — | PostHog/Sentry keyless (inherited) | **DONE** | Owner set PostHog + Sentry keys on prod this session. Sentry provable via `/dev/sentry-check` (B2). |
 | — | `/dev/ui` refresh (inherited redesign debt) | **NOT-MVP** | Dev-only design reference, not shipped / not user-facing. |
 | — | Server-side Sentry capture + source maps | **NOT-MVP** | Owner decision (speed): client-only capture works; full setup risks the JS budget; server errors in Vercel logs (B2). |
 
 Every row is **DONE**, **NOT-MVP**, or **OWNER-MANUAL** (dashboard/key steps, code ready).
 No row is unresolved or "later".
 
-## Owner-manual items (code is ready — these are yours)
+## Owner-manual items
 
-1. PostHog + Sentry + Gemini keys in Vercel → redeploy (LAUNCH_CHECKLIST P2/P3).
-2. Supabase Auth URL Configuration + paste the RU magic-link template; wire Resend as the
-   Auth SMTP provider (P3).
-3. Reminder cron activation: set `RESEND_API_KEY` + the two Vault secrets; apply the cron
-   migration to the shared remote via the neighbor ritual (P3).
-4. Apply pending migrations to the shared remote (ritual) as part of the deploy.
-5. Live phone test: magic-link + Google sign-in, anonymous-plan sync, AI answer, share
-   unfurl (P3). Prove Sentry via `/dev/sentry-check` on a preview.
-6. Domain day (when attaching a custom domain): the 3 steps in LAUNCH_CHECKLIST.
+**Done this session (owner + agent):** PostHog/Sentry/Gemini keys on prod; Supabase Auth
+URLs; `RESEND_API_KEY` + the two Vault secrets; cron migration pushed to the shared remote
+(ritual) + content re-imported + reminder path end-to-end verified (HTTP 200).
+
+**Still owner (code is ready):**
+1. **Merge PR #17** (CI green) → Vercel redeploys with the new content surfaced immediately.
+2. **Resend sending domain** — verify a domain (SPF/DKIM) to lift Resend test mode; until
+   then reminder + magic-link email deliver only to the owner's own address. Unblocks the
+   custom-SMTP RU magic-link template too. (Owner deferred — no domain yet.)
+3. **Eval CI repo-secrets:** `GEMINI_API_KEY` + `EVAL_SUPABASE_URL` + `EVAL_SUPABASE_KEY`
+   so the path-triggered eval job actually gates (else it self-skips green).
+4. **Live phone test:** magic-link + Google sign-in, anonymous-plan sync, AI answer, share
+   unfurl. Prove Sentry via `/dev/sentry-check` on a preview.
+5. **Domain day** (when attaching a custom domain): the 3 steps in LAUNCH_CHECKLIST.
 
 ---
 
