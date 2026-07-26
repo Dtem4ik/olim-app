@@ -45,3 +45,13 @@ citizenship and reproducibility we should backfill a `source_url` + photographer
 per file here when the originals are re-identified. Any future image **must** be
 added to this table with its Unsplash URL at selection time. If a candidate image
 ever lacks a clear free license, it does not ship.
+
+### Resolution (Phase 10, B3)
+
+Closed as **NOT an MVP blocker**. The per-photo URLs cannot be backfilled
+truthfully: they were never captured and Unsplash offers no reliable reverse
+lookup, so inventing "plausible" URLs would be worse than none. The Unsplash
+License requires **no attribution**, so there is no legal or functional gap — the
+inventory above (file → use → subject) plus the license record fully cover the
+MVP's provenance need. The forward rule stands: any NEW image is logged here with
+its Unsplash URL at selection time, so this can never recur.

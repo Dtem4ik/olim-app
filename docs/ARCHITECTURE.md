@@ -419,7 +419,12 @@ Opt-in per user (off by default); lead time 30/14/7 days, stored on `user_state`
   in `reminder_log` (unique → idempotent, never fires twice), and emails a RU
   reminder via **Resend** (deep link to the step + one-click, no-login unsubscribe
   at `/api/reminders/unsubscribe?token=…`). Without `RESEND_API_KEY` it dry-runs
-  (claims + reports, never sends). Cron is scheduled outside the repo (dashboard).
+  (claims + reports, never sends).
+- **Schedule (Phase 10).** The daily run lives in the repo as an additive migration
+  (`20260726120000_schedule_reminders_cron.sql`): `pg_cron` fires at 06:00 UTC and
+  `pg_net` POSTs the function URL with the service key, both read from **Vault at run
+  time** (nothing secret committed; a clean no-op until the owner sets the Vault
+  secrets + `RESEND_API_KEY`). Reproducible from migrations, not a dashboard click.
 - **Settings.** `PATCH /api/reminders` (owner-scoped) writes the toggle + lead
   time; the Profile screen renders them (signed-in only).
 

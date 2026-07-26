@@ -30,6 +30,9 @@ export async function generateMetadata(): Promise<Metadata> {
     description: t("tagline"),
     appleWebApp: { capable: true, statusBarStyle: "default", title: t("name") },
     icons: { apple: "/icons/apple-touch-icon.png" },
+    // Google Search Console site verification (owner-provided) — renders
+    // <meta name="google-site-verification" …>. Needed to submit the sitemap.
+    verification: { google: "l6mQlxevNA1vL6kNy0KdODJbFWg-KtQ4IiYzs10gGD0" },
   };
 }
 

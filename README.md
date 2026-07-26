@@ -1,106 +1,137 @@
 # Olim App
 
-Adaptation navigator for new immigrants (olim) in Israel. Personalized home screen, practical guides (banks, rent, healthcare, work, benefits, Hebrew), a trackable plan with deadline warnings, and search — RU/EN, light/dark, PWA first, app stores via Capacitor later.
+**A free adaptation navigator for new immigrants (_olim_) in Israel.** Answer a short
+quiz about your situation and get a personalized plan: what to do after landing —
+banks, health fund, rent, work, benefits, Hebrew — as trackable steps with deadline
+warnings, full-text + AI search grounded in official sources, and a shareable plan.
+Russian/English, light/dark, PWA-first (works offline at the airport).
 
-## Status
+**Live:** https://olim-app.vercel.app · **Stack:** Next.js (App Router, TS strict) ·
+Supabase (Postgres · Auth · pgvector) · Tailwind + shadcn/ui · next-intl · Gemini
+(embeddings + grounded answers) · Vercel.
 
-Phases 1–5 + a native-mobile UI redesign are in `main`:
+> Built as a public portfolio project via a phased, AI-assisted workflow — see
+> [`docs/CASE_STUDY.md`](docs/CASE_STUDY.md) for the "0 → product" engineering story.
 
-- **Phase 1** — repository foundation, design tokens/themes, UI kit v1.
-- **Phase 2** — Supabase data model + content pipeline (validator, seed script).
-- **Phase 3** — onboarding quiz + the pure condition engine (`buildPlan`, 100% covered).
-- **Phase 4** — personalized home, guides, section & step cards, progress store.
-- **Phase 5** — full plan tracker, plan sharing (`/plan/{slug}` + OG unfurl), PWA/offline.
-- **Phase 5.5** (off-roadmap redesign) — native-mobile UI: photo tiles, bottom-sheet
-  step view with SSR content, floating pill nav, `/search` screen shell.
+## Screenshots
 
-- **Phase 6** — real Postgres full-text search (russian tsvector + trigram typos)
-  behind `/search`, and programmatic SEO (canonical step/section pages, sitemap +
-  robots from the DB, JSON-LD, OG images, ISR + on-demand revalidation).
+| Home (personalized) | Step (bottom sheet) | Plan (tracker) | Guides (photo tiles) |
+|---|---|---|---|
+| ![Home](docs/img/screenshots/home.png) | ![Step](docs/img/screenshots/step.png) | ![Plan](docs/img/screenshots/plan.png) | ![Guides](docs/img/screenshots/guides.png) |
 
-- **Phase 7** — accounts + deadline reminders, still **anonymous-first**: Supabase
-  Auth (magic link + Google), a `user_state` row per account with owner-scoped RLS,
-  first-sign-in plan migration + cross-device sync, account deletion
-  (`docs/PRIVACY.md`); opt-in email deadline reminders via a Deno Edge Function +
-  Resend with idempotent `reminder_log`.
+## What it does
 
-**Phase 8** (this line of work) adds **AI search** — "Спроси об Израиле", a grounded
-answer that may only speak from the app's own steps (it augments the keyword search,
-never replaces it):
+- **Onboarding quiz → personalized plan.** 5–7 questions (lifecycle stage, eligibility
+  basis, country, family, city, dates) feed a pure `buildPlan(answers, steps)` engine
+  that filters/sorts steps and computes deadline warnings. Anonymous-first: the plan
+  lives in `localStorage` until you (optionally) sign in.
+- **Practical guides.** 16 sections / 111 steps sourced from gov.il, Kol Zchut, Bituach
+  Leumi & Nativ — each step carries its `source_url` and a visible `last_verified_at`,
+  with a "report outdated" path and a "not legal advice" disclaimer.
+- **Search — keyword + AI.** Postgres full-text (russian tsvector + trigram typo
+  tolerance) plus a grounded AI answer ("Спроси об Израиле") that may speak **only**
+  from retrieved steps, cites them as source cards, and honestly refuses when it can't.
+- **Trackable plan + sharing.** Progress by lifecycle stage; share a read-only
+  `/plan/{slug}` with an OG-image unfurl for Telegram/WhatsApp.
+- **Accounts + reminders.** Supabase Auth (magic link + Google) with owner-scoped RLS,
+  first-sign-in plan migration + cross-device sync, and opt-in email deadline reminders
+  (Edge Function + Resend, scheduled via `pg_cron`).
+- **PWA.** Installable, offline access to your plan and viewed steps ("at the airport
+  with no connection" is scenario #1).
 
-- **8a** — hybrid retrieval: pgvector embeddings on `steps` (Gemini
-  `gemini-embedding-001`, 768d, HNSW cosine), computed at content-import time, fused
-  with the Phase 6 full-text search via Reciprocal Rank Fusion.
-- **8b** — a streamed, sourced answer (`POST /api/ask`, SSE): the model answers only
-  from retrieved steps, cites them as tappable source cards, and honestly says
-  "не нашёл — вот близкие разделы" when it can't. Gemini-only, **env-gated** on
-  `GEMINI_API_KEY` (server-side); without it the ask box degrades to "AI-ответы
-  скоро" and keyword search still works.
-- **8c** — a committed 51-question eval set + `pnpm eval` grounding gate
-  (≥90% pass, 0 fabricated-source, 0 contradicted-fact; local run 98%).
+## Architecture
 
-**Phase 9** (this line of work) is **launch prep** for the web/PWA (app stores via
-Capacitor are deliberately deferred — see the launch checklist):
+Two data planes: a **content pipeline** (private repo → validated → Supabase → ISR
+pages) and a **retrieval + answer** path (hybrid FTS + vector → grounded LLM behind an
+eval gate). User data is **anonymous-first** and only touches an account when the user
+chooses to sign in.
 
-- Fixed the onboarding quiz to compute its preview over the full content (Supabase
-  repo) instead of the 5 committed fixtures.
-- A dismissible **PWA install prompt** (Android `beforeinstallprompt` + iOS Safari
-  Share→Home-Screen instructions), shown once, with a manual entry on Profile.
-- **Trust & safety:** the not-legal-advice disclaimer on the step-card footer, and
-  an SSR, indexable **/about** page (what the app is, sources, feedback contacts).
-- **Analytics:** PII-masked, sampled PostHog **session replay** (~15%, lazy) and a
-  documented launch **event catalogue**, all events verified through the facade.
-- Auth callback code-path verification (open-redirect guard) and an expanded eval
-  set covering the new sections (pets, documents, safety, taxes, children, work).
+```mermaid
+flowchart TD
+  subgraph Content["Content pipeline (authoring)"]
+    A["Private olim-content repo<br/>(JSON steps + benefits)"] --> B["zod validator<br/>+ editorial lint<br/>(pnpm content:validate)"]
+    B --> C["pnpm content:import<br/>upsert + Gemini embeddings"]
+    C --> D[("Supabase Postgres<br/>public schema<br/>steps · benefits · pgvector")]
+    C -. on-demand revalidate .-> E
+  end
 
-See `docs/LAUNCH_CHECKLIST.md` for the launch gate, `docs/PHASE_REPORTS/` for
-per-phase reports, and `docs/ROADMAP.md` for the full 10-phase plan.
+  subgraph Web["Next.js on Vercel"]
+    D --> E["ISR pages<br/>home · guides · /guides/[section]/[step]<br/>sitemap · robots · JSON-LD · OG"]
+    E --> U(["Browser / PWA<br/>anonymous-first plan (localStorage)"])
+    U -- optional sign-in --> AUTH["Supabase Auth<br/>magic link · Google · RLS"]
+    AUTH --> D
+  end
+
+  subgraph Retrieval["Search + grounded answer"]
+    U --> Q["/api/search (FTS)<br/>/api/ask (SSE)"]
+    Q --> FTS["Postgres FTS<br/>tsvector + trigram"]
+    Q --> VEC["pgvector<br/>match_steps (cosine)"]
+    FTS --> RRF["Reciprocal Rank Fusion"]
+    VEC --> RRF
+    RRF --> LLM["Gemini grounded answer<br/>(answers only from retrieved steps)"]
+    LLM --> U
+  end
+
+  D -. daily pg_cron .-> REM["send-reminders Edge Function<br/>→ Resend email"]
+```
+
+**Key decisions** (full rationale in [`docs/CASE_STUDY.md`](docs/CASE_STUDY.md) and
+[`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)):
+
+- **Content is data, not code.** Guide text lives in a private repo, passes a zod +
+  editorial validator, and is imported into Supabase; components never hardcode content.
+  Every figure carries a source and a verification date.
+- **Grounded RAG with an eval gate.** The answer model is instructed to reproduce only
+  what's in the retrieved context; a committed 66-question `pnpm eval` gate asserts ≥90%
+  pass, **0 fabricated sources, 0 contradicted facts** before grounding can regress.
+- **Anonymous-first.** No account needed to get value; the plan syncs to an account only
+  on opt-in sign-in, with RLS on every user-data table.
+- **Shared database, guarded.** The Supabase project is shared with another site;
+  migrations are additive + `public`-scoped, gated by a documented backup ritual.
 
 ## Quick start
 
-```
+```bash
 pnpm install     # installs deps + git hooks (lefthook)
 pnpm dev         # http://localhost:3000
 ```
 
-Without a database the app renders the committed content **fixtures**, so the home,
-guides, quiz and plan all work out of the box. `/dev/ui` shows the component kit.
-Full command list in `AGENTS.md`.
+Without a database the app renders the committed content **fixtures**, so home, guides,
+quiz and plan work out of the box. `/dev/ui` shows the component kit.
 
-### Data layer
-
-The app uses Supabase. For local development against real content:
+### Data layer (full content)
 
 1. Install the `supabase` CLI and start Docker.
-2. `pnpm db:start` — boots the local stack and applies migrations. `pnpm db:reset`
-   re-applies from scratch; `supabase status` prints local URLs/keys.
-3. `pnpm content:import` — seeds the local DB from the committed `content/fixtures/`
-   (add `--dir ../olim-content/content` to seed the full private content set).
+2. `pnpm db:start` — boots the local stack and applies migrations (`pnpm db:reset` to
+   re-apply; `supabase status` prints local URLs/keys).
+3. `pnpm content:import` — seeds from `content/fixtures/` (add `--dir ../olim-content/content`
+   for the full private set; computes embeddings when `GEMINI_API_KEY` is set).
 
-Real content lives in the **private `olim-content` repo**; clone it as a sibling
-directory (`../olim-content`). Content format is documented in
-`docs/CONTENT_SCHEMA.md`. The Supabase project is **shared** with the portfolio
-site — migrations are additive and `public`-scoped, and destructive commands
-against the linked remote are forbidden (see `AGENTS.md` rules 6 & 7).
+Real content lives in the **private `olim-content` repo** (clone as a sibling
+`../olim-content`); format in [`docs/CONTENT_SCHEMA.md`](docs/CONTENT_SCHEMA.md). The
+Supabase project is **shared** — migrations are additive + `public`-scoped and
+destructive commands against the linked remote are forbidden (`AGENTS.md` rules 6 & 7).
 
-See `CONTRIBUTING.md` for the phase workflow, local setup, and content-contribution
-flow.
+## Quality bar (CI-enforced)
+
+- **TypeScript** strict, `noUncheckedIndexedAccess`, no `any`; **Biome** lint/format.
+- **Vitest** — 294 unit tests; `lib/` ≥80% coverage, the condition engine **100%**.
+- **Playwright** e2e smoke + **axe** (0 critical/serious, both themes).
+- **Lighthouse mobile** (hard gates, every route): Performance ≥90, A11y ≥95; JS
+  first-load regression guard ≤280KB.
+- **`pnpm eval`** — the AI grounding gate (path-triggered in CI): 66/66 = 100%, 0
+  fabricated, 0 contradicted.
+
+Full command list in [`AGENTS.md`](AGENTS.md).
 
 ## How this project is built
 
-Development runs in phases, each executed by a separate Claude Code session and reviewed by a team-lead session. See:
+Development runs in **phases**, each executed by a separate Claude Code session and
+reviewed by a team-lead session:
 
-- `AGENTS.md` — canonical instruction file for all AI agents (read first)
-- `docs/ROADMAP.md` — full 10-phase plan, engineering standards, acceptance checklists
-- `CLAUDE.md` — Claude-specific session addenda
-- `CONTRIBUTING.md` — phase workflow, local setup, commit/PR & content conventions
-- `docs/PROMPTS/` — kickoff prompt per phase
-- `docs/PHASE_REPORTS/` — one report per completed phase
-- `docs/reference/` — product research and planning documents (Russian)
-
-## Getting started (new phase session)
-
-1. Open this folder in a new Claude Code session.
-2. Paste the kickoff prompt for the current phase from `docs/PROMPTS/`.
-3. When the session finishes, take `docs/PHASE_REPORTS/phase-{N}.md` to the
-   team-lead session for review and the next phase prompt.
+- [`AGENTS.md`](AGENTS.md) — canonical instruction file for all AI agents (read first)
+- [`docs/ROADMAP.md`](docs/ROADMAP.md) — the 10-phase plan, standards, acceptance checklists
+- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — system design · [`docs/CONTENT_SCHEMA.md`](docs/CONTENT_SCHEMA.md) — content format
+- [`docs/CASE_STUDY.md`](docs/CASE_STUDY.md) — the "0 → product" engineering story
+- [`docs/PHASE_REPORTS/`](docs/PHASE_REPORTS/) — one report per completed phase
+- [`CONTRIBUTING.md`](CONTRIBUTING.md) — phase workflow, local setup, commit/PR & content conventions

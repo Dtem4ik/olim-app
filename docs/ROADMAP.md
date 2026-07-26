@@ -134,16 +134,30 @@ Each phase is executed in a separate Claude Code session.
 **DoD:** app in TestFlight and internal testing; a deadline push arrives on a real phone.
 **Acceptance:** 4.2 checklist (offline ✓, push ✓, native share ✓, app-like navigation ✓).
 
-### Phase 10 — Launch, growth, showcase
-**10a. Launch.** Posts in 5–7 olim chats (as help, not ads), a "built a free adaptation navigator" post on vc.ru/Habr, feedback monitoring, bugfix sprint.
-**10b. Content top-up.** Weekly new steps driven by search logs ("searched and not found"); triage of step_reports.
-**10c. Portfolio showcase.** README with architecture and screenshots, a "0 → product" case study for CV, EN landing about the project.
-**DoD/metrics:** 100 plans and 500 searches in month one; ≥20% share rate; chat feedback collected.
-**Acceptance:** full project retro + v2 roadmap (doctor/pensioner branches, Hebrew, partner monetization — optional).
+### Phase 10 — MVP code closure + showcase — *redefined* ✅ (10b: quiz dimensions)
+> **Reframe:** the launch/growth half of the original Phase 10 moved to `docs/LAUNCH_CHECKLIST.md` and belongs to the owner (soft launch → olim chats → Search Console). What stays here as engineering work: closing every open code debt (zero-debt rule + debt ledger over phases 5–9) and the showcase deliverables.
+>
+> **Done (see `docs/PHASE_REPORTS/phase-10.md`):** reminders scheduled in a `pg_cron`
+> migration; benefit amounts surfaced inline (min wage current, sal klita → calculator);
+> AI retrieval `pnpm eval` 66/66 = 100% (0/0); eval gate path-triggered in CI; one-variable
+> domain swap; Sentry-provable route + replay confirmed; card-radius normalized; README +
+> `docs/CASE_STUDY.md`. **MVP code status: COMPLETE — zero open debts.** The quiz
+> age/pension + pregnancy dimensions (B1) are carried to a focused **phase 10b**.
+
+**10a. Functional closure.** Reminders actually firing on prod (schedule in a migration, Resend as Auth SMTP to unblock the RU email + volume), no blank/zero benefit amounts, AI retrieval tuned so the 3 known eval misses pass, eval gate enabled in CI on relevant paths.
+**10b. Product gaps + polish.** Quiz gains age/pension + pregnancy dimensions (content exists that cannot otherwise be targeted), Sentry provable, replay confirmed, `/dev/ui` refresh, card-radius normalization, image provenance backfill.
+**10c. Showcase.** README with architecture + mobile screenshots, `docs/CASE_STUDY.md` (0 → product, decisions and trade-offs, measurable outcomes).
+**DoD:** debt ledger has zero unresolved rows; report ends with "MVP code status: COMPLETE" (or NOT complete, named precisely).
+
+### Phase 11 — Web Push (VAPID) — *post-MVP, first candidate after launch*
+Deadline reminders as push notifications: Android + iOS 16.4+ (PWA installed to home screen), free, no Apple Developer fee. Two wins: far more visible than email, and **a push subscription needs no account** — so reminders finally reach anonymous users (today they require sign-in).
+**Scope:** SW push handler (serwist SW exists), VAPID keys, subscriptions table + RLS, sending from the existing `send-reminders` Edge Function via a Deno web-push lib, permission UX behind a user gesture (and behind install on iOS), unsubscribe, prune dead subscriptions on 410, `reminder_log` gains a channel column so email and push never double-send.
+**Keep email as the baseline** — the iOS install→permission funnel converts only a few percent. Requires a real-iPhone test loop, hence post-MVP. Once this lands, the main reason to go native (app stores) disappears.
+**Decision input:** before building, check the analytics — what share of users actually install the PWA (`install_accepted`). Few → defer; many → build.
 
 ## Order and dependencies
 
-1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9 → 10, strictly. The only parallel track is content (2c keeps being extended by separate Claude content sessions from Phase 2 until the end).
+1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9 → 10, strictly. Phase 11 (Web Push) comes after the owner's soft launch, not before. The only parallel track is content (2c keeps being extended by separate Claude content sessions from Phase 2 until the end) — after Phase 10 content becomes the product's main growth axis.
 
 ## Redesign debts (from the off-roadmap Phase 5.5 native-UI redesign)
 
