@@ -38,8 +38,33 @@ The gate that protects real people from acting on a wrong date/sum.
 > steps; after them, do the phone test.
 
 - [ ] **(OWNER)** Supabase → Auth → URL Configuration: Site URL = `https://olim-app.vercel.app`; add `https://olim-app.vercel.app/auth/callback` to Redirect URLs. (Without this magic-link and Google sign-in are rejected on prod.)
-- [ ] **(OWNER)** Supabase → Auth → Email Templates → Magic Link: paste the RU template (from `supabase/templates/magic_link.html`).
-- [ ] **(OWNER)** Supabase → Edge Functions → set `RESEND_API_KEY` secret; schedule the `send-reminders` cron (dashboard Cron or pg_cron, once daily). Test: a reminder email lands in your inbox.
+
+#### Resend as the Auth SMTP provider — unblocks the RU sign-in email AND real sending volume
+
+> **Why this matters (blocked without it):** Supabase refuses to edit the magic-link
+> template unless you use custom SMTP, so the RU sign-in email is impossible on the
+> built-in sender; and the built-in sender is rate-limited to a few emails/hour —
+> unusable past a handful of friends. Wiring Resend fixes both at once.
+
+- [ ] **(OWNER)** Resend → create an account, add & verify a sending domain (DNS: SPF + DKIM records). A `.com`/`.app` domain (or a subdomain of an established domain) has far better deliverability than a cheap `.space`/`.top` TLD — see the domain caution in Priority 6.
+- [ ] **(OWNER)** Resend → API Keys → create a key with **Sending access**. (This same key doubles as the Edge Function `RESEND_API_KEY` below.)
+- [ ] **(OWNER)** Supabase → Project Settings → Authentication → SMTP Settings → **Enable custom SMTP** with: Host `smtp.resend.com`, Port `465`, Username `resend`, Password = the Resend API key, Sender email = `no-reply@<your-domain>`, Sender name = `Olim App`.
+- [ ] **(OWNER)** Supabase → Auth → Email Templates → Magic Link: paste the RU template (from `supabase/templates/magic_link.html`) and subject `Ваша ссылка для входа в Olim App`. (Editing the template is only allowed once custom SMTP is on.)
+- [ ] **(OWNER)** Verify: request a magic link on prod → a **Russian** sign-in email arrives from your domain (not `noreply@mail.app.supabase.io`).
+
+#### Reminder cron — schedule already lives in the repo, only secrets are manual
+
+> **Code-complete (Phase 10, A1):** the daily schedule is an additive migration
+> (`supabase/migrations/20260726120000_schedule_reminders_cron.sql`) using
+> `pg_cron` + `pg_net`. It reads the function URL and service key from **Vault at
+> run time**, so no secret is committed and it is a clean no-op until the two
+> secrets below exist. The function already dry-runs safely without `RESEND_API_KEY`.
+
+- [ ] **(OWNER)** Supabase → Edge Functions → Secrets → set `RESEND_API_KEY` (the same Resend key as above). Optionally set `REMINDER_FROM_EMAIL` = `Olim App <no-reply@your-domain>` and `SITE_URL` = the prod URL (defaults are safe). Without `RESEND_API_KEY` the function claims + logs but never sends (dry-run).
+- [ ] **(OWNER)** Supabase → Project Settings → Vault → add two secrets so the scheduled cron can reach the function:
+  - `send_reminders_url` = `https://<project-ref>.supabase.co/functions/v1/send-reminders`
+  - `service_role_key` = the project's `service_role` key (Project Settings → API).
+- [ ] **(OWNER)** Verify the cron is live: `select jobname, schedule, active from cron.job;` should list `send-reminders-daily` (`0 6 * * *`). To test immediately without waiting for 06:00 UTC, run the migration's `net.http_post` body once by hand (SQL editor) — a reminder email should land for any opted-in user with an upcoming deadline.
 - [ ] **(OWNER)** Vercel env: add `GEMINI_API_KEY` (server-side) → Redeploy. Verify `/search` AI answer works on prod (not the "AI-ответы скоро" fallback).
 - [ ] **(OWNER)** Phone test / sign-in gate: on the live https site — (1) magic-link → land signed-in; (2) Google → land signed-in; (3) an anonymous plan created before sign-in survives and syncs (open it on a second device); (4) ask the AI a question; (5) check a step; (6) share your plan and open the Telegram unfurl.
 
@@ -57,6 +82,7 @@ The gate that protects real people from acting on a wrong date/sum.
 
 ## Priority 6 — Later, NOT a launch gate
 
-- [ ] App stores via Capacitor (Phase 9-original) — only after the web version shows demand and the $99/yr Apple fee is justified.
+- [ ] **Web Push (VAPID) as Phase 11 — the best post-MVP candidate.** Works on Android and on iOS 16.4+ when the PWA is installed to the home screen; free, no Apple Developer fee. Two real wins: a deadline reminder is far more visible than an email, and **a push subscription needs no account**, so reminders finally reach anonymous users too (today they require sign-in for the email). Scope: SW push handler (serwist SW exists), VAPID keys, a subscriptions table + RLS, sending from the existing `send-reminders` Edge Function via a Deno web-push lib, permission UX gated behind a user gesture (and behind install on iOS), unsubscribe, and pruning dead subscriptions on 410. Keep email as the baseline channel — the iOS install→permission funnel converts only a few percent; extend `reminder_log` with a channel column so the two never double-send. Requires a real-iPhone test loop, which is exactly why it stays out of the zero-debt closure phase.
+- [ ] App stores via Capacitor (Phase 9-original) — only after the web version shows demand and the $99/yr Apple fee is justified. Note: once Web Push lands, the main reason to go native disappears.
 - [ ] Standing content cadence (a content session per sprint) — content is now the main growth axis.
 - [ ] Quiz vocabulary gaps: age/pension dimension, pregnancy/gender dimension.

@@ -235,15 +235,20 @@ otp_length = 6
 # Number of seconds before the email OTP expires (defaults to 1 hour).
 otp_expiry = 3600
 
-# Use a production-ready SMTP server
+# Use a production-ready SMTP server.
+# LOCAL dev intentionally keeps this OFF and uses Mailpit ([local_smtp] above) so
+# no real email is sent from a dev box. PROD wires Resend as the Auth SMTP provider
+# (smtp.resend.com:465, user "resend", pass = Resend API key) via the Supabase
+# dashboard — this is what unblocks the RU magic-link template + real sending
+# volume. Exact owner steps: docs/LAUNCH_CHECKLIST.md → "Resend as the Auth SMTP".
 # [auth.email.smtp]
 # enabled = true
-# host = "smtp.sendgrid.net"
-# port = 587
-# user = "apikey"
-# pass = "env(SENDGRID_API_KEY)"
-# admin_email = "admin@email.com"
-# sender_name = "Admin"
+# host = "smtp.resend.com"
+# port = 465
+# user = "resend"
+# pass = "env(RESEND_API_KEY)"
+# admin_email = "no-reply@your-domain"
+# sender_name = "Olim App"
 
 # RU magic-link template (Phase 7a) — keeps LOCAL dev in the product's language;
 # the PROD template is configured in the Supabase dashboard (walk-through in the
