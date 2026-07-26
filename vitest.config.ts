@@ -27,6 +27,11 @@ export default defineConfig({
         "components/plan/**",
         "components/profile/**",
         "components/analytics-provider.tsx",
+        // PWA install prompt provider — a root-mounted integration component
+        // (beforeinstallprompt / iOS branch / sheet), verified by the Playwright
+        // e2e flow (install-prompt.spec + analytics-events.spec), like the
+        // analytics provider above. Its pure logic lives in lib/pwa (unit-tested).
+        "components/pwa/**",
         "lib/plan/use-progress.ts",
         // Navigation / browser-integration UI exercised by the Playwright flow, not
         // unit coverage: the top progress bar (link-click + pathname listeners) and
