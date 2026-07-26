@@ -74,15 +74,51 @@ jobs:
       - name: Validate content
         run: pnpm content:validate
 
+  changes:
+    name: detect eval-relevant changes
+    runs-on: ubuntu-latest
+    outputs:
+      run_evals: ${{ steps.filter.outputs.run_evals }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      # Per-job path filtering: GitHub's `on.paths` gates the WHOLE workflow, but
+      # the other jobs must run on every PR — so we detect the eval-relevant paths
+      # here with a plain git diff (no third-party action) and gate `evals` on it.
+      # Relevant = anything that can change grounding behaviour: the retrieval/answer
+      # code (lib/rag), the eval harness + question set (scripts/eval.ts, evals/), or
+      # the content schema (lib/content/schema.ts, tables.ts). Content itself lives in
+      # the private olim-content repo, so it never trips this here.
+      - id: filter
+        name: Check eval-relevant paths
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            base='${{ github.event.pull_request.base.sha }}'
+            head='${{ github.event.pull_request.head.sha }}'
+          else
+            base='${{ github.event.before }}'
+            head='${{ github.sha }}'
+          fi
+          if ! git cat-file -e "$base^{commit}" 2>/dev/null; then base="$head~1"; fi
+          files=$(git diff --name-only "$base" "$head")
+          echo "Changed files:"; echo "$files"
+          if echo "$files" | grep -qE '^(evals/|lib/rag/|scripts/eval\.ts$|lib/content/(schema|tables)\.ts$)'; then
+            echo "run_evals=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "run_evals=false" >> "$GITHUB_OUTPUT"
+          fi
+
   evals:
     name: AI evals (grounding gate)
-    # Opt-in only. For now the grounding gate is run LOCALLY (`pnpm eval`); this job
-    # stays defined but is skipped in CI until you flip it on, to avoid spending the
-    # Gemini free-tier RPD on every PR. To enable: set the repo variable
-    # RUN_AI_EVALS=true and the secrets GEMINI_API_KEY + EVAL_SUPABASE_URL +
-    # EVAL_SUPABASE_KEY (a DB seeded with embeddings). Even when enabled, `pnpm eval`
-    # self-skips (exit 0) if the key/DB are missing.
-    if: ${{ vars.RUN_AI_EVALS == 'true' }}
+    # Path-triggered: runs only when eval-relevant paths change (see `changes` job),
+    # so grounding can't silently regress on a RAG/eval/schema change, while sparing
+    # the Gemini free-tier RPD on unrelated PRs. Still safe before the owner adds
+    # keys: `pnpm eval` self-skips (exit 0) without GEMINI_API_KEY or a seeded eval
+    # DB. To make it a real gate, set the secrets GEMINI_API_KEY + EVAL_SUPABASE_URL
+    # + EVAL_SUPABASE_KEY (a DB seeded via content:import with embeddings).
+    needs: changes
+    if: ${{ needs.changes.outputs.run_evals == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
