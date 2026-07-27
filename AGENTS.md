@@ -47,6 +47,25 @@ Stack: Next.js (App Router, TS strict) on Vercel · Supabase (Postgres, Auth, pg
 
 ## Known traps (don't re-derive these — they cost days once)
 
+- **SW offline must be verified on a real device in BOTH a Safari tab and the
+  installed PWA — they have separate storage.** Desktop `context.setOffline(true)`
+  emulation (and even iOS Simulator) does not reproduce the real-iPhone offline
+  path: a Safari tab and an installed (A2HS) PWA keep **separate** cache storage,
+  and iOS evicts SW caches after ~7 days of non-use. Phase 5 claimed offline
+  "verified" from desktop emulation only; on a real iPhone `/plan` offline returned
+  `FetchEvent.respondWith received an error: no-response`. The fix
+  (`docs/PHASE_REPORTS/hotfix-offline.md`) makes a `no-response` structurally
+  impossible (`lib/pwa/navigation-strategy.ts` guarantees a Response; asserted by
+  its unit test + `tests/e2e/offline.spec.ts`). When touching the SW, run the
+  owner device checklist in that report — both a Safari tab AND the installed PWA.
+- **serwist's `defaultCache` "pages" matcher never matches real navigations.** It
+  tests `request.headers.get("Content-Type")?.includes("text/html")`, but a GET
+  navigation sends `Accept: text/html`, not `Content-Type` (that's a request-body
+  header). So document navigations fall through to the generic `others`/`NetworkOnly`
+  routes. We therefore own navigation with our route in `app/sw.ts`
+  (`request.mode === "navigate"`, registered before `defaultCache`) — don't "fix" it
+  by trusting the defaultCache page cache.
+
 - **Local macOS-arm64 prod build mis-renders `<a>`/`<button>` colours.** In
   `pnpm build && pnpm start` on Apple Silicon, the Tailwind oxide + Next CSS
   minifier drops the `@layer theme, base, components, utilities;` order
