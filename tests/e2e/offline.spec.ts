@@ -113,16 +113,22 @@ test.describe("offline (service worker)", () => {
   });
 
   test("a previously visited section still renders offline", async ({ page, context }) => {
-    await page.goto("/guides");
+    // A dynamic section route (`/guides/[section]`) — NOT precached, so this
+    // exercises the runtime "pages" cache the navigation handler populates on a
+    // visited document (distinct from the precached app-shell routes). `healthcare`
+    // exists in the committed fixtures (and the seeded DB), so it renders on CI too.
+    const section = "/guides/healthcare";
+
+    // First load registers the SW; wait until it controls the page. That first
+    // document was fetched before the SW controlled it, so visit once more under
+    // SW control — now the navigation handler caches the section document.
+    await page.goto(section);
     await waitForServiceWorkerControl(page);
-    // Open a real section so its document + images cache.
-    const firstSection = page.getByRole("link").filter({ hasText: /./ }).first();
-    await firstSection.click();
-    await page.waitForLoadState("networkidle");
-    const visitedUrl = page.url();
+    await page.goto(section);
+    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
 
     await context.setOffline(true);
-    await page.goto(visitedUrl);
+    await page.goto(section);
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
 
     await context.setOffline(false);
