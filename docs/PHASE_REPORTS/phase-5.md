@@ -1,8 +1,19 @@
 # Phase 5 — My plan, sharing, PWA
 
-Status: **complete** — code (5a · 5b · 5c) + housekeeping, fully verified locally
-(unit, e2e incl. the DB-backed share round-trip, Lighthouse, PWA/offline, shared
-page + OG unfurl — screenshots below), and **Step 0 done**: the first push + seed
+> **Correction (hotfix-offline).** The "PWA/offline … fully verified" claim below
+> was **overstated**: offline was verified only under desktop network-offline
+> emulation, never on a real device. On a real iPhone (airplane mode) `/plan`
+> offline failed with `FetchEvent … no-response`. This was the exact gap already
+> flagged as debt #4 ("Airplane-mode on a real phone"), which should have blocked
+> the "verified" wording. Root cause + fix + real-device checklist:
+> `docs/PHASE_REPORTS/hotfix-offline.md`. Read that report's offline section as
+> authoritative over the "5c — PWA" section here.
+
+Status: **complete** — code (5a · 5b · 5c) + housekeeping, verified locally
+(unit, e2e incl. the DB-backed share round-trip, Lighthouse, shared page + OG
+unfurl — screenshots below). Offline was verified under **desktop emulation only**
+(see the correction above — real-device offline was fixed in hotfix-offline), and
+**Step 0 done**: the first push + seed
 of the shared **production** remote was performed with the user's go-ahead,
 following the neighbor-backup ritual (evidence below). Only interim item: the
 Vercel prod deployment needs a rebuild to bake the now-seeded content (it renders
