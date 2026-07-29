@@ -28,6 +28,10 @@ export async function generateMetadata(): Promise<Metadata> {
       template: `%s — ${t("name")}`,
     },
     description: t("tagline"),
+    // Site-wide OpenGraph defaults. Per-route `generateMetadata` adds
+    // title/description/url/image; `siteName` + `locale` are inherited here so
+    // every unfurl carries the brand without repeating it on each route.
+    openGraph: { type: "website", siteName: t("name"), locale: "ru_RU" },
     appleWebApp: { capable: true, statusBarStyle: "default", title: t("name") },
     // Browser-tab favicon. app/favicon.ico is auto-injected by the file
     // convention (legacy/Safari); the SVG here serves modern browsers crisply

@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
+import { routeOpenGraph } from "@/lib/seo/open-graph";
 
 /** Feedback channels (owner-provided). Change here if they move. */
 const FEEDBACK_EMAIL = "d.tem4ik@gmail.com";
@@ -14,12 +15,11 @@ export async function generateMetadata(): Promise<Metadata> {
     title: t("title"),
     description: t("metaDescription"),
     alternates: { canonical: "/about" },
-    openGraph: {
-      type: "website",
+    openGraph: routeOpenGraph({
       url: "/about",
       title: t("title"),
       description: t("metaDescription"),
-    },
+    }),
   };
 }
 
