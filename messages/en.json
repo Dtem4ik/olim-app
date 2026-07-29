@@ -4,6 +4,8 @@
     "tagline": "Adaptation navigator for Israel"
   },
   "home": {
+    "metaTitle": "Olim — adaptation navigator for new immigrants in Israel",
+    "metaDescription": "Olim is a free navigator for new immigrants (olim) in Israel: answer a few questions and get a personal plan with deadlines, steps and sources.",
     "invite": {
       "title": "Your aliyah adaptation plan",
       "subtitle": "Take a short quiz — we'll assemble the steps for your situation: banks, health, rent, work and benefits.",
@@ -250,6 +252,8 @@
   "guides": {
     "title": "Sections",
     "subtitle": "Practical adaptation guides.",
+    "metaTitle": "Guides for new immigrants: health fund, bank, rent",
+    "metaDescription": "{sections, plural, one {# section} other {# sections}} and {steps, plural, one {# step} other {# steps}} for new immigrants in Israel: health fund, bank, rent, work, benefits, ulpan. Each step comes with a deadline and a link to its source.",
     "personalizedHint": "Your steps first, the full guide below.",
     "allHint": "Take the quiz to highlight steps for you.",
     "yourSteps": "Your steps",
