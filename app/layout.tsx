@@ -29,7 +29,13 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     description: t("tagline"),
     appleWebApp: { capable: true, statusBarStyle: "default", title: t("name") },
-    icons: { apple: "/icons/apple-touch-icon.png" },
+    // Browser-tab favicon. app/favicon.ico is auto-injected by the file
+    // convention (legacy/Safari); the SVG here serves modern browsers crisply
+    // at any size. Both glyphs come from scripts/generate-icons.ts.
+    icons: {
+      icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
+      apple: "/icons/apple-touch-icon.png",
+    },
     // Google Search Console site verification (owner-provided) — renders
     // <meta name="google-site-verification" …>. Needed to submit the sitemap.
     verification: { google: "l6mQlxevNA1vL6kNy0KdODJbFWg-KtQ4IiYzs10gGD0" },
