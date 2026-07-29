@@ -15,6 +15,7 @@
       "!**/playwright-report",
       "!**/test-results",
       "!**/app/globals.css",
+      "!**/app/icon.svg",
       "!**/lib/supabase/database.types.ts",
       "!**/supabase/functions/send-reminders"
     ]
