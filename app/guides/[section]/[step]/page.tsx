@@ -4,6 +4,7 @@ import { type SectionStep, SectionView } from "@/components/guides/section-view"
 import { JsonLd } from "@/components/seo/json-ld";
 import { getContent } from "@/lib/content/repo";
 import { renderMarkdown } from "@/lib/markdown";
+import { routeOpenGraph } from "@/lib/seo/open-graph";
 import { stepJsonLd } from "@/lib/seo/structured-data";
 import { getSiteUrl } from "@/lib/site-url";
 
@@ -23,12 +24,12 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
     title: st.title,
     description: st.summary ?? undefined,
     alternates: { canonical },
-    openGraph: {
+    openGraph: routeOpenGraph({
       type: "article",
       url: canonical,
       title: st.title,
       description: st.summary ?? undefined,
-    },
+    }),
   };
 }
 
