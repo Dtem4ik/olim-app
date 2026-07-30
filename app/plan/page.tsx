@@ -21,17 +21,5 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function PlanPage() {
   const { steps } = await getContent();
-  const t = await getTranslations("plan");
-  return (
-    <>
-      {/* Server-rendered landing intro: gives the route a real crawlable H1 +
-          lead (PlanView is client-only and SSRs a skeleton), and reads as a
-          clear page title for visitors arriving from search. */}
-      <header className="mx-auto w-full max-w-md px-4 pt-6">
-        <h1 className="text-balance text-2xl font-bold tracking-tight">{t("landingHeading")}</h1>
-        <p className="mt-2 text-sm text-muted-foreground">{t("landingLead")}</p>
-      </header>
-      <PlanView steps={steps} />
-    </>
-  );
+  return <PlanView steps={steps} />;
 }

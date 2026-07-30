@@ -50,8 +50,6 @@
     "title": "My plan",
     "metaTitle": "Step-by-step aliyah plan for Israel",
     "metaDescription": "Build your full step-by-step aliyah plan for Israel: every step by date — documents, bank, health fund, benefits. Tick off what's done and never miss a deadline.",
-    "landingHeading": "Your step-by-step aliyah plan for Israel",
-    "landingLead": "A personal immigrant checklist with deadlines and links to official sources. Take the short quiz and your plan assembles for your situation.",
     "progressLabel": "Plan progress",
     "progress": "{done} of {total} {total, plural, one {step} other {steps}}",
     "stats": {
