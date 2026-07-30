@@ -24,13 +24,31 @@ export function routeOpenGraph(opts: {
   title: string;
   description?: string | undefined;
   type?: "website" | "article";
+  /** Article facets (only used when type === "article"): freshness + taxonomy. */
+  article?: {
+    modifiedTime?: string | undefined;
+    publishedTime?: string | undefined;
+    section?: string | undefined;
+    authors?: string[] | undefined;
+  };
 }): OpenGraph {
-  return {
-    type: opts.type ?? "website",
+  const common = {
     siteName: OG_SITE_NAME,
     locale: "ru_RU",
     url: opts.url,
     title: opts.title,
     ...(opts.description !== undefined ? { description: opts.description } : {}),
   };
+  if (opts.type === "article") {
+    const a = opts.article ?? {};
+    return {
+      type: "article",
+      ...common,
+      ...(a.publishedTime ? { publishedTime: a.publishedTime } : {}),
+      ...(a.modifiedTime ? { modifiedTime: a.modifiedTime } : {}),
+      ...(a.section ? { section: a.section } : {}),
+      ...(a.authors ? { authors: a.authors } : {}),
+    };
+  }
+  return { type: "website", ...common };
 }

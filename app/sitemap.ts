@@ -20,14 +20,34 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     return Number.isNaN(d.getTime()) ? undefined : d;
   };
 
+  // Newest last_verified_at across a set of steps → a real `lastmod` for the
+  // pages that aggregate them (home, /guides, each section).
+  const newest = (rows: typeof steps) => {
+    let max: Date | undefined;
+    for (const s of rows) {
+      const d = stepDate(s.last_verified_at);
+      if (d && (!max || d > max)) max = d;
+    }
+    return max;
+  };
+  const corpusModified = newest(steps);
+
   const staticRoutes: MetadataRoute.Sitemap = [
-    { url: `${base}/`, changeFrequency: "weekly", priority: 1 },
-    { url: `${base}/guides`, changeFrequency: "weekly", priority: 0.9 },
+    { url: `${base}/`, lastModified: corpusModified, changeFrequency: "weekly", priority: 1 },
+    {
+      url: `${base}/guides`,
+      lastModified: corpusModified,
+      changeFrequency: "weekly",
+      priority: 0.9,
+    },
+    { url: `${base}/onboarding`, changeFrequency: "monthly", priority: 0.8 },
+    { url: `${base}/plan`, changeFrequency: "monthly", priority: 0.8 },
     { url: `${base}/about`, changeFrequency: "monthly", priority: 0.5 },
   ];
 
   const sectionRoutes: MetadataRoute.Sitemap = sections.map((s) => ({
     url: `${base}/guides/${s.slug}`,
+    lastModified: newest(steps.filter((st) => st.section_slug === s.slug)),
     changeFrequency: "weekly",
     priority: 0.8,
   }));

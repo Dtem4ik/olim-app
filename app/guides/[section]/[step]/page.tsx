@@ -4,7 +4,7 @@ import { type SectionStep, SectionView } from "@/components/guides/section-view"
 import { JsonLd } from "@/components/seo/json-ld";
 import { getContent } from "@/lib/content/repo";
 import { renderMarkdown } from "@/lib/markdown";
-import { routeOpenGraph } from "@/lib/seo/open-graph";
+import { OG_SITE_NAME, routeOpenGraph } from "@/lib/seo/open-graph";
 import { stepJsonLd } from "@/lib/seo/structured-data";
 import { getSiteUrl } from "@/lib/site-url";
 
@@ -16,9 +16,10 @@ export const revalidate = 3600;
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { section, step } = await params;
-  const { steps } = await getContent();
+  const { sections, steps } = await getContent();
   const st = steps.find((s) => s.slug === step && s.section_slug === section);
   if (!st) return { title: "Guides" };
+  const sec = sections.find((s) => s.slug === section);
   const canonical = `/guides/${section}/${step}`;
   return {
     title: st.title,
@@ -29,6 +30,13 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
       url: canonical,
       title: st.title,
       description: st.summary ?? undefined,
+      // `last_verified_at` is our freshness signal — surface it as the article's
+      // modified time so search/AI see how current the step is.
+      article: {
+        modifiedTime: st.last_verified_at,
+        section: sec?.title,
+        authors: [OG_SITE_NAME],
+      },
     }),
   };
 }
