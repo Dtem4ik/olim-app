@@ -21,13 +21,41 @@ const inter = Inter({
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("app");
+  const siteUrl = getSiteUrl();
+  // Keep only real Vercel preview/development deployments out of the index;
+  // production is indexable, and local/CI (no VERCEL_ENV) stay indexable too so
+  // Lighthouse SEO and e2e reflect the production behaviour.
+  const isPreview =
+    process.env.VERCEL_ENV === "preview" || process.env.VERCEL_ENV === "development";
   return {
-    metadataBase: new URL(getSiteUrl()),
+    metadataBase: new URL(siteUrl),
     title: {
       default: `${t("name")} — ${t("tagline")}`,
       template: `%s — ${t("name")}`,
     },
     description: t("tagline"),
+    applicationName: t("name"),
+    authors: [{ name: t("name"), url: siteUrl }],
+    creator: t("name"),
+    publisher: t("name"),
+    // Phone/address/email auto-linking mangles content and adds junk in unfurls.
+    formatDetection: { telephone: false, address: false, email: false },
+    // Default indexing directives; personal routes override with `noindex`.
+    // The googleBot block unlocks large image previews + full snippets in rich
+    // results (and Google's AI Overviews).
+    robots: isPreview
+      ? { index: false, follow: false }
+      : {
+          index: true,
+          follow: true,
+          googleBot: {
+            index: true,
+            follow: true,
+            "max-image-preview": "large",
+            "max-snippet": -1,
+            "max-video-preview": -1,
+          },
+        },
     // Site-wide OpenGraph defaults. Per-route `generateMetadata` adds
     // title/description/url/image; `siteName` + `locale` are inherited here so
     // every unfurl carries the brand without repeating it on each route.
