@@ -8,8 +8,9 @@ export const revalidate = 3600;
 
 /**
  * sitemap.xml built from the DB: the public entry points plus every section and
- * step. Personal/utility routes (/plan, /onboarding, /search, /offline) are left
- * out — they're noindex and carry no SEO value.
+ * step. /plan and /onboarding are included as indexable conversion landings.
+ * Excluded: /search, /offline, /profile, /plan/[slug] — they're noindex and
+ * carry no SEO value.
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = getSiteUrl();
