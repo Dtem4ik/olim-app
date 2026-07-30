@@ -36,6 +36,86 @@ export function extractHowToSteps(bodyMd: string): string[] {
 
 type JsonLd = Record<string, unknown>;
 
+/** Owner contact channels surfaced in Organization schema (mirror /about). */
+const TELEGRAM_URL = "https://t.me/dtem4ik";
+const CONTACT_EMAIL = "d.tem4ik@gmail.com";
+
+/**
+ * Site-identity graph for the home page: Organization (entity Google + AI
+ * assistants resolve the brand from) and WebSite with a SearchAction so Google
+ * can offer the sitelinks search box against our /search route.
+ */
+export function siteJsonLd(args: { siteUrl: string; name: string; description: string }): JsonLd[] {
+  const { siteUrl, name, description } = args;
+  const organization: JsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name,
+    url: siteUrl,
+    logo: `${siteUrl}/icons/icon-512.png`,
+    description,
+    sameAs: [TELEGRAM_URL],
+    contactPoint: {
+      "@type": "ContactPoint",
+      contactType: "customer support",
+      email: CONTACT_EMAIL,
+      availableLanguage: ["Russian", "English"],
+    },
+  };
+  const website: JsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name,
+    url: siteUrl,
+    inLanguage: "ru",
+    publisher: { "@type": "Organization", name },
+    potentialAction: {
+      "@type": "SearchAction",
+      target: {
+        "@type": "EntryPoint",
+        urlTemplate: `${siteUrl}/search?q={search_term_string}`,
+      },
+      "query-input": "required name=search_term_string",
+    },
+  };
+  return [organization, website];
+}
+
+/**
+ * Guides index graph: a home › guides breadcrumb plus an ItemList of the real
+ * section links (a CollectionPage of the corpus). Labels come from the caller's
+ * dictionary so the strings stay translatable.
+ */
+export function guidesJsonLd(args: {
+  siteUrl: string;
+  sections: ContentSection[];
+  homeLabel: string;
+  guidesLabel: string;
+}): JsonLd[] {
+  const { siteUrl, sections, homeLabel, guidesLabel } = args;
+  const breadcrumb: JsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: homeLabel, item: `${siteUrl}/` },
+      { "@type": "ListItem", position: 2, name: guidesLabel, item: `${siteUrl}/guides` },
+    ],
+  };
+  const list: JsonLd = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: guidesLabel,
+    numberOfItems: sections.length,
+    itemListElement: sections.map((s, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      name: s.title,
+      url: `${siteUrl}/guides/${s.slug}`,
+    })),
+  };
+  return [breadcrumb, list];
+}
+
 function breadcrumb(siteUrl: string, section: ContentSection, step?: ContentStep): JsonLd {
   const items: JsonLd[] = [
     { "@type": "ListItem", position: 1, name: "Olim", item: `${siteUrl}/guides` },
