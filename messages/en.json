@@ -48,6 +48,8 @@
   },
   "plan": {
     "title": "My plan",
+    "metaTitle": "Step-by-step aliyah plan for Israel",
+    "metaDescription": "Build your full step-by-step aliyah plan for Israel: every step by date — documents, bank, health fund, benefits. Tick off what's done and never miss a deadline.",
     "progressLabel": "Plan progress",
     "progress": "{done} of {total} {total, plural, one {step} other {steps}}",
     "stats": {
@@ -163,6 +165,8 @@
   "onboarding": {
     "title": "Quick quiz",
     "subtitle": "7 questions to assemble a plan for your situation. Answers stay in this browser only.",
+    "metaTitle": "Quiz: your personal aliyah plan for Israel",
+    "metaDescription": "Answer 7 questions and get a personal step-by-step aliyah plan for Israel: steps for your stage, eligibility and family, with deadlines and links to sources.",
     "start": "Start",
     "resume": "Resume",
     "startOver": "Start over",

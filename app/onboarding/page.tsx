@@ -3,10 +3,20 @@ import { getTranslations } from "next-intl/server";
 import { OnboardingFlow } from "@/components/onboarding/onboarding-flow";
 import { getContent } from "@/lib/content/repo";
 import type { EngineStep } from "@/lib/plan/build-plan";
+import { routeOpenGraph } from "@/lib/seo/open-graph";
 
+// Indexable conversion landing: real server-rendered content (quiz intro) + its
+// own metadata. Distinct intent from home/plan ("answer questions → get a plan").
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("onboarding");
-  return { title: t("title") };
+  const title = t("metaTitle");
+  const description = t("metaDescription");
+  return {
+    title,
+    description,
+    alternates: { canonical: "/onboarding" },
+    openGraph: routeOpenGraph({ url: "/onboarding", title, description }),
+  };
 }
 
 /**
