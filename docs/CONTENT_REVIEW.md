@@ -17,6 +17,7 @@ never quietly drift out of date. Every figure below also carries a
 | **Child allowance** (kitzbat yeladim) | **January** (price-index linked) | `benefits` row `child-allowance-monthly` | 173 ₪ (1st) / 219 ₪ (2nd–4th) (2026-07-24) |
 | **Child savings** (Hisachon le-kol yeled) | **January** | `benefits` row `child-savings-monthly` | 58 ₪/mo (2026-07-24) |
 | **Osek patur turnover ceiling** | **January** | `benefits` row `osek-patur-turnover-ceiling` | 122 833 ₪/yr (2026-07-24) |
+| **Sal klita (absorption basket) amounts** | **January** (Ministry publishes a new year's table) | `sal-klita-schedule` step body (`olim-benefits.json`) — working-age single / single-parent / couple rows inline | 21 694 / 35 071 / 41 359 ₪ total for 2026 (2026-10-07) |
 | **Health-insurance exemption threshold** | Bituach Leumi, ~January | `health-insurance-exemption` step (`healthcare.json`) — narrated as "check the current threshold", no hard number | n/a (deferred to source by design) |
 
 **Important — the minimum wage lives in TWO places** (the `minimum-wage` step
