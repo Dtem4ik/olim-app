@@ -30,6 +30,22 @@ const steps: EngineStep[] = [
     sort_order: 1,
     cond: { stage: ["first_months", "settled"] },
   },
+  {
+    slug: "airport-docs",
+    section_slug: "docs",
+    title: "Документы из аэропорта",
+    stage: "just_landed",
+    sort_order: 0,
+    cond: { stage: "just_landed", left_and_returned: false },
+  },
+  {
+    slug: "eligibility-check",
+    section_slug: "docs",
+    title: "Проверка права на статус",
+    stage: "just_landed",
+    sort_order: 0,
+    cond: { left_and_returned: true },
+  },
 ];
 
 const pickRadio = (name: string) => screen.getByRole("radio", { name });
@@ -45,6 +61,8 @@ describe("OnboardingFlow", () => {
     await user.click(screen.getByTestId("onboarding-start"));
     await user.click(pickRadio("Только приземлился(лась)"));
     await user.click(next());
+    await user.click(pickRadio("Нет, это мой первый приезд"));
+    await user.click(next());
     await user.click(pickRadio("Еврей(ка)"));
     await user.click(next());
     await user.click(pickRadio("Россия"));
@@ -58,14 +76,40 @@ describe("OnboardingFlow", () => {
     await user.click(next()); // city optional → finish
 
     expect(screen.getByTestId("onboarding-preview")).toBeInTheDocument();
-    expect(screen.getAllByTestId("plan-step")).toHaveLength(2);
+    expect(screen.getAllByTestId("plan-step")).toHaveLength(3);
     expect(screen.getByText("Счёт в банке")).toBeInTheDocument();
+    expect(screen.getByText("Документы из аэропорта")).toBeInTheDocument();
+    expect(screen.queryByText("Проверка права на статус")).not.toBeInTheDocument();
     // warn_rule surfaces a deadline badge (icon) on that step; the step without a
     // rule has none. Date-agnostic so it doesn't depend on the current day.
     const deadlineRow = screen.getByText("Больничная касса").closest("li");
     const plainRow = screen.getByText("Счёт в банке").closest("li");
     expect(deadlineRow?.querySelector("svg")).toBeInTheDocument();
     expect(plainRow?.querySelector("svg")).toBeNull();
+  });
+
+  it("swaps the airport steps for the return track when the person left and came back", async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<OnboardingFlow steps={steps} />);
+
+    await user.click(screen.getByTestId("onboarding-start"));
+    await user.click(pickRadio("Только приземлился(лась)"));
+    await user.click(next());
+    await user.click(pickRadio("Да, вернулся(лась) после отъезда"));
+    await user.click(next());
+    await user.click(pickRadio("Еврей(ка)"));
+    await user.click(next());
+    await user.click(pickRadio("Россия"));
+    await user.click(next());
+    await user.click(pickRadio("Еду один(на)"));
+    await user.click(next());
+    await user.click(pickRadio("Нет"));
+    await user.click(next());
+    await user.click(next()); // arrival date optional
+    await user.click(next()); // city optional → finish
+
+    expect(screen.getByText("Проверка права на статус")).toBeInTheDocument();
+    expect(screen.queryByText("Документы из аэропорта")).not.toBeInTheDocument();
   });
 
   it("supports back navigation and children-age chips", async () => {
@@ -80,6 +124,8 @@ describe("OnboardingFlow", () => {
     expect(pickRadio("Только приземлился(лась)")).toBeChecked();
 
     // Advance to the family question and choose "with children".
+    await user.click(next());
+    await user.click(pickRadio("Нет, это мой первый приезд"));
     await user.click(next());
     await user.click(pickRadio("Еврей(ка)"));
     await user.click(next());

@@ -19,6 +19,7 @@ function pickShareable(raw: unknown): unknown {
     pet: r.pet,
   };
   if (r.country !== undefined) out.country = r.country;
+  if (r.leftAndReturned !== undefined) out.leftAndReturned = r.leftAndReturned;
   if (r.childrenAges !== undefined) out.childrenAges = r.childrenAges;
   if (r.monthsInCountry !== undefined) out.monthsInCountry = r.monthsInCountry;
   return out;

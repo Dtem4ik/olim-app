@@ -23,6 +23,7 @@ export const sharedAnswersSchema = z
     country: slugSchema.optional(),
     family: familySchema,
     pet: z.boolean(),
+    leftAndReturned: z.boolean().optional(),
     childrenAges: z.array(age).max(20).optional(),
     monthsInCountry: z.int().min(0).max(1200).optional(),
   })
@@ -46,6 +47,7 @@ export function toSharedAnswers(profile: Profile): SharedAnswers {
     pet: profile.pet,
   };
   if (profile.country !== undefined) shared.country = profile.country;
+  if (profile.leftAndReturned !== undefined) shared.leftAndReturned = profile.leftAndReturned;
   if (profile.childrenAges !== undefined) shared.childrenAges = profile.childrenAges;
   if (profile.monthsInCountry !== undefined) shared.monthsInCountry = profile.monthsInCountry;
   return shared;

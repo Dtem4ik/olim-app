@@ -58,6 +58,13 @@ describe("matchesCond — basis / family / pet", () => {
     expect(match({ pet: true })).toBe(false);
     expect(match({ pet: true }, { pet: true })).toBe(true);
   });
+
+  it("left_and_returned treats a missing answer as no", () => {
+    expect(match({ left_and_returned: true })).toBe(false);
+    expect(match({ left_and_returned: false })).toBe(true);
+    expect(match({ left_and_returned: true }, { leftAndReturned: true })).toBe(true);
+    expect(match({ left_and_returned: false }, { leftAndReturned: true })).toBe(false);
+  });
 });
 
 describe("matchesCond — country (needs an answer)", () => {

@@ -95,6 +95,7 @@ accepted options. Vocabularies are shared with the Phase 3 quiz.
 | `country` | slug \| slug[] | origin-country slug (e.g. `russia`, `ukraine`) |
 | `family` | `Family` \| `Family[]` | `single`, `couple`, `with_children`, `single_parent` |
 | `pet` | boolean | travelling with a pet |
+| `left_and_returned` | boolean | already made aliyah, left Israel and came back (asked only once in country; a missing answer counts as `false`) — status check + teudat oleh at the Ministry instead of the airport flow |
 | `children_ages` | `{ min?, max? }` | matches if a child falls in the range |
 | `months_in_country` | `{ min?, max? }` | months since arrival |
 

@@ -85,6 +85,9 @@ const oneOrMany = <T extends z.ZodType>(inner: T) => z.union([inner, z.array(inn
  * Condition language for `steps.cond`. A step is shown when EVERY present key
  * matches the person's answers. An absent key means "no constraint". `country`
  * is a free-form lowercased origin-country slug (many possible values).
+ * `left_and_returned` targets people who already made aliyah, left Israel
+ * before settling in and came back — their status/benefits path differs from
+ * the standard airport-arrival one.
  */
 export const condSchema = z
   .object({
@@ -93,6 +96,7 @@ export const condSchema = z
     country: oneOrMany(slugSchema).optional(),
     family: oneOrMany(familySchema).optional(),
     pet: z.boolean().optional(),
+    left_and_returned: z.boolean().optional(),
     children_ages: rangeSchema.optional(),
     months_in_country: rangeSchema.optional(),
   })

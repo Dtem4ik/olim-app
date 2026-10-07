@@ -227,6 +227,14 @@
         "remove": "Remove",
         "empty": "No ages added yet."
       },
+      "leftAndReturned": {
+        "label": "Did you already make aliyah, leave Israel and come back?",
+        "help": "For example: you got citizenship, left before setting up your rights, and returned later. The path to your teudat oleh and absorption basket is different then — the plan will account for it.",
+        "options": {
+          "yes": "Yes, I came back after leaving",
+          "no": "No, this is my first arrival"
+        }
+      },
       "pet": {
         "label": "Bringing a pet?",
         "options": { "yes": "Yes", "no": "No" }

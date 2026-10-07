@@ -19,6 +19,14 @@ async function expectNoSeriousA11yViolations(page: Page) {
   }
 }
 
+/** Arrival "yesterday", so the 90-day kupat holim deadline is always in the future. */
+const arrival = new Date();
+arrival.setDate(arrival.getDate() - 1);
+const ymd = (d: Date) =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+const kupatDue = new Date(arrival);
+kupatDue.setDate(kupatDue.getDate() + 90);
+
 const next = (page: Page) => page.getByTestId("onboarding-next").click();
 /** Exact-name radio selector (option labels can be substrings of one another). */
 const radio = (page: Page, name: string) => page.getByRole("radio", { name, exact: true }).click();
@@ -27,6 +35,8 @@ const radio = (page: Page, name: string) => page.getByRole("radio", { name, exac
 async function completeAsFamilyJustLanded(page: Page) {
   await page.getByTestId("onboarding-start").click();
   await radio(page, "Только приземлился(лась)");
+  await next(page);
+  await radio(page, "Нет, это мой первый приезд");
   await next(page);
   await radio(page, "Еврей(ка)");
   await next(page);
@@ -39,7 +49,7 @@ async function completeAsFamilyJustLanded(page: Page) {
   await next(page);
   await radio(page, "Нет");
   await next(page);
-  await page.getByTestId("onboarding-date").fill("2026-07-01");
+  await page.getByTestId("onboarding-date").fill(ymd(arrival));
   await next(page);
   await next(page); // city is optional → finish
 }
@@ -58,10 +68,13 @@ test.describe("onboarding", () => {
     await expect(page.getByTestId("onboarding-preview")).toBeVisible();
     await expect(page.getByTestId("plan-step").first()).toBeVisible();
     await expect(page.getByText("Записаться в больничную кассу")).toBeVisible();
-    // warn_rule (90 days after the 2026-07-01 arrival → 2026-09-29) surfaces a
-    // deadline. The badge renders it as a localized short date ("До 29 сент."),
-    // not an ISO string.
-    await expect(page.getByText("29 сент.")).toBeVisible();
+    // warn_rule (90 days after arrival) surfaces a deadline. The badge renders it
+    // as a localized short date ("До 29 сент."), not an ISO string. Dates are
+    // relative to today so the assertion never rots into "overdue".
+    const dueLabel = new Intl.DateTimeFormat("ru", { day: "numeric", month: "short" }).format(
+      kupatDue,
+    );
+    await expect(page.getByText(dueLabel)).toBeVisible();
 
     // Reload → profile persists, preview shows immediately (no intro).
     await page.reload();
