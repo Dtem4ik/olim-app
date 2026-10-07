@@ -46,6 +46,7 @@ type Draft = {
   family?: Profile["family"];
   childrenAges?: number[];
   pet?: boolean;
+  leftAndReturned?: boolean;
   arrivalDate?: string;
   flightDate?: string;
   city?: string;
@@ -58,13 +59,14 @@ type Question =
       options: readonly string[];
       when?: (d: Draft) => boolean;
     }
-  | { id: "pet"; kind: "boolean"; when?: (d: Draft) => boolean }
+  | { id: "pet" | "leftAndReturned"; kind: "boolean"; when?: (d: Draft) => boolean }
   | { id: "childrenAges"; kind: "ages"; when: (d: Draft) => boolean }
   | { id: "arrivalDate" | "flightDate"; kind: "date"; when: (d: Draft) => boolean }
   | { id: "city"; kind: "text"; when?: (d: Draft) => boolean };
 
 const QUESTIONS: Question[] = [
   { id: "stage", kind: "select", options: stageSchema.options },
+  { id: "leftAndReturned", kind: "boolean", when: (d) => isInCountry(d.stage) },
   { id: "basis", kind: "select", options: basisSchema.options },
   { id: "country", kind: "select", options: COUNTRY_OPTIONS },
   { id: "family", kind: "select", options: familySchema.options },
@@ -92,6 +94,7 @@ function draftToProfile(draft: Draft, now: Date): Profile | null {
     country: draft.country,
     family: draft.family,
     pet: draft.pet,
+    leftAndReturned: inCountry ? draft.leftAndReturned : undefined,
     childrenAges: hasChildren(draft.family) ? draft.childrenAges : undefined,
     monthsInCountry:
       inCountry && draft.arrivalDate ? monthsSince(draft.arrivalDate, now) : undefined,
@@ -133,7 +136,7 @@ export function OnboardingFlow({ steps }: { steps: EngineStep[] }) {
 
   const isAnswered = (q: Question): boolean => {
     if (q.kind === "select") return draft[q.id] !== undefined;
-    if (q.kind === "boolean") return draft.pet !== undefined;
+    if (q.kind === "boolean") return draft[q.id] !== undefined;
     return true; // date / text / ages are optional
   };
 
@@ -272,22 +275,26 @@ export function OnboardingFlow({ steps }: { steps: EngineStep[] }) {
           </RadioGroup>
         )}
 
+        {current.id === "leftAndReturned" && (
+          <p className="text-sm text-muted-foreground">{t("questions.leftAndReturned.help")}</p>
+        )}
+
         {current.kind === "boolean" && (
           <RadioGroup
             aria-labelledby={headingId}
-            value={draft.pet === undefined ? "" : draft.pet ? "yes" : "no"}
-            onValueChange={(v) => set("pet", v === "yes")}
+            value={draft[current.id] === undefined ? "" : draft[current.id] ? "yes" : "no"}
+            onValueChange={(v) => set(current.id, v === "yes")}
             className="gap-2"
           >
             <OptionRow
               value="yes"
-              selected={draft.pet === true}
-              label={t("questions.pet.options.yes")}
+              selected={draft[current.id] === true}
+              label={t(`questions.${current.id}.options.yes`)}
             />
             <OptionRow
               value="no"
-              selected={draft.pet === false}
-              label={t("questions.pet.options.no")}
+              selected={draft[current.id] === false}
+              label={t(`questions.${current.id}.options.no`)}
             />
           </RadioGroup>
         )}

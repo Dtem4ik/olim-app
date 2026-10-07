@@ -22,6 +22,12 @@ const fullProfile: Profile = {
 };
 
 describe("toSharedAnswers", () => {
+  it("keeps the left-and-returned answer (it drives which steps match)", () => {
+    const shared = toSharedAnswers({ ...fullProfile, leftAndReturned: true });
+    expect(shared.leftAndReturned).toBe(true);
+    expect(sharedAnswersSchema.safeParse(shared).success).toBe(true);
+  });
+
   it("drops city, dates and the version tag (privacy)", () => {
     const shared = toSharedAnswers(fullProfile);
     expect(shared).toEqual({

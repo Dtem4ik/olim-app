@@ -28,6 +28,8 @@ async function completeAsFamilyJustLanded(page: Page) {
   await page.getByTestId("onboarding-start").click();
   await radio(page, "Только приземлился(лась)");
   await next(page);
+  await radio(page, "Нет, это мой первый приезд");
+  await next(page);
   await radio(page, "Еврей(ка)");
   await next(page);
   await radio(page, "Россия");

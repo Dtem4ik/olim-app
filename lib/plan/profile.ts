@@ -26,7 +26,8 @@ const monthsInCountry = z.int().min(0).max(1200);
  * A completed profile. Single-valued answers (unlike `cond`, which lists accepted
  * options). Conditional fields are optional and only collected when relevant:
  * `childrenAges` for households with children, `monthsInCountry` once in country,
- * `flightDate` while preparing, `arrivalDate` once arrived.
+ * `flightDate` while preparing, `arrivalDate` once arrived, `leftAndReturned`
+ * once in country (optional so v1 profiles saved before it still parse).
  */
 export const profileSchema = z
   .object({
@@ -36,6 +37,7 @@ export const profileSchema = z
     country: slugSchema.optional(),
     family: familySchema,
     pet: z.boolean(),
+    leftAndReturned: z.boolean().optional(),
     childrenAges: z.array(age).optional(),
     monthsInCountry: monthsInCountry.optional(),
     city: z.string().trim().min(1).max(80).optional(),

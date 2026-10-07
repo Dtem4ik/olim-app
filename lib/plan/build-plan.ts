@@ -28,6 +28,8 @@ export interface PlanAnswers {
   country?: string;
   family: Family;
   pet: boolean;
+  /** Made aliyah earlier, left Israel and came back. Absent means "no". */
+  leftAndReturned?: boolean;
   childrenAges?: number[];
   monthsInCountry?: number;
   flightDate?: string;
@@ -97,6 +99,13 @@ export function matchesCond(cond: Cond, answers: PlanAnswers): boolean {
   if (cond.family !== undefined && !toArray(cond.family).includes(answers.family)) return false;
 
   if (cond.pet !== undefined && cond.pet !== answers.pet) return false;
+
+  if (
+    cond.left_and_returned !== undefined &&
+    cond.left_and_returned !== (answers.leftAndReturned ?? false)
+  ) {
+    return false;
+  }
 
   if (cond.children_ages !== undefined) {
     const range = cond.children_ages;
