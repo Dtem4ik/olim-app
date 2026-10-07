@@ -4,6 +4,10 @@ import { SearchView } from "@/components/search/search-view";
 import { getContent } from "@/lib/content/repo";
 import { isAiConfigured } from "@/lib/rag/config";
 
+// ISR — picks up content:import within the hour even when the revalidation
+// ping is skipped (no REVALIDATE_SECRET locally); was static until redeploy.
+export const revalidate = 3600;
+
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("search");
   // Search is a utility screen, not an SEO target — keep it out of the index.
