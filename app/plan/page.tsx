@@ -4,6 +4,10 @@ import { PlanView } from "@/components/plan/plan-view";
 import { getContent } from "@/lib/content/repo";
 import { routeOpenGraph } from "@/lib/seo/open-graph";
 
+// ISR — picks up content:import within the hour even when the revalidation
+// ping is skipped (no REVALIDATE_SECRET locally); was static until redeploy.
+export const revalidate = 3600;
+
 // Indexable conversion landing ("build your step-by-step aliyah plan"). The
 // personal plan is computed client-side from localStorage, so the crawled HTML
 // is the same generic landing for everyone — no personal data is indexed.

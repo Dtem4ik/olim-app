@@ -5,6 +5,10 @@ import { getContent } from "@/lib/content/repo";
 import type { EngineStep } from "@/lib/plan/build-plan";
 import { routeOpenGraph } from "@/lib/seo/open-graph";
 
+// ISR — picks up content:import within the hour even when the revalidation
+// ping is skipped (no REVALIDATE_SECRET locally); was static until redeploy.
+export const revalidate = 3600;
+
 // Indexable conversion landing: real server-rendered content (quiz intro) + its
 // own metadata. Distinct intent from home/plan ("answer questions → get a plan").
 export async function generateMetadata(): Promise<Metadata> {
