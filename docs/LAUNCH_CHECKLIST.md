@@ -39,7 +39,7 @@ The gate that protects real people from acting on a wrong date/sum.
 > the callback error path. The two boxes below are the remaining OWNER dashboard
 > steps; after them, do the phone test.
 
-- [ ] **(OWNER)** Supabase → Auth → URL Configuration: Site URL = `https://olim-app.vercel.app`; add `https://olim-app.vercel.app/auth/callback` to Redirect URLs. (Without this magic-link and Google sign-in are rejected on prod.)
+- [ ] **(OWNER)** Supabase → Auth → URL Configuration: Site URL = `https://olimguide.online`; Redirect URLs include `https://olimguide.online/**` (the old `https://olim-app.vercel.app/**` entries stay — that host now 308-redirects to the custom domain, 2026-10-09). (Without this magic-link and Google sign-in are rejected on prod.)
 
 #### Resend as the Auth SMTP provider — unblocks the RU sign-in email AND real sending volume
 
