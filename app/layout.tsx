@@ -68,9 +68,13 @@ export async function generateMetadata(): Promise<Metadata> {
       icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
       apple: "/icons/apple-touch-icon.png",
     },
-    // Google Search Console site verification (owner-provided) — renders
-    // <meta name="google-site-verification" …>. Needed to submit the sitemap.
-    verification: { google: "l6mQlxevNA1vL6kNy0KdODJbFWg-KtQ4IiYzs10gGD0" },
+    // Search engine site verification (owner-provided) — renders
+    // <meta name="google-site-verification" …> and <meta name="yandex-verification" …>.
+    // Needed to submit the sitemap. Yandex can't use DNS: vercel.app isn't ours.
+    verification: {
+      google: "l6mQlxevNA1vL6kNy0KdODJbFWg-KtQ4IiYzs10gGD0",
+      yandex: "1ee887c3734d069b",
+    },
   };
 }
 
