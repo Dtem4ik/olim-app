@@ -166,7 +166,7 @@ export function OnboardingFlow({ steps }: { steps: EngineStep[] }) {
   if (phase === "intro") {
     return (
       <section
-        className="animate-page-enter mx-auto flex min-h-dvh max-w-md flex-col gap-6 p-6"
+        className="animate-page-enter mx-auto flex min-h-dvh max-w-md md:max-w-xl flex-col gap-6 p-6"
         data-testid="onboarding-intro"
       >
         <div className="flex">
@@ -186,7 +186,7 @@ export function OnboardingFlow({ steps }: { steps: EngineStep[] }) {
             width={896}
             height={520}
             priority
-            sizes="(max-width: 448px) 100vw, 448px"
+            sizes="(max-width: 576px) 100vw, 576px"
             className="h-60 w-full object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent" />
@@ -239,7 +239,7 @@ export function OnboardingFlow({ steps }: { steps: EngineStep[] }) {
 
   return (
     <section
-      className="animate-page-enter mx-auto flex min-h-dvh max-w-md flex-col gap-6 p-6"
+      className="animate-page-enter mx-auto flex min-h-dvh max-w-md md:max-w-xl flex-col gap-6 p-6"
       data-testid="onboarding-quiz"
     >
       <div className="space-y-2 pt-2">
@@ -470,7 +470,7 @@ function PlanPreview({
 
   return (
     <section
-      className="animate-page-enter mx-auto flex min-h-dvh max-w-md flex-col gap-6 p-6"
+      className="animate-page-enter mx-auto flex min-h-dvh max-w-md md:max-w-xl flex-col gap-6 p-6"
       data-testid="onboarding-preview"
     >
       <div className="space-y-2 pt-2">

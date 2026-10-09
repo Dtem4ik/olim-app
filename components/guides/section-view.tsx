@@ -94,7 +94,7 @@ export function SectionView({
 
   return (
     <>
-      <div className="animate-page-enter mx-auto flex min-h-dvh w-full max-w-md flex-col pb-28">
+      <div className="animate-page-enter mx-auto flex min-h-dvh w-full max-w-md md:max-w-xl flex-col pb-28">
         <header className="flex items-center justify-between px-4 pt-6">
           <Link
             href="/guides"
@@ -257,7 +257,7 @@ function SectionHero({
             alt=""
             fill
             priority
-            sizes="(max-width: 448px) 100vw, 448px"
+            sizes="(max-width: 576px) 100vw, 576px"
             className="object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/25 to-transparent" />

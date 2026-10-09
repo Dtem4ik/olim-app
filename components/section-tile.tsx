@@ -56,7 +56,7 @@ export function SectionTile({
             src={imageUrl as string}
             alt=""
             fill
-            sizes="(max-width: 448px) 50vw, 224px"
+            sizes="(max-width: 576px) 50vw, 288px"
             className="object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/10" />

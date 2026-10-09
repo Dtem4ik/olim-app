@@ -72,7 +72,7 @@ export function HomeView({
     : "";
 
   return (
-    <div className="animate-page-enter mx-auto flex min-h-dvh w-full max-w-md flex-col pb-28">
+    <div className="animate-page-enter mx-auto flex min-h-dvh w-full max-w-md md:max-w-xl flex-col pb-28">
       <header className="flex items-center justify-between px-4 pt-6">
         <span className="text-lg font-semibold tracking-tight">Olim</span>
         <SearchButton />
@@ -217,7 +217,7 @@ function HeroBanner({
         width={896}
         height={480}
         priority
-        sizes="(max-width: 448px) 100vw, 448px"
+        sizes="(max-width: 576px) 100vw, 576px"
         className="h-44 w-full object-cover"
       />
       <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/30 to-transparent" />
