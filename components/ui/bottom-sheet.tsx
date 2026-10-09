@@ -214,7 +214,8 @@ export function BottomSheet({ open, onClose, children, ariaLabel }: BottomSheetP
         onPointerUp={endDrag}
         onPointerCancel={endDrag}
         className={cn(
-          "absolute inset-x-0 bottom-0 flex max-h-[92dvh] w-full flex-col rounded-t-3xl bg-background shadow-2xl outline-none will-change-transform",
+          // Centered and capped at the page-container width so it doesn't span a desktop screen.
+          "absolute inset-x-0 bottom-0 mx-auto flex max-h-[92dvh] w-full max-w-md flex-col rounded-t-3xl bg-background shadow-2xl outline-none will-change-transform md:max-w-xl",
           // No transition while the finger drives it; spring easing on release / enter.
           dragging
             ? "transition-none"
