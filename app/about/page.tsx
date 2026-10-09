@@ -36,7 +36,7 @@ export default async function AboutPage() {
   const sources = [t("sourceGov"), t("sourceKolzchut"), t("sourceBituach"), t("sourceNativ")];
 
   return (
-    <article className="animate-page-enter mx-auto flex min-h-dvh w-full max-w-md flex-col gap-6 px-4 pt-6 pb-28">
+    <article className="animate-page-enter mx-auto flex min-h-dvh w-full max-w-md md:max-w-xl flex-col gap-6 px-4 pt-6 pb-28">
       <header className="flex items-center gap-3">
         <Link
           href="/"

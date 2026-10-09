@@ -86,7 +86,7 @@ export function SearchView({
   const hasResults = results.steps.length > 0 || results.sections.length > 0;
 
   return (
-    <div className="animate-page-enter mx-auto flex min-h-dvh w-full max-w-md flex-col pb-28">
+    <div className="animate-page-enter mx-auto flex min-h-dvh w-full max-w-md md:max-w-xl flex-col pb-28">
       <header className="flex items-center gap-3 px-4 pt-6 pb-3">
         <Link
           href="/"

@@ -27,7 +27,7 @@ export function GuidesView({
   }, [steps]);
 
   return (
-    <div className="animate-page-enter mx-auto flex min-h-dvh w-full max-w-md flex-col pb-28">
+    <div className="animate-page-enter mx-auto flex min-h-dvh w-full max-w-md md:max-w-xl flex-col pb-28">
       <header className="flex items-center justify-between px-4 pt-6">
         <span className="text-lg font-semibold tracking-tight">{t("title")}</span>
         <SearchButton />

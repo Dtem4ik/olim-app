@@ -41,7 +41,7 @@ export default async function SharedPlanPage({ params }: PageProps) {
   const pct = plan.total > 0 ? Math.round((plan.doneCount / plan.total) * 100) : 0;
 
   return (
-    <div className="animate-page-enter mx-auto flex min-h-dvh w-full max-w-md flex-col pb-12">
+    <div className="animate-page-enter mx-auto flex min-h-dvh w-full max-w-md md:max-w-xl flex-col pb-12">
       <header className="flex items-center justify-between px-4 pt-6">
         <span className="text-lg font-semibold tracking-tight">{tApp("name")}</span>
         <ThemeToggle />

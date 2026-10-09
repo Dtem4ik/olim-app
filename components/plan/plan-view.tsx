@@ -68,7 +68,7 @@ export function PlanView({ steps }: { steps: ContentStep[] }) {
 
   if (!loaded) {
     return (
-      <div className="animate-page-enter mx-auto flex min-h-dvh w-full max-w-md flex-col pb-28">
+      <div className="animate-page-enter mx-auto flex min-h-dvh w-full max-w-md md:max-w-xl flex-col pb-28">
         <header className="flex items-center justify-between px-4 pt-6">
           <span className="text-lg font-semibold tracking-tight">{tNav("plan")}</span>
           <SearchButton />
@@ -92,7 +92,7 @@ export function PlanView({ steps }: { steps: ContentStep[] }) {
 
   if (!profile || !plan) {
     return (
-      <div className="animate-page-enter mx-auto flex min-h-dvh w-full max-w-md flex-col pb-28">
+      <div className="animate-page-enter mx-auto flex min-h-dvh w-full max-w-md md:max-w-xl flex-col pb-28">
         <header className="flex items-center justify-between px-4 pt-6">
           <span className="text-lg font-semibold tracking-tight">{tNav("plan")}</span>
           <SearchButton />
@@ -115,7 +115,7 @@ export function PlanView({ steps }: { steps: ContentStep[] }) {
   }
 
   return (
-    <div className="animate-page-enter mx-auto flex min-h-dvh w-full max-w-md flex-col pb-28">
+    <div className="animate-page-enter mx-auto flex min-h-dvh w-full max-w-md md:max-w-xl flex-col pb-28">
       <header className="flex items-center justify-between px-4 pt-6">
         <span className="text-lg font-semibold tracking-tight">{tPlan("title")}</span>
         <SearchButton />

@@ -17,7 +17,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function OfflinePage() {
   const t = await getTranslations("offline");
   return (
-    <div className="animate-page-enter mx-auto flex min-h-dvh w-full max-w-md flex-col items-center justify-center gap-5 px-6 text-center">
+    <div className="animate-page-enter mx-auto flex min-h-dvh w-full max-w-md md:max-w-xl flex-col items-center justify-center gap-5 px-6 text-center">
       <span className="flex size-16 items-center justify-center rounded-3xl bg-sec-sky text-foreground">
         <WifiOff className="size-8" aria-hidden />
       </span>

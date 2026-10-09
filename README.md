@@ -6,7 +6,7 @@ banks, health fund, rent, work, benefits, Hebrew — as trackable steps with dea
 warnings, full-text + AI search grounded in official sources, and a shareable plan.
 Russian/English, light/dark, PWA-first (works offline at the airport).
 
-**Live:** https://olim-app.vercel.app · **Stack:** Next.js (App Router, TS strict) ·
+**Live:** https://olimguide.online · **Stack:** Next.js (App Router, TS strict) ·
 Supabase (Postgres · Auth · pgvector) · Tailwind + shadcn/ui · next-intl · Gemini
 (embeddings + grounded answers) · Vercel.
 
