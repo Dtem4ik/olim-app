@@ -2,6 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
+import { SENTRY_DENY_URLS, SENTRY_IGNORE_ERRORS } from "@/lib/monitoring/sentry-filters";
 import { decideReplaySampling, SESSION_RECORDING_CONFIG } from "@/lib/session-replay";
 
 /**
@@ -47,7 +48,12 @@ export function AnalyticsProvider() {
     const dsn = process.env.NEXT_PUBLIC_SENTRY_DSN;
     if (dsn) {
       void import("@sentry/nextjs").then((Sentry) => {
-        Sentry.init({ dsn, tracesSampleRate: 0.1 });
+        Sentry.init({
+          dsn,
+          tracesSampleRate: 0.1,
+          ignoreErrors: SENTRY_IGNORE_ERRORS,
+          denyUrls: SENTRY_DENY_URLS,
+        });
       });
     }
   }, []);
