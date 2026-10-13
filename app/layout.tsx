@@ -6,6 +6,7 @@ import { getLocale, getMessages, getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
 import { AnalyticsProvider } from "@/components/analytics-provider";
 import { InstallPromptProvider } from "@/components/pwa/install-prompt-provider";
+import { ServiceWorkerRegistrar } from "@/components/pwa/service-worker-registrar";
 import { SiteBottomNav } from "@/components/site-bottom-nav";
 import { SyncProvider } from "@/components/sync-provider";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -94,7 +95,8 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   return (
     <html lang={locale} suppressHydrationWarning>
       <body className={`${inter.variable} min-h-dvh antialiased`}>
-        <SerwistProvider swUrl="/sw.js">
+        <SerwistProvider swUrl="/sw.js" register={false}>
+          <ServiceWorkerRegistrar />
           <ThemeProvider
             attribute="class"
             defaultTheme="system"
