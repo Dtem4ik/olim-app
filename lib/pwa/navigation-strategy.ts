@@ -29,8 +29,50 @@ export const APP_SHELL_ROUTES = [
   "/onboarding",
 ] as const;
 
-/** The precached branded fallback route (see `app/offline/page.tsx`). */
+/** The precached branded fallback route (see `app/[locale]/offline/page.tsx`). */
 export const OFFLINE_URL = "/offline";
+
+/**
+ * URL prefixes of the non-default UI locales (`localePrefix: "as-needed"` in
+ * `i18n/routing.ts` — Russian is unprefixed). Kept as a literal so this module
+ * stays import-free for `next.config.ts` and the SW; a unit test asserts it
+ * matches the routing config.
+ */
+export const NON_DEFAULT_LOCALE_PREFIXES = ["/en"] as const;
+
+/** Prefix an unprefixed route (`/plan`, `/`) for a locale prefix (`/en`). */
+function withPrefix(prefix: string, route: string): string {
+  return route === "/" ? prefix : `${prefix}${route}`;
+}
+
+/**
+ * Every document we precache: the app shell + `/offline`, in every locale, so
+ * an English user's screens open offline on a cold device too.
+ */
+export const PRECACHE_DOCUMENT_ROUTES: readonly string[] = [
+  ...APP_SHELL_ROUTES,
+  OFFLINE_URL,
+  ...NON_DEFAULT_LOCALE_PREFIXES.flatMap((prefix) =>
+    [...APP_SHELL_ROUTES, OFFLINE_URL].map((route) => withPrefix(prefix, route)),
+  ),
+];
+
+/**
+ * The branded offline page in the navigation's own language (`/en/...` →
+ * `/en/offline`); the Russian `/offline` remains the universal fallback.
+ */
+export function offlineUrlFor(requestUrl: string): string {
+  let pathname: string;
+  try {
+    pathname = new URL(requestUrl).pathname;
+  } catch {
+    return OFFLINE_URL;
+  }
+  const prefix = NON_DEFAULT_LOCALE_PREFIXES.find(
+    (p) => pathname === p || pathname.startsWith(`${p}/`),
+  );
+  return prefix ? withPrefix(prefix, OFFLINE_URL) : OFFLINE_URL;
+}
 
 /**
  * How long to wait for the network on a navigation before falling back to cache.
@@ -44,7 +86,8 @@ export const NAVIGATION_NETWORK_TIMEOUT_MS = 3000;
  * evicted every cache) so the chain still returns a real Response instead of the
  * browser error. Intentionally self-contained (no CSS/JS/font requests) and
  * localized-neutral — the branded `/offline` page is the normal fallback; this is
- * the floor beneath it. RU copy mirrors `messages/*.json → offline`.
+ * the floor beneath it. Bilingual (RU + EN) because it cannot know the UI
+ * locale; the copy mirrors `messages/*.json → offline`.
  */
 export const LAST_RESORT_OFFLINE_HTML = `<!doctype html>
 <html lang="ru">
@@ -71,7 +114,9 @@ export const LAST_RESORT_OFFLINE_HTML = `<!doctype html>
   <main>
     <h1>Нет соединения</h1>
     <p>Твой план и открытые ранее гиды доступны без сети.</p>
-    <button type="button" onclick="location.reload()">Обновить</button>
+    <h1 lang="en">You're offline</h1>
+    <p lang="en">Your plan and previously opened guides work without a connection.</p>
+    <button type="button" onclick="location.reload()">Обновить · Reload</button>
   </main>
 </body>
 </html>`;
@@ -185,12 +230,16 @@ export async function handleNavigate(
     // ignore and continue down the chain
   }
 
-  // 3. Precached branded offline page.
-  try {
-    const offline = await deps.matchPrecache(OFFLINE_URL);
-    if (isUsableResponse(offline)) return offline;
-  } catch {
-    // ignore and fall to the inline floor
+  // 3. Precached branded offline page — in the request's locale first, then
+  //    the default-locale page.
+  const offlineUrls = [...new Set([offlineUrlFor(request.url), OFFLINE_URL])];
+  for (const url of offlineUrls) {
+    try {
+      const offline = await deps.matchPrecache(url);
+      if (isUsableResponse(offline)) return offline;
+    } catch {
+      // ignore and try the next fallback
+    }
   }
 
   // 4. Inline floor — the precache itself is gone (iOS evicted everything).
