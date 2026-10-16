@@ -88,6 +88,18 @@ Stack: Next.js (App Router, TS strict) on Vercel · Supabase (Postgres, Auth, pg
   (~5.4:1) at full opacity — do NOT darken it to "fix contrast"; that only
   chases the mid-fade artifact.
 
+- **Never let ordinary requests write the locale cookie.** next-intl's middleware
+  (re)writes `NEXT_LOCALE` on every request whose prefix differs from the cookie —
+  and the service worker precaches `/en/...` in the background on install, so that
+  silently flipped every Russian user to English (caught by e2e, never shipped).
+  `i18n/routing.ts` therefore sets `localeCookie: false` + `localeDetection: false`;
+  the cookie is written only by the language switcher (and an explicit `/ru/...`
+  link), and `proxy.ts` honors it. Don't "simplify" back to next-intl's cookie.
+- **Playwright `setOffline` doesn't reliably cut the SW's own fetches.** An
+  "uncached route offline" e2e can still be answered by the network (a real 404).
+  Assert fallback-page *content* in the unit tests of
+  `lib/pwa/navigation-strategy.ts`, not in e2e.
+
 ## Conventions
 
 - Branches: `phase-N/short-description`. PRs into `main`, green CI required.

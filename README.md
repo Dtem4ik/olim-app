@@ -4,7 +4,8 @@
 quiz about your situation and get a personalized plan: what to do after landing —
 banks, health fund, rent, work, benefits, Hebrew — as trackable steps with deadline
 warnings, full-text + AI search grounded in official sources, and a shareable plan.
-Russian/English, light/dark, PWA-first (works offline at the airport).
+Russian/English interface (guide texts in Russian for now), light/dark, PWA-first
+(works offline at the airport).
 
 **Live:** https://olimguide.online · **Stack:** Next.js (App Router, TS strict) ·
 Supabase (Postgres · Auth · pgvector) · Tailwind + shadcn/ui · next-intl · Gemini
@@ -36,6 +37,9 @@ Supabase (Postgres · Auth · pgvector) · Tailwind + shadcn/ui · next-intl · 
 - **Accounts + reminders.** Supabase Auth (magic link + Google) with owner-scoped RLS,
   first-sign-in plan migration + cross-device sync, and opt-in email deadline reminders
   (Edge Function + Resend, scheduled via `pg_cron`).
+- **Russian & English UI.** Russian at the original URLs, English under `/en/...`
+  (switcher in Profile; the choice is remembered). Guide texts are Russian-only for
+  now — the English UI says so and canonicalizes those pages to Russian.
 - **PWA.** Installable, offline access to your plan and viewed steps ("at the airport
   with no connection" is scenario #1).
 
