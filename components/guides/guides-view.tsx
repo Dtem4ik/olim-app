@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
+import { ContentLanguageNote } from "@/components/guides/content-language-note";
 import { SearchButton } from "@/components/search-button";
 import { SectionTile } from "@/components/section-tile";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -34,6 +35,7 @@ export function GuidesView({
       </header>
 
       <main className="flex flex-1 flex-col gap-4 px-4 py-4">
+        <ContentLanguageNote />
         {loaded ? (
           <p className="text-sm text-muted-foreground">
             {profile ? t("personalizedHint") : t("allHint")}
@@ -41,7 +43,7 @@ export function GuidesView({
         ) : (
           <Skeleton className="h-5 w-64" />
         )}
-        <div className="grid grid-cols-2 gap-3" data-testid="sections-grid">
+        <div className="grid grid-cols-2 gap-3" data-testid="sections-grid" lang="ru">
           {sections.map((s) => (
             <SectionTile
               key={s.slug}

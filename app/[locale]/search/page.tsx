@@ -1,0 +1,25 @@
+import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
+import { SearchView } from "@/components/search/search-view";
+import { type LocaleParams, pageLocale } from "@/i18n/params";
+import { getContent } from "@/lib/content/repo";
+import { isAiConfigured } from "@/lib/rag/config";
+
+// ISR — picks up content:import within the hour even when the revalidation
+// ping is skipped (no REVALIDATE_SECRET locally); was static until redeploy.
+export const revalidate = 3600;
+
+export async function generateMetadata({ params }: LocaleParams): Promise<Metadata> {
+  await pageLocale(params);
+  const t = await getTranslations("search");
+  // Search is a utility screen, not an SEO target — keep it out of the index.
+  return { title: t("title"), robots: { index: false, follow: true } };
+}
+
+export default async function SearchPage({ params }: LocaleParams) {
+  await pageLocale(params);
+  // Only the section list is server-rendered (for the empty-state suggestions and
+  // to resolve result photos/descriptions). Query results come from /api/search.
+  const { sections } = await getContent();
+  return <SearchView sections={sections} aiEnabled={isAiConfigured()} />;
+}

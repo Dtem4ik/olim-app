@@ -273,7 +273,8 @@
     "shareSection": "Share section",
     "stepsCount": "{count, plural, one {# step} other {# steps}}",
     "empty": "No steps in this section yet.",
-    "back": "Back"
+    "back": "Back",
+    "contentLanguageNote": "Guide texts are in Russian for now — English translation is on the way."
   },
   "step": {
     "bring": "Bring with you",
@@ -301,7 +302,7 @@
     "edit": "Edit answers",
     "theme": "Theme",
     "language": "Language",
-    "languageSoon": "Soon",
+    "languages": { "label": "Interface language", "ru": "Русский", "en": "English" },
     "startOver": "Reset everything",
     "empty": "You haven't taken the quiz yet."
   },

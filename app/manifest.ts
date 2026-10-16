@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { getTranslations } from "next-intl/server";
+import { defaultLocale } from "@/i18n/routing";
 
 /**
  * Web app manifest (Phase 5c) — makes the app installable (A2HS). Localized
@@ -8,7 +9,7 @@ import { getTranslations } from "next-intl/server";
  * the root layout. Icons are a simple monochrome glyph set in public/icons/.
  */
 export default async function manifest(): Promise<MetadataRoute.Manifest> {
-  const t = await getTranslations("app");
+  const t = await getTranslations({ locale: defaultLocale, namespace: "app" });
   return {
     name: `${t("name")} — ${t("tagline")}`,
     short_name: t("name"),

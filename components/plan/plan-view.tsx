@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { type CSSProperties, useMemo, useState } from "react";
 import { DeadlineBadge } from "@/components/deadline-badge";
@@ -12,6 +11,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Link } from "@/i18n/navigation";
 import { capture } from "@/lib/analytics";
 import type { ContentStep } from "@/lib/content/repo";
 import { buildPlan, type PlanEntry } from "@/lib/plan/build-plan";

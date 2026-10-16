@@ -273,7 +273,8 @@
     "shareSection": "Поделиться разделом",
     "stepsCount": "{count, plural, one {# шаг} few {# шага} many {# шагов} other {# шага}}",
     "empty": "В этом разделе пока нет шагов.",
-    "back": "Назад"
+    "back": "Назад",
+    "contentLanguageNote": "Тексты гидов пока только на русском."
   },
   "step": {
     "bring": "Возьми с собой",
@@ -301,7 +302,7 @@
     "edit": "Изменить ответы",
     "theme": "Тема",
     "language": "Язык",
-    "languageSoon": "Скоро",
+    "languages": { "label": "Язык интерфейса", "ru": "Русский", "en": "English" },
     "startOver": "Сбросить всё",
     "empty": "Ты ещё не проходил опрос."
   },

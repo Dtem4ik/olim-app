@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { sharePlan } from "@/app/plan/actions";
 import { Button } from "@/components/ui/button";
+import { useLocalePath } from "@/i18n/use-locale-path";
 import { capture } from "@/lib/analytics";
 import type { Profile } from "@/lib/plan/profile";
 import { recordCreatedShare } from "@/lib/share/created-shares";
@@ -18,6 +19,7 @@ type Status = "idle" | "sharing" | "copied" | "error";
  */
 export function SharePlanButton({ answers, done }: { answers: Profile; done: string[] }) {
   const t = useTranslations("plan.share");
+  const withLocale = useLocalePath();
   const [status, setStatus] = useState<Status>("idle");
 
   async function onShare() {
@@ -28,7 +30,7 @@ export function SharePlanButton({ answers, done }: { answers: Profile; done: str
       return;
     }
 
-    const url = `${window.location.origin}/plan/${result.slug}`;
+    const url = `${window.location.origin}${withLocale(`/plan/${result.slug}`)}`;
     // Remember this slug so it can be claimed by the account on first sign-in.
     recordCreatedShare(result.slug);
     capture("plan_shared", { slug: result.slug, done: done.length });

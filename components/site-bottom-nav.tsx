@@ -1,9 +1,9 @@
 "use client";
 
 import { BookOpen, Home, ListChecks, User } from "lucide-react";
-import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { BottomNav } from "@/components/bottom-nav";
+import { usePathname } from "@/i18n/navigation";
 
 /** Tabs that own a top-level destination, matched against the current pathname. */
 const TABS = [

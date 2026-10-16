@@ -2,16 +2,18 @@
 
 import { ArrowLeft, ChevronRight } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { type CSSProperties, type MouseEvent, useEffect, useMemo, useState } from "react";
 import { DeadlineBadge } from "@/components/deadline-badge";
+import { ContentLanguageNote } from "@/components/guides/content-language-note";
 import { StepBody } from "@/components/guides/step-body";
 import { SearchButton } from "@/components/search-button";
 import { ShareButton } from "@/components/share-button";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Link } from "@/i18n/navigation";
+import { useLocalePath } from "@/i18n/use-locale-path";
 import { capture } from "@/lib/analytics";
 import type { ContentSection, ContentStep } from "@/lib/content/repo";
 import { computeWarning, matchesCond, type PlanAnswers } from "@/lib/plan/build-plan";
@@ -42,6 +44,7 @@ export function SectionView({
   const t = useTranslations("guides");
   const tStep = useTranslations("step");
   const router = useRouter();
+  const withLocale = useLocalePath();
   const { isDone, toggle } = useProgress();
   const profile = useProfile().profile ?? null;
   const [openSlug, setOpenSlug] = useState<string | null>(initialStepSlug ?? null);
@@ -62,8 +65,9 @@ export function SectionView({
   // a shared link stays correct as the reader opens, switches, or closes steps.
   useEffect(() => {
     const base = `/guides/${section.slug}`;
-    window.history.replaceState(window.history.state, "", openSlug ? `${base}/${openSlug}` : base);
-  }, [openSlug, section.slug]);
+    const path = withLocale(openSlug ? `${base}/${openSlug}` : base);
+    window.history.replaceState(window.history.state, "", path);
+  }, [openSlug, section.slug, withLocale]);
 
   // Everyone sees the whole guide; matched steps float to the top in their group.
   const groups: Group[] = useMemo(() => {
@@ -111,6 +115,7 @@ export function SectionView({
         </header>
 
         <main className="flex flex-1 flex-col gap-4 px-4 py-4">
+          <ContentLanguageNote />
           <SectionHero section={section} titleIsHeading={openSlug === null} />
           <p className="px-1 text-xs text-muted-foreground">
             {profile ? t("personalizedHint") : t("allHint")}
@@ -121,7 +126,7 @@ export function SectionView({
               {t("empty")}
             </p>
           ) : (
-            <div className="flex flex-col gap-6" data-testid="section-steps">
+            <div className="flex flex-col gap-6" data-testid="section-steps" lang="ru">
               {groups.map((g) => (
                 <section key={g.key} className="flex flex-col gap-2">
                   {g.label && (

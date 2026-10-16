@@ -1,11 +1,11 @@
 "use client";
 
 import { ChevronRight, Loader2, SendHorizontal, Sparkles } from "lucide-react";
-import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { useRef, useState } from "react";
 import { SectionTile } from "@/components/section-tile";
 import { Button } from "@/components/ui/button";
+import { Link } from "@/i18n/navigation";
 import { capture } from "@/lib/analytics";
 import type { ContentSection } from "@/lib/content/repo";
 import type { Source } from "@/lib/rag/types";

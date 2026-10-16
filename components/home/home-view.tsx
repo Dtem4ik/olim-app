@@ -2,7 +2,6 @@
 
 import { CheckCircle2 } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { DeadlineBadge } from "@/components/deadline-badge";
@@ -11,6 +10,7 @@ import { SectionTile } from "@/components/section-tile";
 import { StepCard } from "@/components/step-card";
 import { buttonVariants } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Link } from "@/i18n/navigation";
 import type { ContentSection, ContentStep } from "@/lib/content/repo";
 import { buildPlan, type PlanEntry } from "@/lib/plan/build-plan";
 import type { Profile } from "@/lib/plan/profile";

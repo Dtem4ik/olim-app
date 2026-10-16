@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import type { Locale } from "@/i18n/routing";
+import { ogLocale } from "./i18n";
 
 /**
  * Brand shown as `og:site_name` / inherited into Twitter on every unfurl.
@@ -22,6 +24,8 @@ type OpenGraph = NonNullable<Metadata["openGraph"]>;
 export function routeOpenGraph(opts: {
   url: string;
   title: string;
+  /** Page locale → `og:locale` (defaults to Russian). */
+  locale?: Locale;
   description?: string | undefined;
   type?: "website" | "article";
   /** Article facets (only used when type === "article"): freshness + taxonomy. */
@@ -34,7 +38,7 @@ export function routeOpenGraph(opts: {
 }): OpenGraph {
   const common = {
     siteName: OG_SITE_NAME,
-    locale: "ru_RU",
+    locale: ogLocale(opts.locale ?? "ru"),
     url: opts.url,
     title: opts.title,
     ...(opts.description !== undefined ? { description: opts.description } : {}),

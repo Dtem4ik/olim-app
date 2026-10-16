@@ -1,15 +1,15 @@
+import { hasLocale } from "next-intl";
 import { getRequestConfig } from "next-intl/server";
+import { routing } from "./routing";
 
-/**
- * Single-locale setup for Phase 1: Russian ships now, English keys stay ready.
- * When locale routing lands, derive `locale` from the request instead.
- */
-export const defaultLocale = "ru" as const;
-export const locales = ["ru", "en"] as const;
-export type Locale = (typeof locales)[number];
+export type { Locale } from "./routing";
+export { defaultLocale, locales } from "./routing";
 
-export default getRequestConfig(async () => {
-  const locale: Locale = defaultLocale;
+export default getRequestConfig(async ({ requestLocale }) => {
+  // `requestLocale` comes from the `[locale]` segment; routes outside it
+  // (manifest, API, sitemap) fall back to the default locale.
+  const requested = await requestLocale;
+  const locale = hasLocale(routing.locales, requested) ? requested : routing.defaultLocale;
 
   return {
     locale,
