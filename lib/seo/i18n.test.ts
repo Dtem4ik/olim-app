@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isLocale, localeAlternates, localePath, ogLocale } from "./i18n";
+import { isLocale, localeAlternates, localePath, ogLocale, untranslatedRouteSeo } from "./i18n";
 
 describe("localePath", () => {
   it("keeps the default locale unprefixed", () => {
@@ -15,16 +15,24 @@ describe("localePath", () => {
 
 describe("localeAlternates", () => {
   it("self-canonicalizes translated routes and lists hreflang for every locale", () => {
-    expect(localeAlternates("en", "/plan", { translated: true })).toEqual({
+    expect(localeAlternates("en", "/plan")).toEqual({
       canonical: "/en/plan",
       languages: { "x-default": "/plan", ru: "/plan", en: "/en/plan" },
     });
-    expect(localeAlternates("ru", "/", { translated: true }).canonical).toBe("/");
+    expect(localeAlternates("ru", "/").canonical).toBe("/");
+  });
+});
+
+describe("untranslatedRouteSeo", () => {
+  it("keeps the Russian original self-canonical and indexable", () => {
+    expect(untranslatedRouteSeo("ru", "/guides/banks")).toEqual({
+      alternates: { canonical: "/guides/banks" },
+    });
   });
 
-  it("points untranslated content routes at the Russian original", () => {
-    expect(localeAlternates("en", "/guides/banks", { translated: false })).toEqual({
-      canonical: "/guides/banks",
+  it("keeps the English shell out of the index, without a cross-language canonical", () => {
+    expect(untranslatedRouteSeo("en", "/guides/banks")).toEqual({
+      robots: { index: false, follow: true },
     });
   });
 });

@@ -24,22 +24,33 @@ export function localePath(locale: Locale, path: string): string {
 }
 
 /**
- * `alternates` for a route.
- *
- * - `translated` routes (UI-only pages: home, plan, onboarding, about) are fully
- *   localized, so each locale is self-canonical and they cross-reference each
- *   other via hreflang (+ `x-default` → Russian).
- * - Content routes (guides) still carry Russian-only text, so the English URL
- *   would be a near-duplicate: it canonicalizes to the Russian page and emits no
- *   hreflang until the content itself is translated.
+ * `alternates` for a fully translated route (UI-only pages: home, plan,
+ * onboarding, about): each locale is self-canonical and they cross-reference
+ * each other via hreflang (+ `x-default` → Russian).
  */
 export function localeAlternates(
   locale: Locale,
   path: string,
-  { translated }: { translated: boolean },
 ): NonNullable<Metadata["alternates"]> {
-  if (!translated) return { canonical: path };
   const languages: Record<string, string> = { "x-default": path };
   for (const l of locales) languages[l] = localePath(l, path);
   return { canonical: localePath(locale, path), languages };
+}
+
+/**
+ * Index signals for a content route (guides) whose text is Russian-only for now.
+ *
+ * Russian: self-canonical, as before. Other locales: `noindex, follow` and no
+ * canonical. The English URL is an English shell around Russian text — not a
+ * translation (so no hreflang) and not a clean duplicate either; Google advises
+ * against cross-language canonicals, and `noindex` keeps the hybrid out of the
+ * index deterministically while its links are still followed. Switch these
+ * routes to `localeAlternates` once the content itself is translated.
+ */
+export function untranslatedRouteSeo(
+  locale: Locale,
+  path: string,
+): Pick<Metadata, "alternates" | "robots"> {
+  if (locale === defaultLocale) return { alternates: { canonical: path } };
+  return { robots: { index: false, follow: true } };
 }

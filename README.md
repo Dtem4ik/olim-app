@@ -39,7 +39,7 @@ Supabase (Postgres · Auth · pgvector) · Tailwind + shadcn/ui · next-intl · 
   (Edge Function + Resend, scheduled via `pg_cron`).
 - **Russian & English UI.** Russian at the original URLs, English under `/en/...`
   (switcher in Profile; the choice is remembered). Guide texts are Russian-only for
-  now — the English UI says so and canonicalizes those pages to Russian.
+  now — the English UI says so and keeps those pages out of the search index.
 - **PWA.** Installable, offline access to your plan and viewed steps ("at the airport
   with no connection" is scenario #1).
 

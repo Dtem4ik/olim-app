@@ -38,8 +38,12 @@ is still Russian-only and is the next step (see Deferred).
   `?q=` sync, guide sheet URL sync, share links) use `useLocalePath`.
 - **SEO** — `lib/seo/i18n.ts`: translated routes (home, plan, onboarding, about)
   are self-canonical per locale with hreflang + `x-default`; `og:locale` per locale;
-  sitemap lists them in both locales with alternates. Guide routes (`/en/guides/...`)
-  canonicalize to the Russian page (no hreflang) — their text is Russian.
+  sitemap lists them in both locales with alternates (incl. `x-default`). Guide
+  routes (`/en/guides/...`) are `noindex, follow` with no canonical/hreflang — an
+  English shell around Russian text is neither a translation nor a clean duplicate,
+  and Google advises against cross-language canonicals. Russian guides are untouched.
+  OG images are served at `/ru/...` directly (no 307), and the old unprefixed image
+  URLs still answer 200.
   `revalidate` also purges the `[locale]` layout.
 - **Honest mixed-language UX** — English guide pages show "Guide texts are in
   Russian for now — English translation is on the way."; guide lists carry

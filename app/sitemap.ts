@@ -16,7 +16,7 @@ export const revalidate = 3600;
  *
  * Fully translated UI routes (home, /onboarding, /plan, /about) are listed in
  * every locale with hreflang alternates. Guides stay Russian-only here: their
- * text isn't translated yet, so the /en copies canonicalize to Russian.
+ * text isn't translated yet, so the /en copies are noindex.
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = getSiteUrl();
@@ -46,9 +46,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: "/about", changeFrequency: "monthly", priority: 0.5 },
   ];
   const translatedRoutes: MetadataRoute.Sitemap = translated.flatMap((route) => {
-    const languages = Object.fromEntries(
-      locales.map((l) => [l, `${base}${localePath(l, route.url)}`]),
-    );
+    // Mirrors the pages' hreflang (lib/seo/i18n.ts), x-default → Russian.
+    const languages = Object.fromEntries([
+      ["x-default", `${base}${route.url}`],
+      ...locales.map((l) => [l, `${base}${localePath(l, route.url)}`]),
+    ]);
     return locales.map((l) => ({
       ...route,
       url: `${base}${localePath(l, route.url)}`,

@@ -5,6 +5,7 @@ import { JsonLd } from "@/components/seo/json-ld";
 import { pageLocale } from "@/i18n/params";
 import { getContent } from "@/lib/content/repo";
 import { renderMarkdown } from "@/lib/markdown";
+import { untranslatedRouteSeo } from "@/lib/seo/i18n";
 import { routeOpenGraph } from "@/lib/seo/open-graph";
 import { sectionJsonLd } from "@/lib/seo/structured-data";
 import { getSiteUrl } from "@/lib/site-url";
@@ -15,7 +16,7 @@ type Params = { params: Promise<{ locale: string; section: string }> };
 export const revalidate = 3600;
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
-  await pageLocale(params);
+  const locale = await pageLocale(params);
   const { section } = await params;
   const { sections } = await getContent();
   const sec = sections.find((s) => s.slug === section);
@@ -24,9 +25,8 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   return {
     title: sec.title,
     description: sec.description ?? undefined,
-    // Guide text is Russian-only for now, so /en/... canonicalizes to the Russian
-    // page (no hreflang) until the content itself is translated.
-    alternates: { canonical: path },
+    // Guide text is Russian-only for now: /en/... stays out of the index.
+    ...untranslatedRouteSeo(locale, path),
     openGraph: routeOpenGraph({
       url: path,
       title: sec.title,

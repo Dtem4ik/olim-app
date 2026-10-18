@@ -23,7 +23,7 @@ export async function generateMetadata({ params }: LocaleParams): Promise<Metada
     // already carries the brand, so the template would double it.
     title: { absolute: title },
     description,
-    alternates: localeAlternates(locale, "/", { translated: true }),
+    alternates: localeAlternates(locale, "/"),
     openGraph: routeOpenGraph({
       locale,
       url: localePath(locale, "/"),

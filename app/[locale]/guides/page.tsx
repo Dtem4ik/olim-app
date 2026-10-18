@@ -4,7 +4,7 @@ import { GuidesView } from "@/components/guides/guides-view";
 import { JsonLd } from "@/components/seo/json-ld";
 import { type LocaleParams, pageLocale } from "@/i18n/params";
 import { getContent } from "@/lib/content/repo";
-import { localeAlternates } from "@/lib/seo/i18n";
+import { untranslatedRouteSeo } from "@/lib/seo/i18n";
 import { routeOpenGraph } from "@/lib/seo/open-graph";
 import { guidesJsonLd } from "@/lib/seo/structured-data";
 import { getSiteUrl } from "@/lib/site-url";
@@ -21,8 +21,8 @@ export async function generateMetadata({ params }: LocaleParams): Promise<Metada
   return {
     title,
     description,
-    // The index lists Russian-only section titles → /en canonicalizes to Russian.
-    alternates: localeAlternates(locale, "/guides", { translated: false }),
+    // The index lists Russian-only section titles → /en stays out of the index.
+    ...untranslatedRouteSeo(locale, "/guides"),
     openGraph: routeOpenGraph({ url: "/guides", title, description }),
     // twitter tags are auto-derived from openGraph + the guides opengraph-image
     // (yields summary_large_image), matching the section/step routes.

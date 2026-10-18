@@ -124,7 +124,8 @@ Server components read translations via `getTranslations`; client components via
 - **SEO** — translated UI routes (home, plan, onboarding, about) are
   self-canonical per locale with hreflang + `x-default` (`lib/seo/i18n.ts`) and are
   listed per locale in the sitemap. **Guide content is still Russian-only**, so
-  `/en/guides/...` canonicalizes to the Russian page (no hreflang) and shows a
+  `/en/guides/...` is `noindex, follow` (no cross-language canonical, no hreflang —
+  `untranslatedRouteSeo`) and shows a
   "texts are in Russian for now" note; guide text carries `lang="ru"`.
 - **Not localized yet** (Russian only): guide content (DB), the AI answer's
   source content (it answers in the question's language), keyword search

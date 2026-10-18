@@ -133,17 +133,38 @@ test.describe("English UI", () => {
     expect(langs).toEqual({ "/": "ru", "/plan": "ru", "/offline": "ru", "/en/plan": "en" });
   });
 
-  test("guides say their text is Russian-only and canonicalize to Russian", async ({ page }) => {
+  test("English guide shells say the text is Russian-only and stay out of the index", async ({
+    page,
+  }) => {
     await page.goto("/en/guides/healthcare");
     await expect(page.getByTestId("content-language-note")).toBeVisible();
+    await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /noindex/);
+    await expect(page.locator('link[rel="canonical"]')).toHaveCount(0);
+    await expect(page.locator('link[rel="alternate"][hreflang]')).toHaveCount(0);
+
+    // The Russian original: no note, indexable, self-canonical, still no hreflang.
+    await page.goto("/guides/healthcare");
+    await expect(page.getByTestId("content-language-note")).toHaveCount(0);
+    await expect(page.locator('meta[name="robots"]')).not.toHaveAttribute("content", /noindex/);
     await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
       "href",
       /\/guides\/healthcare$/,
     );
+    await expect(page.locator('link[rel="alternate"][hreflang]')).toHaveCount(0);
+  });
 
-    // The Russian page carries no such note.
-    await page.goto("/guides/healthcare");
-    await expect(page.getByTestId("content-language-note")).toHaveCount(0);
+  test("og:image URLs answer 200 directly (link-preview scrapers may not follow redirects)", async ({
+    page,
+    request,
+  }) => {
+    for (const route of ["/", "/guides/healthcare", "/en/plan"]) {
+      await page.goto(route);
+      const content = await page.locator('meta[property="og:image"]').getAttribute("content");
+      const { pathname, search } = new URL(content ?? "");
+      const res = await request.get(`${pathname}${search}`, { maxRedirects: 0 });
+      expect(res.status(), `${route} → ${pathname}`).toBe(200);
+      expect(res.headers()["content-type"]).toContain("image/png");
+    }
   });
 
   test("translated pages cross-reference each other with hreflang", async ({ page }) => {
