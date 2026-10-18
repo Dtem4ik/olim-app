@@ -28,6 +28,15 @@ const intl = createMiddleware(routing);
  */
 export default function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
+
+  // OG images live under `[locale]`, so Next emits Russian og:image URLs as
+  // `/ru/.../opengraph-image`. Serve them as-is: next-intl would 307 them to the
+  // unprefixed URL, and some link-preview scrapers don't follow redirects. The
+  // unprefixed form (old, already-cached URLs) still works via the rewrite below.
+  if (isMetadataImage(pathname)) {
+    return prefixLocale(pathname) ? NextResponse.next() : intl(request);
+  }
+
   const background = isBackgroundFetch(request);
 
   const target = background
@@ -61,6 +70,11 @@ export function isBackgroundFetch(request: NextRequest): boolean {
   if (request.headers.has("rsc") || request.headers.has("next-router-prefetch")) return true;
   const dest = request.headers.get("sec-fetch-dest");
   return dest !== null && dest !== "document";
+}
+
+/** A file-convention OG image route (`.../opengraph-image`, `?hash` aside). */
+export function isMetadataImage(pathname: string): boolean {
+  return /(^|\/)opengraph-image(-[\w-]+)?$/.test(pathname);
 }
 
 export const config = {
