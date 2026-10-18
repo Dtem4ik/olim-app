@@ -3,6 +3,7 @@
 import { ChevronRight, Loader2, SendHorizontal, Sparkles } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useRef, useState } from "react";
+import { AnswerText } from "@/components/search/answer-text";
 import { SectionTile } from "@/components/section-tile";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
@@ -177,12 +178,15 @@ export function AskBox({ sections }: { sections: ContentSection[] }) {
 
           {answer.length > 0 && status !== "refused" && (
             <div className="rounded-2xl border border-primary/15 bg-primary/[0.06] px-4 py-3.5">
-              <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">
-                {answer}
-                {status === "streaming" && (
-                  <span className="ml-0.5 inline-block h-4 w-[2px] translate-y-0.5 animate-pulse bg-primary align-middle" />
-                )}
-              </p>
+              <AnswerText
+                text={answer}
+                className="text-sm leading-relaxed text-foreground"
+                trailing={
+                  status === "streaming" && (
+                    <span className="ml-0.5 inline-block h-4 w-[2px] translate-y-0.5 animate-pulse bg-primary align-middle" />
+                  )
+                }
+              />
             </div>
           )}
 
