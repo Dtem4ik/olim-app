@@ -8,7 +8,8 @@ export const dynamic = "force-dynamic";
  * successful import so newly imported/edited content goes live without a redeploy.
  * Guarded by a shared secret (`REVALIDATE_SECRET`). Revalidating the root layout
  * regenerates every nested content route (home, guides, sections, steps, sitemap)
- * on its next request.
+ * on its next request; the `[locale]` layout is named explicitly too, since every
+ * page now lives under it (both `/…` and `/en/…`).
  */
 export async function POST(req: NextRequest) {
   const secret = process.env.REVALIDATE_SECRET;
@@ -17,5 +18,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ revalidated: false, error: "unauthorized" }, { status: 401 });
   }
   revalidatePath("/", "layout");
+  revalidatePath("/[locale]", "layout");
   return NextResponse.json({ revalidated: true, now: Date.now() });
 }

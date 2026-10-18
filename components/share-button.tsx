@@ -3,9 +3,13 @@
 import { Check, Share2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
+import { useLocalePath } from "@/i18n/use-locale-path";
 import { cn } from "@/lib/utils";
 
-/** Round button that shares a path via the Web Share API (clipboard fallback). */
+/**
+ * Round button that shares a path via the Web Share API (clipboard fallback).
+ * `path` is unprefixed (`/guides/...`); the current locale's prefix is added.
+ */
 export function ShareButton({
   path,
   title,
@@ -16,10 +20,12 @@ export function ShareButton({
   className?: string;
 }) {
   const t = useTranslations("step");
+  const withLocale = useLocalePath();
   const [copied, setCopied] = useState(false);
 
   async function share() {
-    const url = typeof window !== "undefined" ? new URL(path, window.location.origin).href : path;
+    const url =
+      typeof window !== "undefined" ? new URL(withLocale(path), window.location.origin).href : path;
     try {
       if (navigator.share) {
         await navigator.share({ title, url });

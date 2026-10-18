@@ -1,5 +1,7 @@
 import type { MetadataRoute } from "next";
+import { locales } from "@/i18n/routing";
 import { getContent } from "@/lib/content/repo";
+import { localePath } from "@/lib/seo/i18n";
 import { getSiteUrl } from "@/lib/site-url";
 
 // Regenerate with the content pages (Phase 6b) — new sections/steps appear in the
@@ -11,6 +13,10 @@ export const revalidate = 3600;
  * step. /plan and /onboarding are included as indexable conversion landings.
  * Excluded: /search, /offline, /profile, /plan/[slug] — they're noindex and
  * carry no SEO value.
+ *
+ * Fully translated UI routes (home, /onboarding, /plan, /about) are listed in
+ * every locale with hreflang alternates. Guides stay Russian-only here: their
+ * text isn't translated yet, so the /en copies are noindex.
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = getSiteUrl();
@@ -33,17 +39,33 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   };
   const corpusModified = newest(steps);
 
+  const translated: MetadataRoute.Sitemap[number][] = [
+    { url: "/", lastModified: corpusModified, changeFrequency: "weekly", priority: 1 },
+    { url: "/onboarding", changeFrequency: "monthly", priority: 0.8 },
+    { url: "/plan", changeFrequency: "monthly", priority: 0.8 },
+    { url: "/about", changeFrequency: "monthly", priority: 0.5 },
+  ];
+  const translatedRoutes: MetadataRoute.Sitemap = translated.flatMap((route) => {
+    // Mirrors the pages' hreflang (lib/seo/i18n.ts), x-default → Russian.
+    const languages = Object.fromEntries([
+      ["x-default", `${base}${route.url}`],
+      ...locales.map((l) => [l, `${base}${localePath(l, route.url)}`]),
+    ]);
+    return locales.map((l) => ({
+      ...route,
+      url: `${base}${localePath(l, route.url)}`,
+      alternates: { languages },
+    }));
+  });
+
   const staticRoutes: MetadataRoute.Sitemap = [
-    { url: `${base}/`, lastModified: corpusModified, changeFrequency: "weekly", priority: 1 },
+    ...translatedRoutes,
     {
       url: `${base}/guides`,
       lastModified: corpusModified,
       changeFrequency: "weekly",
       priority: 0.9,
     },
-    { url: `${base}/onboarding`, changeFrequency: "monthly", priority: 0.8 },
-    { url: `${base}/plan`, changeFrequency: "monthly", priority: 0.8 },
-    { url: `${base}/about`, changeFrequency: "monthly", priority: 0.5 },
   ];
 
   const sectionRoutes: MetadataRoute.Sitemap = sections.map((s) => ({

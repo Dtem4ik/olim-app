@@ -45,7 +45,13 @@ const CONTACT_EMAIL = "d.tem4ik@gmail.com";
  * assistants resolve the brand from) and WebSite with a SearchAction so Google
  * can offer the sitelinks search box against our /search route.
  */
-export function siteJsonLd(args: { siteUrl: string; name: string; description: string }): JsonLd[] {
+export function siteJsonLd(args: {
+  siteUrl: string;
+  name: string;
+  description: string;
+  /** Page language (BCP 47) — the home page exists in every UI locale. */
+  inLanguage?: string;
+}): JsonLd[] {
   const { siteUrl, name, description } = args;
   const organization: JsonLd = {
     "@context": "https://schema.org",
@@ -67,7 +73,7 @@ export function siteJsonLd(args: { siteUrl: string; name: string; description: s
     "@type": "WebSite",
     name,
     url: siteUrl,
-    inLanguage: "ru",
+    inLanguage: args.inLanguage ?? "ru",
     publisher: { "@type": "Organization", name },
     potentialAction: {
       "@type": "SearchAction",

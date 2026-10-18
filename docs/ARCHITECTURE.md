@@ -12,7 +12,7 @@ add data, personalization, search and native wrappers.
 | Styling | Tailwind CSS v4 | CSS-first config in `app/globals.css` (`@theme inline`) |
 | Components | shadcn/ui + custom | primitives copied via the shadcn CLI, adapted to our tokens |
 | Icons | lucide-react | named imports (tree-shaken) |
-| i18n | next-intl 4 | single-locale (RU) now, EN keys ready; no locale routing yet |
+| i18n | next-intl 4 | RU (unprefixed) + EN UI (`/en/...`); guide content RU-only for now |
 | Theming | next-themes | `class` strategy, system + manual toggle |
 | Lint/format | Biome 2 | one tool for both |
 | Git hooks | lefthook | pre-commit: Biome + typecheck on staged; commit-msg: commitlint |
@@ -26,14 +26,17 @@ add data, personalization, search and native wrappers.
 
 ```
 app/                 App Router routes
-  layout.tsx         html shell, fonts, ThemeProvider + NextIntlClientProvider
-  page.tsx           home (server component)
+  [locale]/          every page lives under the locale segment (ru | en)
+    layout.tsx       html shell (lang), fonts, ThemeProvider + NextIntlClientProvider
+    page.tsx         home (server component)
+    dev/ui/page.tsx  UI-kit showcase (single theme, toggled)
   globals.css        Tailwind entry + design tokens (light/.light, .dark)
-  dev/ui/page.tsx    UI-kit showcase (single theme, toggled)
+  api/, auth/, sitemap.ts, robots.ts, manifest.ts, llms.txt/, sw.ts
+                     locale-agnostic handlers (outside `[locale]`, not proxied)
 components/          product components (SectionTile, StepCard, …)
   ui/                shadcn primitives (Button, Card, Badge, Input, Checkbox,
                      Empty, InputGroup, Field, Label, Separator, Textarea)
-app/onboarding/      quiz route (server: loads fixtures → client flow)
+app/[locale]/onboarding/ quiz route (server: loads content → client flow)
 components/onboarding/ onboarding quiz + plan preview (client)
 lib/                 pure, unit-tested logic (deadline, cn) + *.test.ts
   content/           schema (client-safe vocabulary), tables (server), bundle loader, lint
@@ -42,8 +45,10 @@ lib/                 pure, unit-tested logic (deadline, cn) + *.test.ts
 supabase/            Supabase CLI project: config.toml + migrations/
 scripts/             content CLI (validate, import, check-links, review-queue)
 content/fixtures/    committed content subset for tests/dev (real content is private)
-i18n/request.ts      next-intl request config (locale + messages)
-messages/            ru.json (shipping), en.json (keys ready)
+i18n/                routing (locales, prefix mode), request config, the
+                     locale-aware Link/usePathname, language-preference cookie
+proxy.ts             locale routing (next-intl middleware + preference redirect)
+messages/            ru.json, en.json (both shipping)
 test/                Testing Library render helper (providers)
 tests/e2e/           Playwright specs
 ```
@@ -96,12 +101,35 @@ props (content is data); chrome strings come from next-intl dictionaries.
 
 ## i18n
 
-Single-locale setup for now: `i18n/request.ts` returns locale `ru` and its
-messages; `next.config.ts` wires the next-intl plugin. Server components read
-translations via `getTranslations`; client components via `useTranslations` under
-the `NextIntlClientProvider` mounted in the root layout. Plural-aware strings use
-ICU syntax (e.g. deadline countdowns). Locale routing (`/[locale]`) and the EN
-switch are deferred to a later phase.
+Two UI locales: **Russian** (default, unprefixed: `/plan`) and **English**
+(`/en/plan`) — `localePrefix: "as-needed"` in `i18n/routing.ts`, so every
+pre-existing Russian URL is unchanged. All pages live under `app/[locale]/`; the
+layout validates the segment, calls `setRequestLocale` (static rendering), and
+`generateStaticParams` prerenders both locales (pages + static OG images).
+Server components read translations via `getTranslations`; client components via
+`useTranslations`. Plural-aware strings use ICU syntax.
+
+- **Routing** — `proxy.ts` runs next-intl's middleware (rewrites `/plan` →
+  `[locale]=ru`) with its own detection **off**: no `Accept-Language` (many
+  Russian-speaking olim use English-language phones) and no next-intl cookie.
+- **Language choice** — the switcher in Profile (`components/language-switcher.tsx`)
+  writes the `NEXT_LOCALE` cookie on click; `proxy.ts` then redirects unprefixed
+  visits to the chosen locale (`/` → `/en`). An explicit `/ru/...` link records
+  "Russian" (so switching back works without JS). Ordinary requests never write
+  the cookie — see AGENTS.md Known traps (SW precache vs locale cookie).
+- **Links** — `i18n/navigation.tsx` is a thin locale-prefixing wrapper over
+  `next/link` + a prefix-stripping `usePathname` (next-intl's `createNavigation`
+  cost ~10 KB gz per route for the same job). Hand-built URLs (`replaceState`,
+  share links) go through `useLocalePath`.
+- **SEO** — translated UI routes (home, plan, onboarding, about) are
+  self-canonical per locale with hreflang + `x-default` (`lib/seo/i18n.ts`) and are
+  listed per locale in the sitemap. **Guide content is still Russian-only**, so
+  `/en/guides/...` is `noindex, follow` (no cross-language canonical, no hreflang —
+  `untranslatedRouteSeo`) and shows a
+  "texts are in Russian for now" note; guide text carries `lang="ru"`.
+- **Not localized yet** (Russian only): guide content (DB), the AI answer's
+  source content (it answers in the question's language), keyword search
+  (Russian tsvector), reminder/magic-link emails, `llms.txt`, OG image `alt`.
 
 ## Data layer (Phase 2)
 
@@ -281,8 +309,9 @@ Installable, offline-capable app via **serwist** (`@serwist/next`):
   icon, per-mode `themeColor` via the root-layout viewport.
 - **Service worker** (`app/sw.ts`): precaches the app shell + static assets, the
   `/offline` fallback, **and the app-shell document routes** (`/`, `/plan`,
-  `/guides`, `/search`, `/profile`, `/onboarding`) — each with a per-build revision
-  (`additionalPrecacheEntries` in `next.config.ts`, list = `APP_SHELL_ROUTES`). The
+  `/guides`, `/search`, `/profile`, `/onboarding`) — in **every locale** (`/en`,
+  `/en/plan`, …, `/en/offline`) — each with a per-build revision
+  (`additionalPrecacheEntries` in `next.config.ts`, list = `PRECACHE_DOCUMENT_ROUTES`). The
   document precache is what makes the core screens open offline on a **cold** device
   (before a route is ever visited, and after iOS evicts the runtime cache); they
   hydrate their live state from localStorage, so a precached HTML snapshot renders
@@ -296,8 +325,9 @@ Installable, offline-capable app via **serwist** (`@serwist/next`):
   Known traps). `handleNavigate` resolves an ordered chain and can **never** return
   nothing: (1) network (navigation preload → timed fetch, cached on success);
   (2) the cached copy of this document (runtime "pages" cache, then precache);
-  (3) the precached branded `/offline`; (4) an inline last-resort page (covers a
-  fully cache-evicted device). This is why `/plan` offline can no longer produce
+  (3) the precached branded offline page in the request's language (`/en/...` →
+  `/en/offline`, then `/offline`); (4) an inline bilingual last-resort page (covers
+  a fully cache-evicted device). This is why `/plan` offline can no longer produce
   Safari's `no-response`. The pure handler is dependency-injected and unit-tested
   (`navigation-strategy.test.ts`); the flow is e2e-tested offline
   (`tests/e2e/offline.spec.ts`).

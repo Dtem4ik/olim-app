@@ -1,9 +1,13 @@
 import { describe, expect, it, vi } from "vitest";
+import { routing } from "@/i18n/routing";
 import {
   APP_SHELL_ROUTES,
   handleNavigate,
   type NavigationStrategyDeps,
+  NON_DEFAULT_LOCALE_PREFIXES,
   OFFLINE_URL,
+  offlineUrlFor,
+  PRECACHE_DOCUMENT_ROUTES,
 } from "./navigation-strategy";
 
 const NAV_URL = "https://olim-app.vercel.app/plan";
@@ -154,5 +158,52 @@ describe("APP_SHELL_ROUTES", () => {
     for (const route of ["/", "/plan", "/guides", "/search", "/profile"]) {
       expect(APP_SHELL_ROUTES).toContain(route);
     }
+  });
+});
+
+describe("locale-aware offline", () => {
+  it("keeps the locale prefixes in sync with the routing config", () => {
+    const expected = routing.locales.filter((l) => l !== routing.defaultLocale).map((l) => `/${l}`);
+    expect([...NON_DEFAULT_LOCALE_PREFIXES]).toEqual(expected);
+  });
+
+  it("precaches the app shell and /offline in every locale", () => {
+    for (const route of ["/", "/plan", "/offline", "/en", "/en/plan", "/en/offline"]) {
+      expect(PRECACHE_DOCUMENT_ROUTES).toContain(route);
+    }
+    expect(new Set(PRECACHE_DOCUMENT_ROUTES).size).toBe(PRECACHE_DOCUMENT_ROUTES.length);
+  });
+
+  it("picks the offline page in the navigation's language", () => {
+    expect(offlineUrlFor("https://olim-app.vercel.app/en/plan")).toBe("/en/offline");
+    expect(offlineUrlFor("https://olim-app.vercel.app/en")).toBe("/en/offline");
+    expect(offlineUrlFor("https://olim-app.vercel.app/plan")).toBe("/offline");
+    // "/english-guide" is not the /en locale.
+    expect(offlineUrlFor("https://olim-app.vercel.app/english-guide")).toBe("/offline");
+    expect(offlineUrlFor("not a url")).toBe("/offline");
+  });
+
+  it("serves the English offline page for an uncached /en navigation", async () => {
+    const res = await handleNavigate(
+      new Request("https://olim-app.vercel.app/en/plan"),
+      deps({
+        matchPrecache: (url) =>
+          Promise.resolve(
+            url === "/en/offline" || url === OFFLINE_URL ? htmlResponse(url) : undefined,
+          ),
+      }),
+    );
+    expect(await res.text()).toBe("/en/offline");
+  });
+
+  it("falls back to the Russian /offline when the English one is missing", async () => {
+    const res = await handleNavigate(
+      new Request("https://olim-app.vercel.app/en/plan"),
+      deps({
+        matchPrecache: (url) =>
+          Promise.resolve(url === OFFLINE_URL ? htmlResponse(url) : undefined),
+      }),
+    );
+    expect(await res.text()).toBe(OFFLINE_URL);
   });
 });

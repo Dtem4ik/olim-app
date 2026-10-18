@@ -24,6 +24,9 @@ module.exports = {
         "http://localhost:3000/guides/healthcare",
         "http://localhost:3000/guides/banks-and-money/open-bank-account",
         "http://localhost:3000/plan",
+        // English UI (/en/...) — same gates as the Russian routes.
+        "http://localhost:3000/en",
+        "http://localhost:3000/en/plan",
       ],
       numberOfRuns: 3,
       settings: {

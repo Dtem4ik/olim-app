@@ -1,13 +1,14 @@
 "use client";
 
 import { ArrowLeft, ChevronRight, Sparkles } from "lucide-react";
-import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 import { AskBox } from "@/components/search/ask-box";
 import { SearchBar } from "@/components/search-bar";
 import { SectionTile } from "@/components/section-tile";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Link } from "@/i18n/navigation";
+import { useLocalePath } from "@/i18n/use-locale-path";
 import { capture } from "@/lib/analytics";
 import type { ContentSection } from "@/lib/content/repo";
 import type { SearchResults } from "@/lib/search/types";
@@ -27,6 +28,7 @@ export function SearchView({
 }) {
   const t = useTranslations("search");
   const tNav = useTranslations("nav");
+  const withLocale = useLocalePath();
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResults>(EMPTY);
   const [loading, setLoading] = useState(false);
@@ -40,9 +42,10 @@ export function SearchView({
 
   // Mirror the query into the URL (replace — no history spam).
   useEffect(() => {
-    const url = query ? `/search?q=${encodeURIComponent(query)}` : "/search";
+    const path = withLocale("/search");
+    const url = query ? `${path}?q=${encodeURIComponent(query)}` : path;
     window.history.replaceState(window.history.state, "", url);
-  }, [query]);
+  }, [query, withLocale]);
 
   // Debounced server search. An AbortController drops stale in-flight requests so
   // fast typing never renders an earlier query's results out of order.

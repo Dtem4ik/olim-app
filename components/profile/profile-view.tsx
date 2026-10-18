@@ -1,15 +1,16 @@
 "use client";
 
-import { Download, Globe, Info, Languages, Palette, User } from "lucide-react";
+import { Download, Info, Languages, Palette, User } from "lucide-react";
 import dynamic from "next/dynamic";
-import Link from "next/link";
 import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
+import { LanguageSwitcher } from "@/components/language-switcher";
 import { useInstallPrompt } from "@/components/pwa/install-prompt-provider";
 import { SearchButton } from "@/components/search-button";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Link } from "@/i18n/navigation";
 import { useProfile } from "@/lib/plan/use-profile";
 import { setProgressValue } from "@/lib/plan/use-progress";
 
@@ -110,10 +111,7 @@ export function ProfileView() {
             <ThemeToggle />
           </SettingRow>
           <SettingRow icon={Languages} label={t("language")}>
-            <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
-              <Globe className="size-4" aria-hidden />
-              RU · {t("languageSoon")}
-            </span>
+            <LanguageSwitcher />
           </SettingRow>
           {canInstall && (
             <button

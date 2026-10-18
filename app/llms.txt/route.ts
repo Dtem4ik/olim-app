@@ -1,4 +1,5 @@
 import { getTranslations } from "next-intl/server";
+import { defaultLocale } from "@/i18n/routing";
 import { getContent } from "@/lib/content/repo";
 import { getSiteUrl } from "@/lib/site-url";
 
@@ -10,7 +11,10 @@ export const revalidate = 3600;
 
 export async function GET(): Promise<Response> {
   const base = getSiteUrl();
-  const [{ sections, steps }, tApp] = await Promise.all([getContent(), getTranslations("app")]);
+  const [{ sections, steps }, tApp] = await Promise.all([
+    getContent(),
+    getTranslations({ locale: defaultLocale, namespace: "app" }),
+  ]);
 
   const bySort = <T extends { sort_order: number }>(a: T, b: T) => a.sort_order - b.sort_order;
   const lines: string[] = [];

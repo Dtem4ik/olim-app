@@ -2,7 +2,6 @@
 
 import { ArrowLeft } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
 import { DeadlineBadge } from "@/components/deadline-badge";
@@ -11,6 +10,7 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Link } from "@/i18n/navigation";
 import { capture } from "@/lib/analytics";
 import { basisSchema, familySchema, stageSchema } from "@/lib/content/schema";
 import { buildPlan, type EngineStep, type PlanAnswers } from "@/lib/plan/build-plan";
