@@ -95,6 +95,10 @@ Stack: Next.js (App Router, TS strict) on Vercel · Supabase (Postgres, Auth, pg
   `i18n/routing.ts` therefore sets `localeCookie: false` + `localeDetection: false`;
   the cookie is written only by the language switcher (and an explicit `/ru/...`
   link), and `proxy.ts` honors it. Don't "simplify" back to next-intl's cookie.
+  The proxy's own cookie write and cookie redirect run on page navigations only
+  (`isBackgroundFetch` in `proxy.ts`): a Link prefetch of the switcher's
+  `/ru/...` URL reset English readers to Russian just by opening Profile, and the
+  SW precaching `/plan` under `NEXT_LOCALE=en` stored English HTML at Russian URLs.
 - **Playwright `setOffline` doesn't reliably cut the SW's own fetches.** An
   "uncached route offline" e2e can still be answered by the network (a real 404).
   Assert fallback-page *content* in the unit tests of

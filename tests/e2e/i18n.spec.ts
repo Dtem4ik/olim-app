@@ -81,6 +81,58 @@ test.describe("English UI", () => {
     await expect(page).toHaveURL(/\/$/);
   });
 
+  test("opening Profile in English keeps English (switcher prefetch can't reset it)", async ({
+    page,
+    context,
+    baseURL,
+  }) => {
+    await context.addCookies([{ name: "NEXT_LOCALE", value: "en", url: baseURL ?? "" }]);
+    await page.goto("/");
+    await expect(page).toHaveURL(/\/en$/);
+    // Client-side tab navigation renders the switcher with its `/ru/profile` link.
+    await page
+      .getByRole("navigation", { name: "Primary navigation" })
+      .getByRole("link")
+      .last()
+      .click();
+    await expect(page).toHaveURL(/\/en\/profile$/);
+    // The network never idles here (SW precache, analytics). Give Next's
+    // viewport prefetch time to fire — it used to request `/ru/profile` and the
+    // proxy then rewrote the cookie to `ru`.
+    await waitForServiceWorkerControl(page);
+    await page.waitForTimeout(2_000);
+
+    const cookie = (await context.cookies()).find((c) => c.name === "NEXT_LOCALE");
+    expect(cookie?.value).toBe("en");
+    await page.goto("/");
+    await expect(page).toHaveURL(/\/en$/);
+  });
+
+  test("the SW precaches Russian pages in Russian even with an English preference", async ({
+    page,
+    context,
+    baseURL,
+  }) => {
+    await context.addCookies([{ name: "NEXT_LOCALE", value: "en", url: baseURL ?? "" }]);
+    await page.goto("/en");
+    await waitForServiceWorkerControl(page);
+
+    const langs = await page.evaluate(async () => {
+      const out: Record<string, string | undefined> = {};
+      for (const name of await caches.keys()) {
+        const cache = await caches.open(name);
+        for (const req of await cache.keys()) {
+          const path = new URL(req.url).pathname;
+          if (!["/", "/plan", "/offline", "/en/plan"].includes(path)) continue;
+          const html = (await (await cache.match(req))?.text()) ?? "";
+          out[path] = html.match(/<html lang="(\w+)"/)?.[1];
+        }
+      }
+      return out;
+    });
+    expect(langs).toEqual({ "/": "ru", "/plan": "ru", "/offline": "ru", "/en/plan": "en" });
+  });
+
   test("guides say their text is Russian-only and canonicalize to Russian", async ({ page }) => {
     await page.goto("/en/guides/healthcare");
     await expect(page.getByTestId("content-language-note")).toBeVisible();

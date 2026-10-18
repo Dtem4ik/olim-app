@@ -20,11 +20,19 @@ const intl = createMiddleware(routing);
  *    prefix (→ `/plan`) and we record the choice, so no-JS switching works too.
  * Plain requests never write the cookie — the service worker precaching
  * `/en/...` in the background must not change anyone's language.
+ *
+ * Both rules apply to page navigations only (`isBackgroundFetch`): Next's Link
+ * prefetch of the switcher's `/ru/...` link would otherwise reset an English
+ * reader to Russian just by opening Profile, and the SW precaching `/plan` with
+ * `NEXT_LOCALE=en` would store the English page under the Russian URL.
  */
 export default function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
+  const background = isBackgroundFetch(request);
 
-  const target = preferenceRedirect(pathname, request.cookies.get(LOCALE_COOKIE)?.value);
+  const target = background
+    ? null
+    : preferenceRedirect(pathname, request.cookies.get(LOCALE_COOKIE)?.value);
   if (target) {
     const url = request.nextUrl.clone();
     url.pathname = target;
@@ -33,7 +41,7 @@ export default function proxy(request: NextRequest) {
   }
 
   const response = intl(request);
-  if (prefixLocale(pathname) === defaultLocale) {
+  if (!background && prefixLocale(pathname) === defaultLocale) {
     response.cookies.set(LOCALE_COOKIE, defaultLocale, {
       path: "/",
       maxAge: LOCALE_COOKIE_MAX_AGE,
@@ -41,6 +49,18 @@ export default function proxy(request: NextRequest) {
     });
   }
   return response;
+}
+
+/**
+ * A fetch() rather than a page navigation: RSC prefetches/navigations and SW
+ * precache requests. The SW forwards real navigations as-is, so they keep
+ * `Sec-Fetch-Dest: document`. Browsers without Fetch Metadata send no header
+ * and are treated as navigations (the pre-fix behavior).
+ */
+export function isBackgroundFetch(request: NextRequest): boolean {
+  if (request.headers.has("rsc") || request.headers.has("next-router-prefetch")) return true;
+  const dest = request.headers.get("sec-fetch-dest");
+  return dest !== null && dest !== "document";
 }
 
 export const config = {

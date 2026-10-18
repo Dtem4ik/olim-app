@@ -25,6 +25,9 @@ export function LanguageSwitcher({ className }: { className?: string }) {
             key={locale}
             href={pathname}
             locale={locale}
+            // No prefetch: a background fetch of `/ru/...` must not touch the
+            // language preference (the proxy also ignores it — belt and braces).
+            prefetch={false}
             hrefLang={locale}
             lang={locale}
             aria-current={active ? "true" : undefined}

@@ -23,6 +23,14 @@ is still Russian-only and is the next step (see Deferred).
   every Russian user to English. Fixed by disabling next-intl's cookie/detection
   and writing the cookie only on an explicit choice; documented in AGENTS.md
   Known traps.
+- **Two more of the same class, found in review:** (1) Next's Link prefetch of the
+  switcher's `/ru/profile` hit the proxy, which wrote `NEXT_LOCALE=ru` — an English
+  reader was reset to Russian just by opening Profile; (2) with `NEXT_LOCALE=en`,
+  the SW precache of `/`, `/plan`, `/offline`… was redirected to `/en/...`, storing
+  English HTML under the Russian URLs. `proxy.ts` now applies the cookie redirect
+  and cookie write to page navigations only (`Sec-Fetch-Dest: document`; RSC and
+  prefetch requests excluded), and the switcher links don't prefetch. Both cases
+  have e2e regressions in `tests/e2e/i18n.spec.ts` (verified failing without the fix).
 - **Links** — locale-aware `Link` / `usePathname` (`i18n/navigation.tsx`), a thin
   wrapper over `next/link`. next-intl's `createNavigation` was tried first and cost
   +4–16 KB gz JS per route; the wrapper brings that back to +3–12 KB (most of the
